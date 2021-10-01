@@ -13,7 +13,7 @@ class CalendarItem extends Hero {
             style: TextStyle(decoration: TextDecoration.none),
             child: Center(
               child: Container(
-                padding: expanded ? const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0) : const EdgeInsets.all(5.0),
+                padding: expanded ? const EdgeInsets.all(10.0) : const EdgeInsets.all(5.0),
                 margin: const EdgeInsets.all(0.0),
                 width: size.width,
                 height: size.height,
@@ -37,9 +37,10 @@ class CalendarItem extends Hero {
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        event.course,
+                        event.course.length > 0 ? event.course : event.subject,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontWeight: FontWeight.w800,
@@ -62,20 +63,20 @@ class CalendarItem extends Hero {
                         event.getTimePeriod(),
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 22,
+                          fontSize: expanded ? 22 : 0,
                           fontStyle: FontStyle.italic,
                           color: expanded ? Colors.white : event.color,
                         ),
                       ),
-                      // SizedBox(height: expanded ? 10 : 1),
-                      // Text(
-                      //   event.subject,
-                      //   textAlign: TextAlign.center,
-                      //   style: TextStyle(
-                      //     fontSize: expanded ? 22 : 0,
-                      //     color: Colors.white,
-                      //   ),
-                      // ),
+                      SizedBox(height: expanded ? 10 : 1),
+                      Text(
+                        event.subject,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: expanded ? 22 : 0,
+                          color: Colors.white,
+                        ),
+                      ),
                     ],
                   ),
                 ),
