@@ -1,0 +1,29 @@
+name: am_calendar
+description: A calendar for the ENSAM students
+version: 0.0.1+1
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.2
+  syncfusion_flutter_calendar: ^19.2.62
+  syncfusion_localizations:  ^19.2.62
+  syncfusion_flutter_core:  ^19.2.62
+  http: ^0.13.3
+
+  flutter_localizations:
+    sdk: flutter
+  intl: 0.17.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+flutter:
+  uses-material-design: true
+
