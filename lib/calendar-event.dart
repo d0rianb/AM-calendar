@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 import 'dart:ui';
 
@@ -6,8 +7,11 @@ import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import 'blur-transition.dart';
+import 'cache.dart';
 import 'calendar-event-popup.dart';
 import 'calendar-item.dart';
+
+typedef JSON = Map<String, dynamic>;
 
 Map<String, Color> classColor = {};
 List<MaterialColor> primariesColors = <MaterialColor>[
@@ -32,46 +36,114 @@ class CalendarEvent extends Appointment {
   String? location = '';
   String teacherName = '';
   String duration = '';
+  String group = '';
   DateTime startTime = DateTime.now();
   DateTime endTime = DateTime.now();
   bool isAllDay = false;
-  Color color = Colors.blue;
 
-  CalendarEvent(this.title, this.course, this.classType, this.location, this.teacherName, this.duration, this.startTime, this.endTime, this.isAllDay) : super(startTime: startTime, endTime: endTime);
+  CalendarEvent({required this.title, required this.course, required this.classType, this.location, required this.teacherName, required this.group, required this.duration, required this.startTime, required this.endTime, this.isAllDay = false}) : super(startTime: startTime, endTime: endTime);
 
-  get subject => '$classType - $teacherName - $duration';
+  static final DateFormat dateParser = new DateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+  static final RegExp endCharRegex = new RegExp(r'\\n');
+  static final RegExp classeTypeRegex = new RegExp(r'TYPE_ACTIVITE\s:\s([\w_]+)\n', caseSensitive: false, multiLine: true);
+  static final RegExp teacherNameRegex = new RegExp(r'INTERVENANTS\s:\s(.+)\n-\sDESCRIPTION');
+  static final RegExp groupRegex = new RegExp(r'GROUPES\s:\s(.*)\\n');
 
-  static fromLiseObject(Map<String, dynamic> event) {
-    DateFormat dateParser = new DateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-    List<String> list = event['title'].split(' - ');
-    String subject = list[3];
+  String get subject => '$classType - $teacherName - $duration';
 
-    CalendarEvent calendarEvent = new CalendarEvent(
-      event['title'],
-      subject,
-      list[4],
-      list[0],
-      list[5],
-      list[6],
-      dateParser.parse(event['start']),
-      dateParser.parse(event['end']),
-      event['allDay'] as bool,
-    );
-
+  Color get color {
     if (!classColor.containsKey(subject)) {
       Color color = primariesColors[Random().nextInt(primariesColors.length)][300]!;
       classColor[subject] = color;
     }
-    calendarEvent.color = classColor[subject]!;
+    return classColor[subject] ?? Colors.blue;
+  }
+
+  get shouldDisplay => title != 'INDISP';
+
+  get isExam => title.contains('EXAMEN');
+
+  static CalendarEvent fromLiseObject(JSON event) {
+    List<String> list = event['title'].split(' - ');
+    String subject = list[3];
+
+    CalendarEvent calendarEvent = new CalendarEvent(
+      title: event['title'],
+      course: subject,
+      classType: list[4],
+      location: list[0],
+      teacherName: list[5],
+      duration: list[6],
+      group: list[8],
+      startTime: dateParser.parse(event['start']),
+      endTime: dateParser.parse(event['end']),
+      isAllDay: event['allDay'] as bool,
+    );
     return calendarEvent;
+  }
+
+  static CalendarEvent fromENSAMCampus(JSON event) {
+    DateTime startTime = dateParser.parse(event['start']);
+    DateTime endTime = dateParser.parse(event['end']);
+    return new CalendarEvent(
+      title: (event['desc1'] + event['desc2']).replaceAll(endCharRegex, ''),
+      course: event['desc1'].replaceAll(endCharRegex, ''),
+      classType: classeTypeRegex.firstMatch(event['desc2'])?.group(1) ?? '',
+      location: event['locAdd1'].replaceAll(endCharRegex, ''),
+      teacherName: teacherNameRegex.firstMatch(event['desc2'])?.group(1) ?? '',
+      group: groupRegex.firstMatch(event['desc2'])?.group(1) ?? '',
+      duration: '${endTime.difference(startTime).inHours}h',
+      startTime: startTime,
+      endTime: endTime,
+      isAllDay: event['meeting'] == 'true',
+    );
+  }
+
+  static CalendarEvent fromJSON(JSON event) {
+    DateTime startTime = dateParser.parse(event['startTime']);
+    DateTime endTime = dateParser.parse(event['endTime']);
+    return new CalendarEvent(
+      title: event['title'],
+      course: event['course'],
+      classType: event['classType'],
+      location: event['location'],
+      teacherName: event['teacherName'],
+      group: event['group'],
+      duration: event['duration'],
+      startTime: startTime,
+      endTime: endTime,
+      isAllDay: event['isAllDay'],
+    );
+  }
+
+  String getTimePeriod() {
+    DateFormat dateTimeFormatter = DateFormat('kk:mm');
+    String start = dateTimeFormatter.format(startTime);
+    String end = dateTimeFormatter.format(endTime);
+    return '$start - $end';
+  }
+
+  String toJSON() {
+    return jsonEncode({
+      'title': title,
+      'course': course,
+      'classType': classType,
+      'location': location,
+      'teacherName': teacherName,
+      'duration': duration,
+      'group': group,
+      'startTime': startTime.toIso8601String(),
+      'endTime': endTime.toIso8601String(),
+      'isAllDay': isAllDay,
+    });
   }
 
   Widget build(BuildContext context, Size size) {
     return Listener(
-      onPointerDown: (_) => Navigator.push(
+      onPointerDown: (pointerDownEvent) => Navigator.push(
         context,
         new PageRouteBuilder(
-          pageBuilder: (context, animation, _) => new CalendarEventPopup(this),
+          pageBuilder: (context, animation, _) => CalendarEventPopup(this),
           opaque: false,
           transitionsBuilder: (context, animation, _, child) {
             final tween = Tween<double>(begin: 0, end: 2.0);
@@ -82,11 +154,14 @@ class CalendarEvent extends Appointment {
                 children: [
                   BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: animation.value, sigmaY: animation.value),
-                    child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.2),
+                    child: Scrollable(
+                      physics: NeverScrollableScrollPhysics(),
+                      viewportBuilder: (BuildContext context, _) => Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.2),
+                        ),
                       ),
                     ),
                   ),
@@ -103,13 +178,6 @@ class CalendarEvent extends Appointment {
       onPointerUp: (_) => Navigator.pop(context),
       child: CalendarItem(this, size, false),
     );
-  }
-
-  String getTimePeriod() {
-    DateFormat dateTimeFormatter = DateFormat('kk:mm');
-    String start = dateTimeFormatter.format(startTime);
-    String end = dateTimeFormatter.format(endTime);
-    return '$start - $end';
   }
 }
 

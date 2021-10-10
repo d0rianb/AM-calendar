@@ -2,7 +2,7 @@
     package="com.dorian.co.am_calendar">
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:label="A&amp;M Calendar"
+        android:label="AM Calendar"
         android:icon="@mipmap/ic_launcher">
        <activity
             android:name=".MainActivity"
