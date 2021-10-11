@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import 'blur-transition.dart';
-import 'cache.dart';
 import 'calendar-event-popup.dart';
 import 'calendar-item.dart';
 import 'color-helpers.dart';
@@ -16,7 +15,6 @@ typedef JSON = Map<String, dynamic>;
 
 Map<String, Color> classColor = {};
 List<MaterialColor> primariesColors = <MaterialColor>[
-  Colors.red,
   Colors.pink,
   Colors.purple,
   Colors.deepPurple,
@@ -62,8 +60,6 @@ class CalendarEvent extends Appointment {
   bool get isExam => title.contains('EXAMEN');
   bool get isVisio => title.contains('VIA TEAMS');
   Color get borderColor => isExam ? Colors.red : isVisio ? Colors.green : darken(color, 10);
-
-
 
   static CalendarEvent fromLiseObject(JSON event) {
     List<String> list = event['title'].split(' - ');

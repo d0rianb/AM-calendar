@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -41,29 +39,39 @@ class CalendarState extends State<Calendar> {
 
   Future<void> getEvents() async {
     setState(() => loading = true);
+    if (!loadWeekFromStorage(week) || !loadWeekFromStorage(week.getNewtWeek())) {
+      getEventsFromNetworks(week);
+      getEventsFromNetworks(week.getNewtWeek());
+    }
+    setState(() => loading = false);
+  }
+
+  bool loadWeekFromStorage(Week week) {
+    print(prefs!.getKeys());
     if (prefs != null && prefs!.containsKey(week.stringId)) {
       print('get value from storage');
       String storedValue = prefs!.getString(week.stringId)!;
       Cache cache = Cache.fromString(week.stringId, storedValue);
       if (cache.isValid) {
-        return addEvents(cache.object);
+        addEvents(cache.object);
+        return true;
       }
+      return false;
     }
-    return getEventsFromNetworks();
+    return false;
   }
 
-  void getEventsFromNetworks() async {
-    setState(() => loading = true);
+  void getEventsFromNetworks(Week week) async {
+    print('get value from network');
     var response = await ENSAMRequest.getCalendar(week.firstDay, week.lastDay);
     List<CalendarEvent> events = List.from(response['events'].map((e) => CalendarEvent.fromENSAMCampus(e)));
     Cache cache = Cache.create(week.stringId, events);
-    if (prefs != null) prefs!.setString(cache.id, cache.serialized);
+    prefs!.setString(cache.id, cache.serialized);
     addEvents(events);
   }
 
   void addEvents(List<CalendarEvent> newEvents) {
     newEvents.forEach((event) => !events.contains(event) ? events.add(event) : null);
-    setState(() => loading = false);
   }
 
   @override
@@ -117,14 +125,6 @@ class CalendarState extends State<Calendar> {
                 appointmentBuilder: (BuildContext context, CalendarAppointmentDetails details) {
                   CalendarEvent event = details.appointments.first;
                   return event.build(context, details.bounds.size);
-                },
-                onViewChanged: (viewChangedDetails) async {
-                  if (viewChangedDetails.visibleDates.first.day != week.firstDay.day) {
-                    week = Week(viewChangedDetails.visibleDates.first, viewChangedDetails.visibleDates.last);
-                    if (events.where((e) => e.startTime.isAfter(week.firstDay)).length == 0) {
-                      getEvents();
-                    }
-                  }
                 },
               ),
               Visibility(

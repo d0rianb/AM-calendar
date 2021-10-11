@@ -25,7 +25,7 @@ class CalendarItem extends Hero {
                     shape: BoxShape.rectangle,
                     color: event.color,
                     borderRadius: BorderRadius.all(Radius.circular(expanded ? 6.0 : 3.5)),
-                    border: Border.all(color: event.borderColor, width: expanded ? 6.0 : 2.5),
+                    border: Border.all(color: event.borderColor, width: expanded ? 6.0 : 2),
                   ),
                   child: SingleChildScrollView(
                     child: Column(
