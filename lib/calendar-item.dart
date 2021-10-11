@@ -12,7 +12,7 @@ class CalendarItem extends Hero {
           child: Visibility(
             visible: event.shouldDisplay,
             child: DefaultTextStyle(
-              style: TextStyle(decoration: TextDecoration.none),
+              style: const TextStyle(decoration: TextDecoration.none),
               child: Center(
                 child: Container(
                   padding: expanded ? const EdgeInsets.all(10.0) : const EdgeInsets.all(5.0),
@@ -25,16 +25,7 @@ class CalendarItem extends Hero {
                     shape: BoxShape.rectangle,
                     color: event.color,
                     borderRadius: BorderRadius.all(Radius.circular(expanded ? 6.0 : 3.5)),
-                    boxShadow: expanded
-                        ? [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: -2,
-                              blurRadius: 10,
-                              offset: Offset.zero,
-                            )
-                          ]
-                        : null,
+                    border: Border.all(color: event.borderColor, width: expanded ? 6.0 : 2.5),
                   ),
                   child: SingleChildScrollView(
                     child: Column(

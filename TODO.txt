@@ -5,3 +5,4 @@
 - Build APK auto naming
 - App name + icon
 - go to the day view when click / show the courses on month view
+- isVisio getter

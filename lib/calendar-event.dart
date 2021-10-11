@@ -10,6 +10,7 @@ import 'blur-transition.dart';
 import 'cache.dart';
 import 'calendar-event-popup.dart';
 import 'calendar-item.dart';
+import 'color-helpers.dart';
 
 typedef JSON = Map<String, dynamic>;
 
@@ -49,8 +50,7 @@ class CalendarEvent extends Appointment {
   static final RegExp teacherNameRegex = new RegExp(r'INTERVENANTS\s:\s(.+)\n-\sDESCRIPTION');
   static final RegExp groupRegex = new RegExp(r'GROUPES\s:\s(.*)\\n');
 
-  String get subject => '$classType - $teacherName - $duration';
-
+  String get subject => '$classType - $teacherName - $duration' + (isExam ? ' - EXAMEN' : '');
   Color get color {
     if (!classColor.containsKey(subject)) {
       Color color = primariesColors[Random().nextInt(primariesColors.length)][300]!;
@@ -58,10 +58,12 @@ class CalendarEvent extends Appointment {
     }
     return classColor[subject] ?? Colors.blue;
   }
+  bool get shouldDisplay => classType != 'INDISP';
+  bool get isExam => title.contains('EXAMEN');
+  bool get isVisio => title.contains('VIA TEAMS');
+  Color get borderColor => isExam ? Colors.red : isVisio ? Colors.green : darken(color, 10);
 
-  get shouldDisplay => title != 'INDISP';
 
-  get isExam => title.contains('EXAMEN');
 
   static CalendarEvent fromLiseObject(JSON event) {
     List<String> list = event['title'].split(' - ');
