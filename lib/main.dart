@@ -1,19 +1,17 @@
-import 'package:am_calendar/requests.dart';
-import 'package:intl/date_symbol_data_local.dart';
-
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:syncfusion_localizations/syncfusion_localizations.dart';
-
-import 'package:am_calendar/calendar-event.dart';
-import 'package:am_calendar/calendar.dart';
+import 'package:am_calendar/headless-browser.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'localization_extendibility.dart';
+import 'calendar.dart';
+import 'splash-screen.dart';
+import 'login-form.dart';
 
 const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(App());
 }
 
@@ -41,14 +39,20 @@ class App extends StatelessWidget {
           accentColor: ORANGE,
         ),
       ),
-      home: HomePage(title: 'AM Calendar'),
+      initialRoute: '/calendar',
+      routes: {
+        '/': (context) => const SplashScreen(),
+        '/calendar': (context) => CalendarPage(title: 'AM calendar'),
+        '/login': (context) => LoginForm(),
+      }
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  HomePage({Key? key, required this.title}) : super(key: key);
-  // final events = [
+class CalendarPage extends StatefulWidget {
+  CalendarPage({Key? key, required this.title}) : super(key: key);
+
+  // final liseEvents = [
   //   {"id": "64852304", "title": "CH_Amphi_2 - 08:00 - 10:00 - EEA_CEE - CM - GILLOT Cyrille - 2h00 -  - 5GIE CM", "start": "2021-09-20T08:00:00+0200", "end": "2021-09-20T10:00:00+0200", "allDay": false, "editable": true, "className": "CM"},
   //   {"id": "64852219", "title": "CH_Amphi_2 - 11:00 - 12:00 - Mécanique des Fluides Energétique  - CM - DEMIRCI Ibrahim - 1h00 -  - 5GIE CM", "start": "2021-09-20T11:00:00+0200", "end": "2021-09-20T12:00:00+0200", "allDay": false, "editable": true, "className": "CM"},
   //   {"id": "64851348", "title": "CH_Grand_Amphi_Alfred_CHABAUD - 14:30 - 15:30 - Avant Projet - CM - PERINET Jean-Marc - 1h00 -  - 5GIE CM", "start": "2021-09-20T14:30:00+0200", "end": "2021-09-20T15:30:00+0200", "allDay": false, "editable": true, "className": "CM"},
@@ -69,20 +73,15 @@ class HomePage extends StatefulWidget {
   final String title;
 
   @override
-  HomePageState createState() => HomePageState();
+  CalendarPageState createState() => CalendarPageState();
 }
 
-class HomePageState extends State<HomePage> {
-  Calendar calendar = new Calendar();
+class CalendarPageState extends State<CalendarPage> {
+  final Calendar calendar = new Calendar();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: false
-          ? AppBar(
-              title: Text(widget.title),
-            )
-          : null,
       body: calendar,
     );
   }

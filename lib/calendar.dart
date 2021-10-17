@@ -39,15 +39,15 @@ class CalendarState extends State<Calendar> {
 
   Future<void> getEvents() async {
     setState(() => loading = true);
-    if (!loadWeekFromStorage(week) || !loadWeekFromStorage(week.getNewtWeek())) {
-      getEventsFromNetworks(week);
-      getEventsFromNetworks(week.getNewtWeek());
-    }
+    loadWeekFromStorage(week);
+    loadWeekFromStorage(week.getNewtWeek());
+    if (events.isNotEmpty) setState(() => loading = false);
+    getEventsFromNetworks(week);
+    getEventsFromNetworks(week.getNewtWeek());
     setState(() => loading = false);
   }
 
   bool loadWeekFromStorage(Week week) {
-    print(prefs!.getKeys());
     if (prefs != null && prefs!.containsKey(week.stringId)) {
       print('get value from storage');
       String storedValue = prefs!.getString(week.stringId)!;
@@ -88,9 +88,8 @@ class CalendarState extends State<Calendar> {
                 allowedViews: [
                   CalendarView.day,
                   CalendarView.workWeek,
-                  CalendarView.month,
                 ],
-                showDatePickerButton: true,
+                showDatePickerButton: false,
                 timeZone: 'W. Europe Standard Time',
                 timeSlotViewSettings: const TimeSlotViewSettings(
                   timeInterval: const Duration(minutes: 60),

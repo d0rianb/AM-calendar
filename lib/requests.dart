@@ -50,7 +50,7 @@ class LiseRequest {
       headers: liseAuthenticationHeaders,
       body: {
         'username': '2021 - 0698',
-        'password': 'Lololeproem2.0',
+        'password': 'None',
         'j_idt28': '',
       },
     );

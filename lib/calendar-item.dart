@@ -15,7 +15,7 @@ class CalendarItem extends Hero {
               style: const TextStyle(decoration: TextDecoration.none),
               child: Center(
                 child: Container(
-                  padding: expanded ? const EdgeInsets.all(10.0) : const EdgeInsets.all(5.0),
+                  padding: expanded ? const EdgeInsets.all(10.0) : const EdgeInsets.all(2.0),
                   margin: const EdgeInsets.all(0.0),
                   width: size.width,
                   height: size.height,
@@ -41,9 +41,9 @@ class CalendarItem extends Hero {
                             color: Colors.white,
                           ),
                         ),
-                        SizedBox(height: expanded ? 10 : 1),
+                        SizedBox(height: expanded ? 4 : 0),
                         Text(
-                          event.location ?? '',
+                          event.formattedLocation,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontStyle: FontStyle.italic,
@@ -51,7 +51,7 @@ class CalendarItem extends Hero {
                             color: Colors.white,
                           ),
                         ),
-                        SizedBox(height: expanded ? 5 : 1),
+                        SizedBox(height: expanded ? 4 : 0),
                         Text(
                           event.getTimePeriod(),
                           textAlign: TextAlign.center,
@@ -61,7 +61,7 @@ class CalendarItem extends Hero {
                             color: expanded ? Colors.white : event.color,
                           ),
                         ),
-                        SizedBox(height: expanded ? 5 : 1),
+                        SizedBox(height: expanded ? 4 : 0),
                         Text(
                           event.subject,
                           textAlign: TextAlign.center,

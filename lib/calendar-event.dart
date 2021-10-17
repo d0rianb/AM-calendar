@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -9,24 +8,18 @@ import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'blur-transition.dart';
 import 'calendar-event-popup.dart';
 import 'calendar-item.dart';
+import 'calendar.dart';
 import 'color-helpers.dart';
 
 typedef JSON = Map<String, dynamic>;
 
-Map<String, Color> classColor = {};
-List<MaterialColor> primariesColors = <MaterialColor>[
-  Colors.pink,
-  Colors.purple,
-  Colors.deepPurple,
-  Colors.indigo,
-  Colors.blue,
-  Colors.lightBlue,
-  Colors.teal,
-  Colors.green,
-  Colors.lightGreen,
-  Colors.orange,
-  Colors.deepOrange,
-];
+Map<String, Color> classColor = {
+  'CM':  ORANGE,
+  'ED_TD': HexColor.fromHex('#9b3471'),
+  'TPS': HexColor.fromHex('#1976d2'),
+  'OTHER': HexColor.fromHex('#388e3c'),
+  'EXAM': HexColor.fromHex('#e53935'),
+};
 
 class CalendarEvent extends Appointment {
   String title = '';
@@ -48,18 +41,14 @@ class CalendarEvent extends Appointment {
   static final RegExp teacherNameRegex = new RegExp(r'INTERVENANTS\s:\s(.+)\n-\sDESCRIPTION');
   static final RegExp groupRegex = new RegExp(r'GROUPES\s:\s(.*)\\n');
 
-  String get subject => '$classType - $teacherName - $duration' + (isExam ? ' - EXAMEN' : '');
-  Color get color {
-    if (!classColor.containsKey(subject)) {
-      Color color = primariesColors[Random().nextInt(primariesColors.length)][300]!;
-      classColor[subject] = color;
-    }
-    return classColor[subject] ?? Colors.blue;
-  }
+  String get subject => '$formattedClassType - $teacherName - $duration';
+  String get formattedLocation => (location ?? '').replaceAll('_', ' ');
+  String get formattedClassType => classType.replaceAll('_', ' ');
+  Color get color => classColor.containsKey(classType) ? classColor[classType]! : isExam ? classColor['EXAM']! : classColor['OTHER']!;
   bool get shouldDisplay => classType != 'INDISP';
   bool get isExam => title.contains('EXAMEN');
   bool get isVisio => title.contains('VIA TEAMS');
-  Color get borderColor => isExam ? Colors.red : isVisio ? Colors.green : darken(color, 10);
+  Color get borderColor => isVisio ? Colors.green : darken(color, 10);
 
   static CalendarEvent fromLiseObject(JSON event) {
     List<String> list = event['title'].split(' - ');
@@ -180,32 +169,20 @@ class CalendarEvent extends Appointment {
 }
 
 class AppointmentDataSource extends CalendarDataSource {
-  AppointmentDataSource(List<Appointment> source) {
-    appointments = source;
-  }
+  AppointmentDataSource(List<Appointment> source) { appointments = source; }
 
   @override
-  DateTime getStartTime(int index) {
-    return appointments![index].from;
-  }
+  DateTime getStartTime(int index) => appointments![index].from;
 
   @override
-  DateTime getEndTime(int index) {
-    return appointments![index].to;
-  }
+  DateTime getEndTime(int index) => appointments![index].to;
 
   @override
-  bool isAllDay(int index) {
-    return appointments![index].isAllDay;
-  }
+  bool isAllDay(int index) => appointments![index].isAllDay;
 
   @override
-  String getSubject(int index) {
-    return appointments![index].eventName;
-  }
+  String getSubject(int index) => appointments![index].eventName;
 
   @override
-  Color getColor(int index) {
-    return appointments![index].color;
-  }
+  Color getColor(int index) => appointments![index].color;
 }
