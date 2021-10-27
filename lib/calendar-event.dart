@@ -17,8 +17,9 @@ Map<String, Color> classColor = {
   'CM':  ORANGE,
   'ED_TD': HexColor.fromHex('#9b3471'),
   'TPS': HexColor.fromHex('#1976d2'),
-  'OTHER': HexColor.fromHex('#388e3c'),
+  'OTHER': HexColor.fromHex('#607d8b'),
   'EXAM': HexColor.fromHex('#e53935'),
+  'TEAMS': HexColor.fromHex('#4caf50'),
 };
 
 class CalendarEvent extends Appointment {
@@ -41,14 +42,14 @@ class CalendarEvent extends Appointment {
   static final RegExp teacherNameRegex = new RegExp(r'INTERVENANTS\s:\s(.+)\n-\sDESCRIPTION');
   static final RegExp groupRegex = new RegExp(r'GROUPES\s:\s(.*)\\n');
 
-  String get subject => '$formattedClassType - $teacherName - $duration';
+  String get subject => List.from([formattedClassType, teacherName, duration].where((element) => element != '')).join(' - ');
   String get formattedLocation => (location ?? '').replaceAll('_', ' ');
   String get formattedClassType => classType.replaceAll('_', ' ');
   Color get color => classColor.containsKey(classType) ? classColor[classType]! : isExam ? classColor['EXAM']! : classColor['OTHER']!;
   bool get shouldDisplay => classType != 'INDISP';
   bool get isExam => title.contains('EXAMEN');
   bool get isVisio => title.contains('VIA TEAMS');
-  Color get borderColor => isVisio ? Colors.green : darken(color, 10);
+  Color get borderColor => isVisio ? classColor['TEAMS']! : darken(color, 10);
 
   static CalendarEvent fromLiseObject(JSON event) {
     List<String> list = event['title'].split(' - ');
@@ -127,6 +128,7 @@ class CalendarEvent extends Appointment {
 
   Widget build(BuildContext context, Size size) {
     return Listener(
+        behavior: HitTestBehavior.opaque,
       onPointerDown: (pointerDownEvent) => Navigator.push(
         context,
         new PageRouteBuilder(

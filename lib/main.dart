@@ -1,17 +1,20 @@
-import 'package:am_calendar/headless-browser.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'localization_extendibility.dart';
 import 'calendar.dart';
+import 'login-webview.dart';
 import 'splash-screen.dart';
-import 'login-form.dart';
 
 const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // await AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
+  // final pref = await SharedPreferences.getInstance();
+  // await pref.clear();
   runApp(App());
 }
 
@@ -21,14 +24,14 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'AM Calendar',
       debugShowCheckedModeBanner: false,
-      localizationsDelegates: [
+      localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         SfLocalizationsFrDelegate(),
       ],
-      supportedLocales: [
-        const Locale('en'),
-        const Locale('fr'),
+      supportedLocales: const [
+        Locale('en'),
+        Locale('fr'),
       ],
       locale: const Locale('fr'),
       theme: ThemeData(
@@ -39,11 +42,11 @@ class App extends StatelessWidget {
           accentColor: ORANGE,
         ),
       ),
-      initialRoute: '/calendar',
+      initialRoute: '/',
       routes: {
         '/': (context) => const SplashScreen(),
         '/calendar': (context) => CalendarPage(title: 'AM calendar'),
-        '/login': (context) => LoginForm(),
+        '/login': (context) => LoginWebView(),
       }
     );
   }
@@ -82,7 +85,7 @@ class CalendarPageState extends State<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: calendar,
+      body: SafeArea(child: calendar),
     );
   }
 }

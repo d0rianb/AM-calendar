@@ -1,6 +1,6 @@
 name: am_calendar
 description: A calendar for the ENSAM students
-version: 0.1.1+1
+version: 0.2.0+1
 
 environment:
   sdk: ">=2.13.0 <3.0.0"
@@ -16,12 +16,11 @@ dependencies:
   shared_preferences: ^2.0.5
   http: ^0.13.3
   flutter_launcher_icons: ^0.9.2
-
-
   flutter_localizations:
     sdk: flutter
   intl: 0.17.0
   flutter_inappwebview: ^5.3.2
+  collection: ^1.15.0
 
 dev_dependencies:
   flutter_test:

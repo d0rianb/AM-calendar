@@ -14,27 +14,21 @@ class SplashScreenState extends State<SplashScreen> {
   SharedPreferences? prefs;
 
   @override
-  void initState() {
-    super.initState();
-  }
+  void initState() => super.initState();
 
-  Future<void> initSharedPreferences() async {
-    prefs = await SharedPreferences.getInstance();
-  }
+  Future<void> initSharedPreferences() async => prefs = await SharedPreferences.getInstance();
 
   Future<bool> hasLoginInfos() async {
     if (prefs == null) await initSharedPreferences();
-    return prefs!.containsKey('id') && prefs!.containsKey('password');
+    return prefs!.containsKey('cmAuthToken');
   }
 
 
-  void toggleRoute(bool? hasLoginAndPwd, BuildContext context) {
-    return;
+  void toggleRoute(bool? hasLoginInfos, BuildContext context) {
     NavigatorState nav = Navigator.of(context);
-    if (hasLoginAndPwd == null) return;
-    // if (!hasLoginAndPwd) Future.microtask(() => nav.pushReplacementNamed('/login'));
-    // else Future.microtask(() => nav.pushReplacementNamed('/calendar'));
-    Future.microtask(() => nav.pushReplacementNamed('/login'));
+    if (hasLoginInfos == null) return;
+    if (!hasLoginInfos) Future.microtask(() => nav.pushReplacementNamed('/login'));
+    else Future.microtask(() => nav.pushReplacementNamed('/calendar'));
   }
 
   @override

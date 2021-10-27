@@ -1,11 +1,10 @@
-import 'package:am_calendar/webview.dart';
+import 'package:am_calendar/login-webview.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'calendar.dart';
-import 'headless-browser.dart';
 
 class LoginForm extends StatefulWidget {
   @override
@@ -91,13 +90,12 @@ class LoginFormState extends State<LoginForm> {
                                   prefs.setString('id', userId);
                                   prefs.setString('password', password);
                           });
-                          Navigator.of(context).push(new MaterialPageRoute(builder: (context) => WebView()));
+                          Navigator.of(context).push(new MaterialPageRoute(builder: (context) => LoginWebView()));
                           ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                   content: Text('Connection en cours ...'),
                                   elevation: 2.0,
                                   behavior: SnackBarBehavior.floating,
-
                               )
                           );
                         }

@@ -41,7 +41,7 @@ class CalendarItem extends Hero {
                             color: Colors.white,
                           ),
                         ),
-                        SizedBox(height: expanded ? 4 : 0),
+                        // SizedBox(height: expanded ? 1 : 0),
                         Text(
                           event.formattedLocation,
                           textAlign: TextAlign.center,
@@ -51,7 +51,7 @@ class CalendarItem extends Hero {
                             color: Colors.white,
                           ),
                         ),
-                        SizedBox(height: expanded ? 4 : 0),
+                        // SizedBox(height: expanded ? 1 : 0),
                         Text(
                           event.getTimePeriod(),
                           textAlign: TextAlign.center,
@@ -61,7 +61,7 @@ class CalendarItem extends Hero {
                             color: expanded ? Colors.white : event.color,
                           ),
                         ),
-                        SizedBox(height: expanded ? 4 : 0),
+                        // SizedBox(height: expanded ? 3 : 0),
                         Text(
                           event.subject,
                           textAlign: TextAlign.center,
