@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'calendar-event.dart';
 
 typedef JSON = Map<String, dynamic>;
-const cacheInvalidationDuration = const Duration(days: 2);
+const cacheInvalidationDuration = const Duration(days: 3);
 final DateFormat dateParser = new DateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
 class Cache {
@@ -29,9 +29,9 @@ class Cache {
     this.age = DateTime.now();
   }
 
-  static Cache fromString(String key, String str) {
-    var decodedString = jsonDecode(str);
-    Iterable parsedContent = decodedString['content'].map((e) => CalendarEvent.fromJSON(jsonDecode(e)));
+  static Cache fromString(String key, String? str) {
+    final dynamic decodedString = jsonDecode(str ?? '');
+    final Iterable parsedContent = decodedString['content'].map((e) => CalendarEvent.fromJSON(jsonDecode(e)));
     return Cache(key, List.from(parsedContent), dateParser.parse(decodedString['age']));
   }
 }

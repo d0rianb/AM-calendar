@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'calendar.dart';
+const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
+const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);
 
 class LoginForm extends StatefulWidget {
   @override

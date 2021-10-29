@@ -1,8 +1,3 @@
 - Select source from app/lise
-- Cache the data
-- Reload when app is mounted
 - Notification when cache != live data
-- Build APK auto naming
-- App name + icon
-- go to the day view when click / show the courses on month view
-- isVisio getter
+- Load previous week from cache

@@ -47,7 +47,7 @@ class CalendarEvent extends Appointment {
   String get formattedClassType => classType.replaceAll('_', ' ');
   Color get color => classColor.containsKey(classType) ? classColor[classType]! : isExam ? classColor['EXAM']! : classColor['OTHER']!;
   bool get shouldDisplay => classType != 'INDISP';
-  bool get isExam => title.contains('EXAMEN');
+  bool get isExam => title.toUpperCase().contains('EXAMEN') || title.toUpperCase().contains('TEST');
   bool get isVisio => title.contains('VIA TEAMS');
   Color get borderColor => isVisio ? classColor['TEAMS']! : darken(color, 10);
 

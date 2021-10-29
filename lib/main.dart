@@ -12,9 +12,6 @@ const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
-  // final pref = await SharedPreferences.getInstance();
-  // await pref.clear();
   runApp(App());
 }
 
@@ -47,6 +44,7 @@ class App extends StatelessWidget {
         '/': (context) => const SplashScreen(),
         '/calendar': (context) => CalendarPage(title: 'AM calendar'),
         '/login': (context) => LoginWebView(),
+        '/infos': (context) => Scaffold(),
       }
     );
   }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
 class Week {
@@ -8,12 +9,18 @@ class Week {
 
   int get id => this.firstDay.millisecondsSinceEpoch;
 
-  String get stringId => this.id.toString();
+  String get stringId => 'week:this.id';
 
-  static Week fromDateTime(DateTime day) {
-    DateTime firstDay = DateTime(day.year, day.month, day.day, 0, 0, 0).subtract(Duration(days: day.weekday - 1));
-    DateTime lastDay = DateTime(day.year, day.month, day.day, 23, 59, 59).add(Duration(days: 7 - day.weekday));
-    return Week(firstDay, lastDay);
+  Week.fromDateTime(DateTime day) {
+    firstDay = DateTime(day.year, day.month, day.day, 0, 0, 0).subtract(Duration(days: day.weekday - 1));
+    lastDay = DateTime(day.year, day.month, day.day, 23, 59, 59).add(Duration(days: 7 - day.weekday));
+  }
+
+  Week.fromId(String id) {
+    if (!id.startsWith('week:')) throw ErrorHint('Wrong Week id');
+    Week.fromDateTime(
+        DateTime.fromMicrosecondsSinceEpoch(int.parse(id.replaceAll('week:', '')))
+    );
   }
 
   Week getWorkWeek() {
@@ -26,5 +33,5 @@ class Week {
     return 'Week : ${dateTimeFormatter.format(firstDay)} - ${dateTimeFormatter.format(lastDay)}';
   }
 
-  Week getNewtWeek() => Week(firstDay.add(Duration(days: 7)), lastDay.add(Duration(days: 7)));
+  Week getNextWeek() => Week(firstDay.add(Duration(days: 7)), lastDay.add(Duration(days: 7)));
 }

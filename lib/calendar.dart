@@ -40,37 +40,45 @@ class CalendarState extends State<Calendar> {
 
   Future<void> getEvents() async {
     print('getEvents');
-    setState(() => loading = true);
-    loadWeekFromStorage(week);
-    loadWeekFromStorage(week.getNewtWeek());
-    if (events.isNotEmpty) setState(() => loading = false);
-    getEventsFromNetworks(week);
-    getEventsFromNetworks(week.getNewtWeek());
-    setState(() => loading = false);
+    if (mounted) setState(() => loading = true);
+    final List<CalendarEvent> cachedEvents = getCachedEvents();
+    int addedEventsFromCache = addEvents(cachedEvents);
+    if (addedEventsFromCache > 0 && mounted) setState(() => loading = false);
+    final List<CalendarEvent> networksEvents = await getEventsFromNetworks(week);
+    int addedEventsFromNetwork = addEvents(networksEvents);
+    if (addedEventsFromNetwork > 0) print('$addedEventsFromNetwork new events');
+   if (mounted) setState(() => loading = false);
   }
 
-  bool loadWeekFromStorage(Week week) {
-    if (prefs == null) return false;
-    if (!prefs!.containsKey(week.stringId)) return false;
-    final String storedValue = prefs!.getString(week.stringId)!;
-    Cache cache = Cache.fromString(week.stringId, storedValue);
-    if (cache.isValid) addEvents(cache.object);
-    return cache.isValid;
+  List<CalendarEvent> getCachedEvents() {
+    // TODO: filter too old events
+    if (prefs == null) return [];
+    final Iterable<String> cachedWeeksId = prefs!
+        .getKeys()
+        .where((key) => key.startsWith('week:'));
+    return cachedWeeksId
+        .map((id) => {'id': id, 'value': prefs!.getString(id)})
+        .map((obj) => Cache.fromString(obj['id']!, obj['value']))
+        .where((cache) => cache.isValid)
+        .map((cache) => cache.object)
+        .flattened
+        .toList();
   }
 
-  void getEventsFromNetworks(Week week) async {
-    final response = await ENSAMRequest.getCalendar(week.firstDay, week.lastDay);
+  Future<List<CalendarEvent>> getEventsFromNetworks(Week week) async {
+    final response = await ENSAMRequest.getCalendar(week.firstDay, week.getNextWeek().lastDay);
     final List<CalendarEvent> events = List.from(response['events'].map((e) => CalendarEvent.fromENSAMCampus(e)));
     final Cache cache = Cache.create(week.stringId, events);
     prefs!.setString(cache.id, cache.serialized);
-    addEvents(events);
+    return events;
   }
 
-  void addEvents(List<CalendarEvent> newEvents) {
-    if (IterableEquality().equals(events, newEvents)) return;
-    if (events != []) print('new courses');
+  /// Return the number og events added
+  int addEvents(List<CalendarEvent> newEvents) {
+    if (IterableEquality().equals(events, newEvents)) return 0;
+    int oldEventsLength = events.length;
     newEvents.forEach((event) => !events.contains(event) ? events.add(event) : null);
-    setState(() { });
+    return events.length - oldEventsLength;
   }
 
   @override
@@ -139,4 +147,5 @@ class CalendarState extends State<Calendar> {
       ],
     );
   }
+
 }
