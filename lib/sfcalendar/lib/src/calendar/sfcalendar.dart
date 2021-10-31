@@ -10,6 +10,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart' show DateFormat;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_core/core.dart';
 import 'package:syncfusion_flutter_core/localizations.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
@@ -7115,10 +7116,37 @@ class _SfCalendarState extends State<SfCalendar>
         ),
       ));
     }
+    children.add(const Divider(
+        height: 1,
+        thickness: 1
+    ));
+    children.add(InkWell(
+      onTap: () async {
+        final pref = await SharedPreferences.getInstance();
+        pref.remove('cmAuthToken');
+        Navigator.of(context).pushNamed('/login');
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 0.0),
+        height: calendarViewTextHeight,
+        alignment: alignment,
+        child: RichText(
+          text: TextSpan(
+            children: [
+              WidgetSpan(child: Padding(
+                padding: EdgeInsets.only(right: 4.0),
+                child: Icon(Icons.cancel, size: 20.0, color: todayColor),
+              ), alignment: PlaceholderAlignment.middle),
+              TextSpan(text: 'Déconnexion', style: style.copyWith(color: todayColor))
+            ]
+          )
+        )
+      ),
+    ));
 
     /// Restrict the pop up height with max height(200)
-    double height = allowedViewLength * calendarViewTextHeight;
-    height = height > 200 ? 200 : height;
+    double height = (allowedViewLength + 2) * calendarViewTextHeight + 6;
+    // height = height > 200 ? 200 : height;
 
     double arrowWidth = 0;
     double iconWidth = _minWidth / 8;
@@ -7259,7 +7287,7 @@ class _SfCalendarState extends State<SfCalendar>
         top: widget.headerHeight,
         // left: left,
         right: 10,
-        height: 3*44,
+        height: height,
         width: 3*44,
         child: _PopupWidget(
             alignment: popupAlignment,

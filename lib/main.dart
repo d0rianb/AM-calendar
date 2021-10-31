@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'infos.dart';
+import 'routes/infos.dart';
 import 'localization_extendibility.dart';
 import 'calendar.dart';
-import 'login-webview.dart';
-import 'splash-screen.dart';
+import 'routes/login-webview.dart';
+import 'routes/splash-screen.dart';
+import 'routes/settings.dart';
 
 const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
@@ -46,6 +47,7 @@ class App extends StatelessWidget {
         '/calendar': (context) => CalendarPage(title: 'AM calendar'),
         '/login': (context) => LoginWebView(),
         '/infos': (context) => Infos(),
+        '/settings': (context) => Settings(),
       }
     );
   }

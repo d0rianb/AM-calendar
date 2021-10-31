@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'calendar.dart';
+import '../calendar.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -22,7 +22,6 @@ class SplashScreenState extends State<SplashScreen> {
     if (prefs == null) await initSharedPreferences();
     return prefs!.containsKey('cmAuthToken');
   }
-
 
   void toggleRoute(bool? hasLoginInfos, BuildContext context) {
     NavigatorState nav = Navigator.of(context);

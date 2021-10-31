@@ -13,7 +13,7 @@ class PopupMenuBar extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         InkWell(
-          onTap: () => print('reload'),
+          onTap: () =>  Navigator.of(context).pushNamed('/calendar'),
           child: SizedBox(width: iconSize, height: iconSize, child: Icon(Icons.refresh, color: iconColor)),
         ),
         InkWell(
@@ -21,12 +21,8 @@ class PopupMenuBar extends StatelessWidget {
           child: SizedBox(width: iconSize, height: iconSize, child: Icon(Icons.info, color: iconColor)),
         ),
         InkWell(
-          onTap: () async {
-            final pref = await SharedPreferences.getInstance();
-            pref.remove('cmAuthToken');
-            Navigator.of(context).pushNamed('/login');
-          },
-          child: SizedBox(width: iconSize, height: iconSize, child: Icon(Icons.cancel, color: iconColor)),
+          onTap: () => Navigator.of(context).pushNamed('/settings'),
+          child: SizedBox(width: iconSize, height: iconSize, child: Icon(Icons.settings, color: iconColor)),
         ),
       ],
     );

@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:package_info/package_info.dart';
@@ -7,7 +6,7 @@ import 'package:package_info/package_info.dart';
 const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
 
-final String proms = DateTime.now().isBefore(DateTime(2021, 12, 4)) ? '221' : '.21';
+final String proms = DateTime.now().isAfter(DateTime(2021, 12, 4)) ? '221' : '.21';
 
 const String DISCLAIMER = '''\t\tCe calendrier n'est pas une application officielle Arts&Métiers. 
 Elle a été crée par un élève voulant simplement avoir accès à son emploi du temps s'il vous plait ne me faite pas de procès.''';
@@ -19,12 +18,17 @@ class Infos extends StatefulWidget {
 }
 
 class InfosState extends State<Infos> {
-  late PackageInfo packageInfo;
+  late PackageInfo packageInfo = PackageInfo(appName: '', packageName: '', version: '', buildNumber: '');
 
   @override
-  void initState() async {
+  void initState() {
     super.initState();
+    initPackageInfo();
+  }
+
+  Future<void> initPackageInfo() async {
     packageInfo = await PackageInfo.fromPlatform();
+    setState(() {});
   }
 
   void showSnackBar(String text) {
@@ -37,6 +41,11 @@ class InfosState extends State<Infos> {
     );
   }
 
+  TextStyle titleStyle(BuildContext context) => Theme.of(context)
+        .textTheme
+        .headline5!
+        .copyWith(color: VIOLET, fontFamily: 'Cloister');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,19 +56,22 @@ class InfosState extends State<Infos> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Utilisation', style: Theme.of(context).textTheme.headline5!.copyWith(color: VIOLET)),
+            Text('Utilisation', style: titleStyle(context)),
             RichText(
               text: TextSpan(
                 text: USAGE,
                 style: TextStyle(color: Colors.grey[800]),
               ),
             ),
-            Text('Disclaimer', style: Theme.of(context).textTheme.headline5!.copyWith(color: VIOLET)),
-            RichText(
-              text: TextSpan(
-                text: DISCLAIMER,
-                style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey[800]),
-                recognizer: TapGestureRecognizer()..onTap = () => showSnackBar('Nique la Strass'),
+            SizedBox(height: 15),
+            Text('Disclaimer', style: titleStyle(context)),
+            GestureDetector(
+              onTap: () => showSnackBar('Nique la Strass'),
+              child: RichText(
+                text: TextSpan(
+                  text: DISCLAIMER,
+                  style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey[800]),
+                ),
               ),
             ),
           ],
@@ -71,7 +83,7 @@ class InfosState extends State<Infos> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
-                'Dorian&Co © ${packageInfo.appName} -  v${packageInfo.version}',
+                '58ch$proms © ${packageInfo.appName} -  v${packageInfo.version}',
                 style: TextStyle(color: Colors.grey[500], backgroundColor: Colors.transparent),
               ),
             ),

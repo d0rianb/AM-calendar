@@ -37,4 +37,8 @@ flutter:
   uses-material-design: true
   assets:
     - resources/icons/am-logo.png
+  fonts:
+    - family: Cloister
+      fonts:
+        - asset: resources/fonts/CloisterBlack.ttf
 
