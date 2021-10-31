@@ -1,9 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'sfcalendar/lib/calendar.dart';
 import './calendar-event.dart';
 import './requests.dart';
 import './week.dart';
