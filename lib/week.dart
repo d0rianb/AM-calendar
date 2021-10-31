@@ -9,7 +9,7 @@ class Week {
 
   int get id => this.firstDay.millisecondsSinceEpoch;
 
-  String get stringId => 'week:this.id';
+  String get stringId => 'week:$id';
 
   Week.fromDateTime(DateTime day) {
     firstDay = DateTime(day.year, day.month, day.day, 0, 0, 0).subtract(Duration(days: day.weekday - 1));

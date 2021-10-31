@@ -5,9 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'sfcalendar/lib/calendar.dart';
 import './calendar-event.dart';
-import './requests.dart';
-import './week.dart';
-import './cache.dart';
+import 'helplers/requests.dart';
+import 'week.dart';
+import 'cache.dart';
 
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
 const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);

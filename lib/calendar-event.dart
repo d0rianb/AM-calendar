@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'sfcalendar/lib/calendar.dart';
 
-import 'blur-transition.dart';
+import 'helplers/blur-transition.dart';
 import 'calendar-event-popup.dart';
 import 'calendar-item.dart';
 import 'calendar.dart';
-import 'color-helpers.dart';
+import 'helplers/color-helpers.dart';
 
 typedef JSON = Map<String, dynamic>;
 

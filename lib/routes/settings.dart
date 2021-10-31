@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:am_calendar/helplers/snackbar.dart';
 
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
 const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);
@@ -142,6 +144,7 @@ class SettingsState extends State<Settings> {
                           if (formKey.currentState!.validate()) {
                             prefs?.setString('id', userId);
                             prefs?.setString('password', password);
+                            showSnackBar(context, 'Les paramètres ont bien été enregistrés');
                           }
                         },
                       ),

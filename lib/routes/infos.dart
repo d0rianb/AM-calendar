@@ -1,3 +1,4 @@
+import 'package:am_calendar/helplers/snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:package_info/package_info.dart';
@@ -31,16 +32,6 @@ class InfosState extends State<Infos> {
     setState(() {});
   }
 
-  void showSnackBar(String text) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(text),
-        elevation: 2.0,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
   TextStyle titleStyle(BuildContext context) => Theme.of(context)
         .textTheme
         .headline5!
@@ -66,7 +57,7 @@ class InfosState extends State<Infos> {
             SizedBox(height: 15),
             Text('Disclaimer', style: titleStyle(context)),
             GestureDetector(
-              onTap: () => showSnackBar('Nique la Strass'),
+              onTap: () => showSnackBar(context, 'Nique la Strass'),
               child: RichText(
                 text: TextSpan(
                   text: DISCLAIMER,
