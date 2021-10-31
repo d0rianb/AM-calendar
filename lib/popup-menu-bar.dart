@@ -8,7 +8,7 @@ class PopupMenuBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const iconColor = ORANGE;
-    const double iconSize = 44;
+    const double iconSize = 50;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [

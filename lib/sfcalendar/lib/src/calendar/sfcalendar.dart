@@ -7057,14 +7057,14 @@ class _SfCalendarState extends State<SfCalendar>
       return Container();
     }
 
-    const double calendarViewTextHeight = 40;
+    const double calendarViewTextHeight = 50;
     final List<Widget> children = <Widget>[];
     double width = 0;
     Color? headerTextColor = widget.headerStyle.textStyle != null
         ? widget.headerStyle.textStyle!.color
         : (_calendarTheme.headerTextStyle.color);
     headerTextColor ??= Colors.black87;
-    final TextStyle style = TextStyle(color: headerTextColor, fontSize: 12);
+    final TextStyle style = TextStyle(color: headerTextColor, fontSize: 14);
     int selectedIndex = -1;
     final Color? todayColor = CalendarViewHelper.getTodayHighlightTextColor(
         widget.todayHighlightColor ?? _calendarTheme.todayHighlightColor,
@@ -7286,9 +7286,9 @@ class _SfCalendarState extends State<SfCalendar>
     return Positioned(
         top: widget.headerHeight,
         // left: left,
-        right: 10,
+        right: 5,
         height: height,
-        width: 3*44,
+        width: 3*50,
         child: _PopupWidget(
             alignment: popupAlignment,
             child: Container(
@@ -8299,7 +8299,7 @@ class _PopupWidgetState extends State<_PopupWidget>
   @override
   void initState() {
     _animationController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 200));
+        vsync: this, duration: const Duration(milliseconds: 100));
     _animation =
         CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
     super.initState();
@@ -8448,7 +8448,7 @@ class _CalendarHeaderViewState extends State<_CalendarHeaderView> {
     final bool navigationArrowEnabled =
         widget.showNavigationArrow && widget.view != CalendarView.schedule;
     double iconWidth = widget.width / 8;
-    iconWidth = iconWidth > 40 ? 40 : iconWidth;
+    iconWidth = iconWidth > 60 ? 60 : iconWidth;
     double calendarViewWidth = 0;
 
     /// Assign arrow width as icon width when the navigation arrow enabled.
