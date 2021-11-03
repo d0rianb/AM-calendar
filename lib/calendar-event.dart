@@ -5,15 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'sfcalendar/lib/calendar.dart';
 
-import 'helplers/blur-transition.dart';
+import 'helpers/blur-transition.dart';
 import 'calendar-event-popup.dart';
 import 'calendar-item.dart';
 import 'calendar.dart';
-import 'helplers/color-helpers.dart';
+import 'helpers/color-helpers.dart';
 
 typedef JSON = Map<String, dynamic>;
 
-Map<String, Color> classColor = {
+final Map<String, Color> classColor = {
   'CM':  ORANGE,
   'ED_TD': HexColor.fromHex('#9b3471'),
   'TPS': HexColor.fromHex('#1976d2'),

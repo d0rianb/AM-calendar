@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:am_calendar/helplers/snackbar.dart';
+import 'package:am_calendar/helpers/snackbar.dart';
 
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
 const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);
 
 class Settings extends StatefulWidget {
+  const Settings({Key? key}) : super(key: key);
+
   @override
   SettingsState createState() => SettingsState();
 }
@@ -19,6 +21,8 @@ class SettingsState extends State<Settings> {
   final TextEditingController passwordFieldController = TextEditingController();
   String userId = '';
   String password = '';
+  String nums = '';
+  String proms = '';
   String tbk = "Chalon's";
   bool showPals = false;
   SharedPreferences? prefs;
@@ -36,6 +40,27 @@ class SettingsState extends State<Settings> {
   }
 
   Future<void> initSharedPreferences() async => prefs = await SharedPreferences.getInstance();
+
+  void checkNums(BuildContext context) {
+    if (nums == '' || proms == '') return;
+    if (proms == '220') {
+      switch (int.tryParse(nums)) {
+        case 53:
+          return showSnackBar(context, 'OuinOuin');
+        case 58:
+          return showSnackBar(context, 'Il s\'agirait d\'avoir le matos');
+        case 74:
+          return showSnackBar(context, 'Il s\'agirait de courir plus vite le matin dans le pal\'s');
+        case 16:
+        case 108:
+          showDialog(barrierDismissible: false, context: context, builder: (_) => AlertDialog(content: Text('C\'est clairement zocké pour toi')));
+          Future.delayed(const Duration(milliseconds: 500), () => throw ErrorHint('Num\'s de shaymen'));
+          break;
+        case 139:
+          return showSnackBar(context, 'Ca va t\'es cool avec le seau ?');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +126,7 @@ class SettingsState extends State<Settings> {
                           icon: Icon(Icons.location_city),
                           hintText: 'Choisissez votre TBK',
                           labelText: 'TBK',
-                          border: const OutlineInputBorder(borderSide: BorderSide(color: VIOLET)),
+                          border: const UnderlineInputBorder(borderSide: BorderSide(color: VIOLET)),
                         ),
                         value: tbk,
                         icon: const Icon(Icons.arrow_downward, color: VIOLET),
@@ -119,21 +144,70 @@ class SettingsState extends State<Settings> {
                       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
                       child: Visibility(
                         visible: tbk == 'Chalon\'s',
-                        child: CheckboxListTile(
-                            title: Text(
-                              'Afficher les pal\'s',
-                              textAlign: TextAlign.left,
+                        child: Column(
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                              textBaseline: TextBaseline.alphabetic,
+                              children: [
+                                Flexible(
+                                  child: TextFormField(
+                                    decoration: InputDecoration(
+                                      icon: Icon(Icons.looks_one_outlined),
+                                      alignLabelWithHint: true,
+                                      labelText: 'Num\'s',
+                                      border: InputBorder.none,
+                                    ),
+                                    keyboardType: TextInputType.number,
+                                    textAlign: TextAlign.right,
+                                    onChanged: (value) {
+                                      setState(() => nums = value);
+                                      checkNums(context);
+                                    },
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(2.0),
+                                  child: Text(
+                                    'Ch',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                ),
+                                Flexible(
+                                  child: TextFormField(
+                                    decoration: InputDecoration(
+                                      alignLabelWithHint: true,
+                                      labelText: 'Prom\'s',
+                                      border: InputBorder.none,
+                                    ),
+                                    initialValue: proms,
+                                    keyboardType: TextInputType.number,
+                                    textAlign: TextAlign.left,
+                                    onChanged: (value) {
+                                      setState(() => proms = value);
+                                      checkNums(context);
+                                    },
+                                  ),
+                                )
+                              ],
                             ),
-                            controlAffinity: ListTileControlAffinity.leading,
-                            contentPadding: EdgeInsets.all(0),
-                            value: showPals,
-                            activeColor: VIOLET,
-                            onChanged: (value) {
-                              setState(() {
-                                showPals = value!;
-                                prefs?.setBool('showPals', value);
-                              });
-                            }),
+                            CheckboxListTile(
+                                title: Text(
+                                  'Afficher les pal\'s',
+                                  textAlign: TextAlign.left,
+                                ),
+                                controlAffinity: ListTileControlAffinity.leading,
+                                contentPadding: EdgeInsets.all(0),
+                                value: showPals,
+                                activeColor: VIOLET,
+                                onChanged: (value) {
+                                  setState(() {
+                                    showPals = value!;
+                                    prefs?.setBool('showPals', value);
+                                  });
+                                }),
+                          ],
+                        ),
                       ),
                     ),
                     Padding(

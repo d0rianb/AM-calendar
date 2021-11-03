@@ -1,4 +1,4 @@
-import 'package:am_calendar/helplers/snackbar.dart';
+import 'package:am_calendar/helpers/snackbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -17,6 +17,8 @@ const Map<String, String> JSPath = {
 };
 
 class LoginWebView extends StatefulWidget {
+  const LoginWebView({Key? key}) : super(key: key);
+
   @override
   LoginWebViewState createState() => LoginWebViewState();
 }

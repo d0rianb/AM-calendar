@@ -3,7 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'routes/infos.dart';
-import 'helplers/localization_extendibility.dart';
+import 'helpers/localization_extendibility.dart';
 import 'calendar.dart';
 import 'routes/login-webview.dart';
 import 'routes/splash-screen.dart';
@@ -45,17 +45,17 @@ class App extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const SplashScreen(),
-        '/calendar': (context) => CalendarPage(title: 'AM calendar'),
-        '/login': (context) => LoginWebView(),
-        '/infos': (context) => Infos(),
-        '/settings': (context) => Settings(),
+        '/calendar': (context) => const CalendarPage(title: 'AM calendar'),
+        '/login': (context) => const LoginWebView(),
+        '/infos': (context) => const Infos(),
+        '/settings': (context) => const Settings(),
       }
     );
   }
 }
 
 class CalendarPage extends StatefulWidget {
-  CalendarPage({Key? key, required this.title}) : super(key: key);
+  const CalendarPage({Key? key, required this.title}) : super(key: key);
 
   // final liseEvents = [
   //   {"id": "64852304", "title": "CH_Amphi_2 - 08:00 - 10:00 - EEA_CEE - CM - GILLOT Cyrille - 2h00 -  - 5GIE CM", "start": "2021-09-20T08:00:00+0200", "end": "2021-09-20T10:00:00+0200", "allDay": false, "editable": true, "className": "CM"},
@@ -82,7 +82,7 @@ class CalendarPage extends StatefulWidget {
 }
 
 class CalendarPageState extends State<CalendarPage> {
-  final Calendar calendar = new Calendar();
+  final Calendar calendar = Calendar();
 
   @override
   Widget build(BuildContext context) {

@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'sfcalendar/lib/calendar.dart';
 import './calendar-event.dart';
-import 'helplers/requests.dart';
+import 'helpers/requests.dart';
 import 'week.dart';
 import 'cache.dart';
 
@@ -39,7 +39,6 @@ class CalendarState extends State<Calendar> {
   }
 
   Future<void> getEvents() async {
-    print('getEvents');
     if (mounted) setState(() => loading = true);
     final List<CalendarEvent> cachedEvents = getCachedEvents();
     int addedEventsFromCache = addEvents(cachedEvents);

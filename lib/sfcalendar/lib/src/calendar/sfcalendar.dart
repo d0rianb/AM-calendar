@@ -8299,7 +8299,7 @@ class _PopupWidgetState extends State<_PopupWidget>
   @override
   void initState() {
     _animationController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 100));
+        vsync: this, duration: const Duration(milliseconds: 10));
     _animation =
         CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
     super.initState();
