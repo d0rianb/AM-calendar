@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:am_calendar/main.dart';
+import 'package:am_calendar/reload-view-event.dart';
 import 'package:am_calendar/helpers/snackbar.dart';
 
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
@@ -24,10 +27,11 @@ class SettingsState extends State<Settings> {
   String nums = '';
   String proms = '';
   String tbk = "Chalon's";
-  bool showPals = false;
   SharedPreferences? prefs;
 
   static const List<String> TBKList = ["Chalon's", "Siber's", "Boquette", "Birse", "Paris", "KIN", "Bordel's", "Clun's"];
+
+  bool get showPals => prefs?.getBool('showPals') ?? false;
 
   @override
   void initState() {
@@ -54,7 +58,7 @@ class SettingsState extends State<Settings> {
         case 16:
         case 108:
           showDialog(barrierDismissible: false, context: context, builder: (_) => AlertDialog(content: Text('C\'est clairement zocké pour toi')));
-          Future.delayed(const Duration(milliseconds: 500), () => throw ErrorHint('Num\'s de shaymen'));
+          Future.delayed(const Duration(milliseconds: 500), () => SystemChannels.platform.invokeMethod('SystemNavigator.pop'));
           break;
         case 139:
           return showSnackBar(context, 'Ca va t\'es cool avec le seau ?');
@@ -65,7 +69,9 @@ class SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Paramètres')),
+      appBar: AppBar(
+          title: const Text('Paramètres'),
+      ),
       body: Theme(
         data: Theme.of(context).copyWith(primaryColor: VIOLET),
         child: Form(
@@ -95,7 +101,6 @@ class SettingsState extends State<Settings> {
                         cursorColor: VIOLET,
                         inputFormatters: [LengthLimitingTextInputFormatter(9)],
                         controller: userIdFieldController,
-                        validator: (id) => (id ?? '').isEmpty ? 'Il faut remplir votre identifiant' : null,
                         textInputAction: TextInputAction.next,
                         onChanged: (id) => setState(() => userId = id),
                       ),
@@ -114,7 +119,6 @@ class SettingsState extends State<Settings> {
                         enableSuggestions: false,
                         autocorrect: false,
                         controller: passwordFieldController,
-                        validator: (pswd) => (pswd ?? '').isEmpty ? 'Il faut remplir votre mot de passe' : null,
                         textInputAction: TextInputAction.next,
                         onChanged: (pswd) => setState(() => password = pswd),
                       ),
@@ -202,8 +206,8 @@ class SettingsState extends State<Settings> {
                                 activeColor: VIOLET,
                                 onChanged: (value) {
                                   setState(() {
-                                    showPals = value!;
-                                    prefs?.setBool('showPals', value);
+                                    prefs?.setBool('showPals', value!);
+                                    eventBus.fire(ReloadViewEvent());
                                   });
                                 }),
                           ],

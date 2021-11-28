@@ -8,7 +8,7 @@ class CalendarItem extends Hero {
 
   CalendarItem(this.event, this.size, this.expanded)
       : super(
-          tag: event.startTime.millisecondsSinceEpoch.toString(),
+          tag: event.id,
           child: Visibility(
             visible: event.shouldDisplay,
             child: DefaultTextStyle(

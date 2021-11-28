@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:event_bus/event_bus.dart';
 
 import 'routes/infos.dart';
 import 'helpers/localization_extendibility.dart';
@@ -8,6 +8,8 @@ import 'calendar.dart';
 import 'routes/login-webview.dart';
 import 'routes/splash-screen.dart';
 import 'routes/settings.dart';
+
+EventBus eventBus = EventBus();
 
 const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
@@ -83,6 +85,12 @@ class CalendarPage extends StatefulWidget {
 
 class CalendarPageState extends State<CalendarPage> {
   final Calendar calendar = Calendar();
+
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

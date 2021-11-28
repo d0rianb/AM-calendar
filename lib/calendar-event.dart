@@ -14,7 +14,7 @@ import 'helpers/color-helpers.dart';
 typedef JSON = Map<String, dynamic>;
 
 final Map<String, Color> classColor = {
-  'CM':  ORANGE,
+  'CM': ORANGE,
   'ED_TD': HexColor.fromHex('#9b3471'),
   'TPS': HexColor.fromHex('#1976d2'),
   'OTHER': HexColor.fromHex('#607d8b'),
@@ -34,7 +34,18 @@ class CalendarEvent extends Appointment {
   DateTime endTime = DateTime.now();
   bool isAllDay = false;
 
-  CalendarEvent({required this.title, required this.course, required this.classType, this.location, required this.teacherName, required this.group, required this.duration, required this.startTime, required this.endTime, this.isAllDay = false}) : super(startTime: startTime, endTime: endTime);
+  CalendarEvent({
+    required this.title,
+    required this.course,
+    required this.classType,
+    this.location,
+    required this.teacherName,
+    required this.group,
+    required this.duration,
+    required this.startTime,
+    required this.endTime,
+    this.isAllDay = false,
+  }) : super(startTime: startTime, endTime: endTime);
 
   static final DateFormat dateParser = new DateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
   static final RegExp endCharRegex = new RegExp(r'\\n');
@@ -43,13 +54,26 @@ class CalendarEvent extends Appointment {
   static final RegExp groupRegex = new RegExp(r'GROUPES\s:\s(.*)\\n');
 
   String get subject => List.from([formattedClassType, teacherName, duration].where((element) => element != '')).join(' - ');
+
   String get formattedLocation => (location ?? '').replaceAll('_', ' ');
+
   String get formattedClassType => classType.replaceAll('_', ' ');
-  Color get color => classColor.containsKey(classType) ? classColor[classType]! : isExam ? classColor['EXAM']! : classColor['OTHER']!;
+
+  Color get color => classColor.containsKey(classType)
+      ? classColor[classType]!
+      : isExam
+          ? classColor['EXAM']!
+          : classColor['OTHER']!;
+
   bool get shouldDisplay => classType != 'INDISP';
+
   bool get isExam => title.toUpperCase().contains('EXAMEN') || title.toUpperCase().contains('TEST');
+
   bool get isVisio => title.contains('VIA TEAMS');
+
   Color get borderColor => isVisio ? classColor['TEAMS']! : darken(color, 10);
+
+  String get id => subject + startTime.millisecondsSinceEpoch.toString();
 
   static CalendarEvent fromLiseObject(JSON event) {
     List<String> list = event['title'].split(' - ');
@@ -128,7 +152,7 @@ class CalendarEvent extends Appointment {
 
   Widget build(BuildContext context, Size size) {
     return Listener(
-        behavior: HitTestBehavior.opaque,
+      behavior: HitTestBehavior.opaque,
       onPointerDown: (pointerDownEvent) => Navigator.push(
         context,
         new PageRouteBuilder(
@@ -171,7 +195,9 @@ class CalendarEvent extends Appointment {
 }
 
 class AppointmentDataSource extends CalendarDataSource {
-  AppointmentDataSource(List<Appointment> source) { appointments = source; }
+  AppointmentDataSource(List<Appointment> source) {
+    appointments = source;
+  }
 
   @override
   DateTime getStartTime(int index) => appointments![index].from;

@@ -2,12 +2,16 @@ import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:am_calendar/main.dart';
 
 import 'sfcalendar/lib/calendar.dart';
-import './calendar-event.dart';
+import 'calendar-event.dart';
 import 'helpers/requests.dart';
 import 'week.dart';
 import 'cache.dart';
+import 'custom-event.dart';
+import 'helpers/datetime-helpers.dart';
+import 'reload-view-event.dart';
 
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
 const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);
@@ -21,17 +25,27 @@ class Calendar extends StatefulWidget {
 
 class CalendarState extends State<Calendar> {
   final CalendarController controller = CalendarController();
-  List<CalendarEvent> events = [];
+  List<Appointment> events = [];
   Week week = Week.fromDateTime(DateTime.now());
   bool loading = false;
   SharedPreferences? prefs;
+  bool? _showPals;
+  bool? _showCM;
 
   bool get isLoading => loading || events.length == 0;
+
+  bool get showPals => _showPals ?? prefs?.getBool('showPals') ?? false;
+
+  bool get showCM => _showCM ?? prefs?.getBool('showCM') ?? true;
 
   @override
   void initState() {
     super.initState();
     initSharedPreferences().then((_) => getEvents());
+    eventBus.on<ReloadViewEvent>().listen((event) => setState(() {
+      _showPals = prefs?.getBool('showPals') ?? false;
+      _showCM = prefs?.getBool('showCM') ?? true;
+    }));
   }
 
   Future<void> initSharedPreferences() async {
@@ -40,28 +54,37 @@ class CalendarState extends State<Calendar> {
 
   Future<void> getEvents() async {
     if (mounted) setState(() => loading = true);
+    if (showPals)
+      addEvents(getPals());
+    else
+      events = events.where((e) => !(e is CustomEvent && e.type == 'pals')).toList();
     final List<CalendarEvent> cachedEvents = getCachedEvents();
     int addedEventsFromCache = addEvents(cachedEvents);
     if (addedEventsFromCache > 0 && mounted) setState(() => loading = false);
     final List<CalendarEvent> networksEvents = await getEventsFromNetworks(week);
     int addedEventsFromNetwork = addEvents(networksEvents);
     if (addedEventsFromNetwork > 0) print('$addedEventsFromNetwork new events');
-   if (mounted) setState(() => loading = false);
+    if (mounted) setState(() => loading = false);
   }
 
   List<CalendarEvent> getCachedEvents() {
     // TODO: filter too old events
     if (prefs == null) return [];
-    final Iterable<String> cachedWeeksId = prefs!
-        .getKeys()
-        .where((key) => key.startsWith('week:'));
-    return cachedWeeksId
-        .map((id) => {'id': id, 'value': prefs!.getString(id)})
-        .map((obj) => Cache.fromString(obj['id']!, obj['value']))
-        .where((cache) => cache.isValid)
-        .map((cache) => cache.object)
-        .flattened
-        .toList();
+    final Iterable<String> cachedWeeksId = prefs!.getKeys().where((key) => key.startsWith('week:'));
+    return cachedWeeksId.map((id) => {'id': id, 'value': prefs!.getString(id)}).map((obj) => Cache.fromString(obj['id']!, obj['value'])).where((cache) => cache.isValid).map((cache) => cache.object).flattened.toList();
+  }
+
+  List<CustomEvent> getPals() {
+    List<CustomEvent> pals = [];
+    for (int i = 0; i < 12; i++) {
+      DateTime morning = week.firstDay.add(Duration(days: i)).copyWith(hour: 7, minute: 0);
+      pals.add(CustomEvent(type: 'pals', subject: 'Pal\'s', startTime: morning, endTime: morning.add(Duration(hours: 1)), prefs: prefs));
+      if (i != 2 && i != 4 && i != 9 && i != 11) {
+        DateTime evening = morning.copyWith(hour: 19, minute: 15);
+        pals.add(CustomEvent(type: 'pals', subject: 'Pal\'s', startTime: evening, endTime: evening.add(Duration(hours: 3)), prefs: prefs));
+      }
+    }
+    return pals;
   }
 
   Future<List<CalendarEvent>> getEventsFromNetworks(Week week) async {
@@ -72,8 +95,8 @@ class CalendarState extends State<Calendar> {
     return events;
   }
 
-  /// Return the number og events added
-  int addEvents(List<CalendarEvent> newEvents) {
+  /// Return the number of events added
+  int addEvents(List<Appointment> newEvents) {
     if (IterableEquality().equals(events, newEvents)) return 0;
     int oldEventsLength = events.length;
     newEvents.forEach((event) => !events.contains(event) ? events.add(event) : null);
@@ -96,12 +119,12 @@ class CalendarState extends State<Calendar> {
               ],
               showDatePickerButton: false,
               timeZone: 'W. Europe Standard Time',
-              timeSlotViewSettings: const TimeSlotViewSettings(
+              timeSlotViewSettings: TimeSlotViewSettings(
                 timeInterval: const Duration(minutes: 60),
                 timeIntervalHeight: 45,
                 timeFormat: 'Hm',
                 startHour: 7,
-                endHour: 19,
+                endHour: showPals ? 22 : 19,
               ),
               viewHeaderStyle: const ViewHeaderStyle(
                 dayTextStyle: const TextStyle(
@@ -127,7 +150,10 @@ class CalendarState extends State<Calendar> {
                 fontWeight: FontWeight.bold,
               ),
               appointmentBuilder: (BuildContext context, CalendarAppointmentDetails details) {
-                CalendarEvent event = details.appointments.first;
+                dynamic event = details.appointments.first;
+                if (event is CalendarEvent && event.classType == 'CM') {
+                  if (!showCM) return Container();
+                }
                 return event.build(context, details.bounds.size);
               },
             ),
@@ -146,5 +172,4 @@ class CalendarState extends State<Calendar> {
       ],
     );
   }
-
 }
