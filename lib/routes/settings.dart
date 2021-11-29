@@ -102,7 +102,10 @@ class SettingsState extends State<Settings> {
                         inputFormatters: [LengthLimitingTextInputFormatter(9)],
                         controller: userIdFieldController,
                         textInputAction: TextInputAction.next,
-                        onChanged: (id) => setState(() => userId = id),
+                        onChanged: (id) => setState(() {
+                          prefs?.setString('id', userId);
+                          userId = id;
+                        }),
                       ),
                     ),
                     Padding(
@@ -120,7 +123,10 @@ class SettingsState extends State<Settings> {
                         autocorrect: false,
                         controller: passwordFieldController,
                         textInputAction: TextInputAction.next,
-                        onChanged: (pswd) => setState(() => password = pswd),
+                        onChanged: (pswd) => setState(() {
+                          password = pswd;
+                          prefs?.setString('password', pswd);
+                        }),
                       ),
                     ),
                     Padding(
@@ -214,19 +220,6 @@ class SettingsState extends State<Settings> {
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(18.0),
-                      child: ElevatedButton(
-                        child: const Text('Sauvegarder'),
-                        onPressed: () {
-                          if (formKey.currentState!.validate()) {
-                            prefs?.setString('id', userId);
-                            prefs?.setString('password', password);
-                            showSnackBar(context, 'Les paramètres ont bien été enregistrés');
-                          }
-                        },
-                      ),
-                    )
                   ],
                 ),
               ),

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:event_bus/event_bus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'routes/infos.dart';
 import 'helpers/localization_extendibility.dart';
 import 'calendar.dart';
-import 'routes/login-webview.dart';
+import 'routes/login-view.dart';
 import 'routes/splash-screen.dart';
 import 'routes/settings.dart';
 
@@ -16,7 +17,7 @@ const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // SharedPreferences.getInstance().then((value) => value.clear());
+  SharedPreferences.getInstance().then((value) => value.clear());
   runApp(App());
 }
 
@@ -48,7 +49,7 @@ class App extends StatelessWidget {
       routes: {
         '/': (context) => const SplashScreen(),
         '/calendar': (context) => const CalendarPage(title: 'AM calendar'),
-        '/login': (context) => const LoginWebView(),
+        '/login': (context) => const LoginView(),
         '/infos': (context) => const Infos(),
         '/settings': (context) => const Settings(),
       }
