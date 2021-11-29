@@ -2,8 +2,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:am_calendar/main.dart';
 
+import 'main.dart';
 import 'sfcalendar/lib/calendar.dart';
 import 'calendar-event.dart';
 import 'helpers/requests.dart';
@@ -54,10 +54,10 @@ class CalendarState extends State<Calendar> {
 
   Future<void> getEvents() async {
     if (mounted) setState(() => loading = true);
-    if (showPals)
+    if (showPals) {
       addEvents(getPals());
-    else
-      events = events.where((e) => !(e is CustomEvent && e.type == 'pals')).toList();
+      setState(() {});
+    } else events = events.where((e) => !(e is CustomEvent && e.type == 'pals')).toList();
     final List<CalendarEvent> cachedEvents = getCachedEvents();
     int addedEventsFromCache = addEvents(cachedEvents);
     if (addedEventsFromCache > 0 && mounted) setState(() => loading = false);

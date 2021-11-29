@@ -1,8 +1,9 @@
-import 'package:am_calendar/helpers/snackbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:am_calendar/helpers/snackbar.dart';
 
 const String initialUrl = 'https://ensam.campusm.exlibrisgroup.com/campusm/cmauth/login/5313';
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
