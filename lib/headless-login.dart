@@ -1,9 +1,10 @@
+import 'package:am_calendar/helpers/app-events.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../helpers/snackbar.dart';
+import '../main.dart' show eventBus;
 
 const String initialUrl = 'https://ensam.campusm.exlibrisgroup.com/campusm/cmauth/login/5313';
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
@@ -52,8 +53,9 @@ class HeadlessLogin {
   }
 
 
-  void login(BuildContext context) async {
-    var headlessWebView = HeadlessInAppWebView(
+  void login() async {
+    eventBus.fire(LoginEvent('Initialisation de la connection'));
+    HeadlessInAppWebView headlessWebView = HeadlessInAppWebView(
       initialUrlRequest: URLRequest(url: Uri.parse(initialUrl)),
       initialOptions: InAppWebViewGroupOptions(
         crossPlatform: InAppWebViewOptions(
@@ -67,33 +69,38 @@ class HeadlessLogin {
       onWebViewCreated: (controller) async {
         prefs = await SharedPreferences.getInstance();
         webViewController = controller;
+        eventBus.fire(LoginEvent('Création de la vue Web'));
       },
-      onLoadStart: (controller, url) {},
+      onLoadStart: (controller, url) => eventBus.fire(LoginEvent('Chargement de l\'interface CAS')),
       androidOnPermissionRequest: (controller, origin, resources) async => PermissionRequestResponse(resources: resources, action: PermissionRequestResponseAction.GRANT),
       shouldOverrideUrlLoading: (controller, navigationAction) async => NavigationActionPolicy.ALLOW,
       onLoadStop: (controller, url) async {
+        eventBus.fire(LoginEvent('Connection au serveur'));
         if (url.toString().startsWith('https://auth.ensam.eu/cas/login?')) {
           if (++urlCount < 2) return;
-          controller.evaluateJavascript(source: '''document.querySelector("#fm1").onsubmit = () => console.log('internalSubmitForm')''');
-          if (prefs.getString('id') == null || prefs.getString('id')!.isEmpty) return error('id');
-          if (prefs.getString('password') == null || prefs.getString('password')!.isEmpty) return error('password');
+          if (prefs.getString('id') == null || prefs.getString('id')!.isEmpty) return error('Identifiant incorrect');
+          if (prefs.getString('password') == null || prefs.getString('password')!.isEmpty) return error('Mot de passe incorrect');
           fillField(controller, 'username', prefs.getString('id')!);
           fillField(controller, 'password', prefs.getString('password')!);
           submit(controller, 'login-form');
+          eventBus.fire(LoginEvent('Envoi des données au server'));
         }
         if (url.toString() == 'https://ensam.campusm.exlibrisgroup.com/cmauth/saml/sso') {
           final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse('https://ensam.campusm.exlibrisgroup.com'));
           final int cmAuthTokenIndex = cookies.indexWhere((cookie) => cookie.name == 'cmAuthToken');
+          eventBus.fire(LoginEvent('Réception des informations de connections'));
           if (cmAuthTokenIndex > -1) {
             prefs.setString('cmAuthToken', cookies[cmAuthTokenIndex].value);
-            Navigator.of(context).pushNamed('/calendar');
+            eventBus.fire(LoginEvent('Connection réussie', finished: true));
           } else {
-            print('No auth cookie detected');
-            showSnackBar(context, 'No auth cookie detected');
+            error('Pas de cookie détecté.');
           }
         }
       },
-      onLoadHttpError: (controller, url, code, message) => print('HTTP error $code : $message'),
+      onLoadHttpError: (controller, url, code, message) {
+        if (code == 401) error('Identifiant ou mot de passe incorrect');
+        print('HTTP error $code : $message');
+      },
       onUpdateVisitedHistory: (controller, url, androidIsReload) {},
       onConsoleMessage: (controller, consoleMessage) => print('[Embedded console] : $consoleMessage'),
     );
@@ -101,7 +108,7 @@ class HeadlessLogin {
   }
 
   void error([String? reason]) {
-    print('Error : $reason');
-    return;
+    eventBus.fire(LoginEvent('Erreur de connection : $reason', error: true));
+    throw 'Error : $reason';
   }
 }

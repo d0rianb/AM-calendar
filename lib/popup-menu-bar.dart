@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'main.dart';
-import 'reload-view-event.dart';
+import 'helpers/app-events.dart';
 
 const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);

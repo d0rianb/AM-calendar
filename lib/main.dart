@@ -17,7 +17,7 @@ const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SharedPreferences.getInstance().then((value) => value.clear());
+  // SharedPreferences.getInstance().then((value) => value.clear());
   runApp(App());
 }
 

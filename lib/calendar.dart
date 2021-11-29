@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'main.dart';
+import 'main.dart' show eventBus;
 import 'sfcalendar/lib/calendar.dart';
 import 'calendar-event.dart';
 import 'helpers/requests.dart';
@@ -11,7 +11,7 @@ import 'week.dart';
 import 'cache.dart';
 import 'custom-event.dart';
 import 'helpers/datetime-helpers.dart';
-import 'reload-view-event.dart';
+import 'helpers/app-events.dart';
 
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
 const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);

@@ -4,9 +4,9 @@ import 'package:flutter/services.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:am_calendar/main.dart';
-import 'package:am_calendar/reload-view-event.dart';
-import 'package:am_calendar/helpers/snackbar.dart';
+import '../main.dart' show eventBus;
+import '../helpers/app-events.dart';
+import '../helpers/snackbar.dart';
 
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
 const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);
