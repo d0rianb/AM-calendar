@@ -37,7 +37,7 @@ class PopupMenuBarState extends State<PopupMenuBar> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             InkWell(
-              onTap: () =>  eventBus.fire(ReloadViewEvent()),
+              onTap: () =>  eventBus.fire(RecallGetEvent()),
               child: SizedBox(width: iconSize, height: iconSize, child: Icon(Icons.refresh, color: iconColor)),
             ),
             InkWell(

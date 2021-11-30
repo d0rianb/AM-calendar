@@ -2,6 +2,10 @@ class ReloadViewEvent {
   ReloadViewEvent();
 }
 
+class RecallGetEvent {
+  RecallGetEvent();
+}
+
 class LoginEvent {
   String text;
   bool? finished = false;

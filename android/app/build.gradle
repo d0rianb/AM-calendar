@@ -69,10 +69,12 @@ android {
             applicationVariants.all { variant ->
                 variant.outputs.all {
                     def appName = "am-calendar"
-                    def newName
-                    newName = "${appName}-v${defaultConfig.versionName}.apk"
+                    def newName = "${appName}-v${defaultConfig.versionName}.apk"
                     outputFileName = newName
                 }
+            }
+            ndk {
+                debugSymbolLevel 'SYMBOL_TABLE'
             }
         }
     }
