@@ -34,7 +34,7 @@ class HeadlessLogin {
 
   static Future fillField(InAppWebViewController controller, String JSpathIndex, String value) async {
     return controller.evaluateJavascript(source: '''
-      document.querySelector('${JSPath[JSpathIndex]}').value = '$value'
+      document.querySelector('${JSPath[JSpathIndex]}').value = String.raw`$value`
       ''');
   }
 
@@ -42,14 +42,12 @@ class HeadlessLogin {
     return controller.evaluateJavascript(source: '''
       let form = document.querySelector('${JSPath[JSpathIndex]}')
       let button = document.querySelector('${JSPath['submit']}')
-      form.requestSubmit(button)
+      if (form && button) form.requestSubmit(button)
       ''');
   }
 
   static Future getInputValue(InAppWebViewController controller, String JSpathIndex) async {
-    return controller.evaluateJavascript(source: '''
-        document.querySelector('${JSPath[JSpathIndex]}').value
-    ''');
+    return controller.evaluateJavascript(source: '''document.querySelector('${JSPath[JSpathIndex]}').value''');
   }
 
 
@@ -77,7 +75,7 @@ class HeadlessLogin {
       onLoadStop: (controller, url) async {
         eventBus.fire(LoginEvent('Connection au serveur'));
         if (url.toString().startsWith('https://auth.ensam.eu/cas/login?')) {
-          if (++urlCount < 2) return;
+          if (++urlCount > 5) return; // To prevent DDOS & account blocking
           if (prefs.getString('id') == null || prefs.getString('id')!.isEmpty) return error('Identifiant incorrect');
           if (prefs.getString('password') == null || prefs.getString('password')!.isEmpty) return error('Mot de passe incorrect');
           fillField(controller, 'username', prefs.getString('id')!);

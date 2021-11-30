@@ -36,10 +36,28 @@ class LoginViewState extends State<LoginView> {
     initSharedPreferences().whenComplete(() => setState(() {
           userIdFieldController.text = prefs!.getString('id') ?? '2021-';
           passwordFieldController.text = prefs!.getString('password') ?? '';
+          userId = prefs!.getString('id') ?? '2021-';
+          password = prefs!.getString('password') ?? '';
         }));
   }
 
   Future<void> initSharedPreferences() async => prefs = await SharedPreferences.getInstance();
+
+  void webLoginCallback() => Navigator.of(context).pushNamed('/web-login');
+
+  void debugCallback() {
+    showDialog(
+      context: context,
+      builder: (_) => SimpleDialog(
+        title: const Text('Login Debug'),
+        contentPadding: const EdgeInsets.all(12.0),
+        children: [
+          Text('ID : ' + (prefs?.getString('id') ?? '')),
+          Text('Password : ' + (prefs?.getString('password') ?? '')),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +75,7 @@ class LoginViewState extends State<LoginView> {
                 key: formKey,
                 child: Center(
                   child: Container(
-                    width: MediaQuery.of(context).size.width * .8,
+                    width: MediaQuery.of(context).size.width * .85,
                     padding: const EdgeInsets.all(16.0),
                     child: Theme(
                       data: ThemeData(
@@ -69,7 +87,7 @@ class LoginViewState extends State<LoginView> {
                       child: ListView(
                         children: [
                           Transform.translate(
-                          offset: const Offset(-12.0, 0.0),
+                            offset: const Offset(-12.0, 0.0),
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: TextFormField(
@@ -84,8 +102,9 @@ class LoginViewState extends State<LoginView> {
                                 controller: userIdFieldController,
                                 textInputAction: TextInputAction.next,
                                 onChanged: (id) => setState(() {
-                                  userId = id;
-                                  prefs?.setString('id', userId);
+                                  userId = id.trim();
+                                  if (userId == 'web-login') webLoginCallback();
+                                  else if (userId == 'debug') debugCallback();
                                 }),
                               ),
                             ),
@@ -96,7 +115,7 @@ class LoginViewState extends State<LoginView> {
                               padding: const EdgeInsets.all(8.0),
                               child: TextFormField(
                                 decoration: const InputDecoration(
-                                  icon: Icon(Icons.password),
+                                  icon: const Icon(Icons.password),
                                   hintText: 'Entrez votre mot de passe',
                                   labelText: 'Mot de passe',
                                   border: const OutlineInputBorder(borderSide: BorderSide(color: VIOLET)),
@@ -109,7 +128,6 @@ class LoginViewState extends State<LoginView> {
                                 textInputAction: TextInputAction.next,
                                 onChanged: (pswd) => setState(() {
                                   password = pswd;
-                                  prefs?.setString('password', pswd);
                                 }),
                               ),
                             ),
@@ -119,6 +137,8 @@ class LoginViewState extends State<LoginView> {
                             child: ElevatedButton(
                               child: Text(!isLoading ? 'Se connecter' : 'Annuler'),
                               onPressed: () {
+                                prefs?.setString('id', userId);
+                                prefs?.setString('password', password);
                                 if (formKey.currentState!.validate()) {
                                   if (isLoading) {
                                     setState(() {
@@ -135,10 +155,11 @@ class LoginViewState extends State<LoginView> {
                                   eventBus.on<LoginEvent>().listen((event) {
                                     if (hasError) return;
                                     if (event.finished ?? false) Navigator.of(context).pushNamed('/calendar');
-                                    if (event.error ?? false) setState(() {
-                                      isLoading = false;
-                                      hasError = true;
-                                    });
+                                    if (event.error ?? false)
+                                      setState(() {
+                                        isLoading = false;
+                                        hasError = true;
+                                      });
                                     setState(() => connectionText = event.text + '...');
                                   });
                                 }

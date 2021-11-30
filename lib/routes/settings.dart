@@ -22,6 +22,8 @@ class SettingsState extends State<Settings> {
   final formKey = GlobalKey<FormState>();
   final TextEditingController userIdFieldController = TextEditingController();
   final TextEditingController passwordFieldController = TextEditingController();
+  final TextEditingController numsFieldController = TextEditingController();
+  final TextEditingController promsFieldController = TextEditingController();
   String userId = '';
   String password = '';
   String nums = '';
@@ -39,7 +41,8 @@ class SettingsState extends State<Settings> {
     initSharedPreferences().whenComplete(() => setState(() {
           tbk = prefs!.getString('tbk') ?? 'Chalon\'s';
           userIdFieldController.text = prefs?.getString('id') ?? '2021-';
-          passwordFieldController.text = prefs?.getString('password') ?? '';
+          numsFieldController.text = prefs?.getString('nums') ?? '';
+          promsFieldController.text = prefs?.getString('proms') ?? '';
         }));
   }
 
@@ -145,7 +148,7 @@ class SettingsState extends State<Settings> {
                         style: const TextStyle(color: VIOLET),
                         onChanged: (value) => setState(() {
                           tbk = value!;
-                          prefs?.setString(tbk, value);
+                          prefs?.setString('tbk', value);
                         }),
                         items: TBKList.map((value) => DropdownMenuItem<String>(value: value, child: Text(value))).toList(),
                       ),
@@ -169,9 +172,11 @@ class SettingsState extends State<Settings> {
                                       border: InputBorder.none,
                                     ),
                                     keyboardType: TextInputType.number,
+                                    controller: numsFieldController,
                                     textAlign: TextAlign.right,
                                     onChanged: (value) {
                                       setState(() => nums = value);
+                                      prefs?.setString('nums', value);
                                       checkNums(context);
                                     },
                                   ),
@@ -191,10 +196,12 @@ class SettingsState extends State<Settings> {
                                       border: InputBorder.none,
                                     ),
                                     initialValue: proms,
+                                    controller: promsFieldController,
                                     keyboardType: TextInputType.number,
                                     textAlign: TextAlign.left,
                                     onChanged: (value) {
                                       setState(() => proms = value);
+                                      prefs?.setString('proms', value);
                                       checkNums(context);
                                     },
                                   ),

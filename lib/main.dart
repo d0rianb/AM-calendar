@@ -7,6 +7,7 @@ import 'routes/infos.dart';
 import 'helpers/localization_extendibility.dart';
 import 'calendar.dart';
 import 'routes/login-view.dart';
+import 'routes/login-webview.dart';
 import 'routes/splash-screen.dart';
 import 'routes/settings.dart';
 
@@ -50,6 +51,7 @@ class App extends StatelessWidget {
         '/': (context) => const SplashScreen(),
         '/calendar': (context) => const CalendarPage(title: 'AM calendar'),
         '/login': (context) => const LoginView(),
+        '/web-login': (context) => const LoginWebView(),
         '/infos': (context) => const Infos(),
         '/settings': (context) => const Settings(),
       }

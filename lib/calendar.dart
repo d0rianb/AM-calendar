@@ -46,6 +46,7 @@ class CalendarState extends State<Calendar> {
       _showPals = prefs?.getBool('showPals') ?? false;
       _showCM = prefs?.getBool('showCM') ?? true;
     }));
+    eventBus.on<RecallGetEvent>().listen((event) => getEvents());
   }
 
   Future<void> initSharedPreferences() async {
