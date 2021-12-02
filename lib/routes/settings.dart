@@ -73,7 +73,7 @@ class SettingsState extends State<Settings> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text('Paramètres'),
+        title: const Text('Paramètres'),
       ),
       body: Theme(
         data: Theme.of(context).copyWith(primaryColor: VIOLET),
@@ -195,7 +195,6 @@ class SettingsState extends State<Settings> {
                                       labelText: 'Prom\'s',
                                       border: InputBorder.none,
                                     ),
-                                    initialValue: proms,
                                     controller: promsFieldController,
                                     keyboardType: TextInputType.number,
                                     textAlign: TextAlign.left,

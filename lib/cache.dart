@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:intl/intl.dart';
 
-import 'calendar-event.dart';
+import 'events/calendar-event.dart';
 
 typedef JSON = Map<String, dynamic>;
 const cacheInvalidationDuration = const Duration(days: 3);

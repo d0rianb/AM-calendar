@@ -18,9 +18,7 @@ class Week {
 
   Week.fromId(String id) {
     if (!id.startsWith('week:')) throw ErrorHint('Wrong Week id');
-    Week.fromDateTime(
-        DateTime.fromMicrosecondsSinceEpoch(int.parse(id.replaceAll('week:', '')))
-    );
+    Week.fromDateTime(DateTime.fromMicrosecondsSinceEpoch(int.parse(id.replaceAll('week:', ''))));
   }
 
   Week getWorkWeek() {
@@ -28,7 +26,12 @@ class Week {
     return Week(firstDay, newLastDay);
   }
 
-  String format() {
+  bool isDayInside(DateTime day) {
+    return firstDay.isBefore(day) && lastDay.isAfter(day);
+  }
+
+  @override
+  String toString() {
     DateFormat dateTimeFormatter = DateFormat.MMMMEEEEd();
     return 'Week : ${dateTimeFormatter.format(firstDay)} - ${dateTimeFormatter.format(lastDay)}';
   }

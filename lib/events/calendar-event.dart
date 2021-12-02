@@ -3,13 +3,13 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'sfcalendar/lib/calendar.dart';
+import '../sfcalendar/lib/calendar.dart';
 
-import 'helpers/blur-transition.dart';
+import '../helpers/blur-transition.dart';
 import 'calendar-event-popup.dart';
-import 'calendar-item.dart';
-import 'calendar.dart';
-import 'helpers/color-helpers.dart';
+import '../calendar-item.dart';
+import '../calendar.dart';
+import '../helpers/color-helpers.dart';
 
 typedef JSON = Map<String, dynamic>;
 

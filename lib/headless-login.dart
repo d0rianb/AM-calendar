@@ -73,7 +73,7 @@ class HeadlessLogin {
       androidOnPermissionRequest: (controller, origin, resources) async => PermissionRequestResponse(resources: resources, action: PermissionRequestResponseAction.GRANT),
       shouldOverrideUrlLoading: (controller, navigationAction) async => NavigationActionPolicy.ALLOW,
       onLoadStop: (controller, url) async {
-        eventBus.fire(LoginEvent('Connection au serveur'));
+        eventBus.fire(LoginEvent('Connexion au serveur'));
         if (url.toString().startsWith('https://auth.ensam.eu/cas/login?')) {
           if (++urlCount > 5) return; // To prevent DDOS & account blocking
           if (prefs.getString('id') == null || prefs.getString('id')!.isEmpty) return error('Identifiant incorrect');
@@ -89,7 +89,7 @@ class HeadlessLogin {
           eventBus.fire(LoginEvent('Réception des informations de connections'));
           if (cmAuthTokenIndex > -1) {
             prefs.setString('cmAuthToken', cookies[cmAuthTokenIndex].value);
-            eventBus.fire(LoginEvent('Connection réussie', finished: true));
+            eventBus.fire(LoginEvent('Connexion réussie', finished: true));
           } else {
             error('Pas de cookie détecté.');
           }

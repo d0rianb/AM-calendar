@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import 'calendar-event.dart';
-import 'calendar-item.dart';
+import '../calendar-item.dart';
 
 class CalendarEventPopup extends Dialog {
   final CalendarEvent event;
