@@ -3,13 +3,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'events/no-info-event.dart';
+import 'events/pals-event.dart';
 import 'main.dart' show eventBus;
 import 'sfcalendar/lib/calendar.dart';
-import 'calendar-event.dart';
+import 'events/calendar-event.dart';
 import 'helpers/requests.dart';
 import 'week.dart';
 import 'cache.dart';
-import 'custom-event.dart';
+import 'events/custom-event.dart';
 import 'helpers/datetime-helpers.dart';
 import 'helpers/app-events.dart';
 
@@ -28,6 +30,7 @@ class CalendarState extends State<Calendar> {
   List<Appointment> events = [];
   Week week = Week.fromDateTime(DateTime.now());
   bool loading = false;
+  bool displayNoInfos = false;
   SharedPreferences? prefs;
   bool? _showPals;
   bool? _showCM;
@@ -43,9 +46,9 @@ class CalendarState extends State<Calendar> {
     super.initState();
     initSharedPreferences().then((_) => getEvents());
     eventBus.on<ReloadViewEvent>().listen((event) => setState(() {
-      _showPals = prefs?.getBool('showPals') ?? false;
-      _showCM = prefs?.getBool('showCM') ?? true;
-    }));
+          _showPals = prefs?.getBool('showPals') ?? false;
+          _showCM = prefs?.getBool('showCM') ?? true;
+        }));
     eventBus.on<RecallGetEvent>().listen((event) => getEvents());
   }
 
@@ -58,7 +61,10 @@ class CalendarState extends State<Calendar> {
     if (showPals) {
       addEvents(getPals());
       setState(() {});
-    } else events = events.where((e) => !(e is CustomEvent && e.type == 'pals')).toList();
+    } else {
+      events = events.where((e) => !(e is CustomEvent && e.type == 'pals')).toList();
+    }
+    addNoInfoEvents();
     final List<CalendarEvent> cachedEvents = getCachedEvents();
     int addedEventsFromCache = addEvents(cachedEvents);
     if (addedEventsFromCache > 0 && mounted) setState(() => loading = false);
@@ -79,13 +85,23 @@ class CalendarState extends State<Calendar> {
     List<CustomEvent> pals = [];
     for (int i = 0; i < 12; i++) {
       DateTime morning = week.firstDay.add(Duration(days: i)).copyWith(hour: 7, minute: 0);
-      pals.add(CustomEvent(type: 'pals', subject: 'Pal\'s', startTime: morning, endTime: morning.add(Duration(hours: 1)), prefs: prefs));
+      pals.add(PalsEvent(subject: 'Pal\'s', startTime: morning, endTime: morning.add(Duration(hours: 1)), prefs: prefs));
       if (i != 2 && i != 4 && i != 9 && i != 11) {
         DateTime evening = morning.copyWith(hour: 19, minute: 15);
-        pals.add(CustomEvent(type: 'pals', subject: 'Pal\'s', startTime: evening, endTime: evening.add(Duration(hours: 3)), prefs: prefs));
+        pals.add(PalsEvent(subject: 'Pal\'s', startTime: evening, endTime: evening.add(Duration(hours: 3)), prefs: prefs));
       }
     }
     return pals;
+  }
+
+  void addNoInfoEvents() {
+    Week secondWeek = week.getNextWeek().getNextWeek();
+    Week thirdWeek = secondWeek.getNextWeek();
+    List<NoInfoEvent> noInfoEvents = [
+      NoInfoEvent(startTime: secondWeek.firstDay, endTime: secondWeek.lastDay),
+      NoInfoEvent(startTime: thirdWeek.firstDay, endTime: thirdWeek.lastDay),
+    ];
+    addEvents(noInfoEvents);
   }
 
   Future<List<CalendarEvent>> getEventsFromNetworks(Week week) async {
@@ -106,6 +122,7 @@ class CalendarState extends State<Calendar> {
 
   @override
   Widget build(BuildContext context) {
+    displayNoInfos = events.where((e) => week.isDayInside(e.startTime)).isEmpty;
     return Stack(
       children: [
         Stack(

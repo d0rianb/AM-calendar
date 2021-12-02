@@ -137,6 +137,8 @@ class LoginViewState extends State<LoginView> {
                             child: ElevatedButton(
                               child: Text(!isLoading ? 'Se connecter' : 'Annuler'),
                               onPressed: () {
+                                if (userId == 'web-login') return webLoginCallback();
+                                else if (userId == 'debug') return debugCallback();
                                 prefs?.setString('id', userId);
                                 prefs?.setString('password', password);
                                 if (formKey.currentState!.validate()) {
@@ -151,7 +153,7 @@ class LoginViewState extends State<LoginView> {
                                     isLoading = true;
                                   });
                                   HeadlessLogin()..login();
-                                  showSnackBar(context, 'Connection en cours');
+                                  showSnackBar(context, 'Connexion en cours');
                                   eventBus.on<LoginEvent>().listen((event) {
                                     if (hasError) return;
                                     if (event.finished ?? false) Navigator.of(context).pushNamed('/calendar');

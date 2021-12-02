@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'sfcalendar/lib/calendar.dart';
+import '../sfcalendar/lib/calendar.dart';
 
 class CustomEvent extends Appointment {
   String type = '';
@@ -10,6 +10,8 @@ class CustomEvent extends Appointment {
   DateTime startTime = DateTime.now();
   DateTime endTime = DateTime.now();
   Color color = Colors.transparent;
+  Color textColor = Colors.black;
+  Color borderColor = Colors.blueGrey;
   SharedPreferences? prefs;
 
   bool get isVisible => prefs?.getBool('showPals') ?? false;
@@ -19,7 +21,7 @@ class CustomEvent extends Appointment {
     required this.subject,
     required this.startTime,
     required this.endTime,
-    this.prefs
+    this.prefs,
   }) : super(startTime: startTime, endTime: endTime);
 
   Widget build(BuildContext context, Size size) {
@@ -29,7 +31,7 @@ class CustomEvent extends Appointment {
         style: const TextStyle(decoration: TextDecoration.none),
         child: Center(
           child: Container(
-            padding:  const EdgeInsets.all(2.0),
+            padding: const EdgeInsets.all(2.0),
             margin: const EdgeInsets.all(0.0),
             width: size.width,
             height: size.height,
@@ -39,7 +41,7 @@ class CustomEvent extends Appointment {
               shape: BoxShape.rectangle,
               color: color,
               borderRadius: BorderRadius.all(Radius.circular(3.5)),
-              border: Border.all(color: Colors.blueGrey, width: 2),
+              border: Border.all(color: borderColor, width: 2),
             ),
             child: SingleChildScrollView(
               child: Column(
@@ -52,7 +54,7 @@ class CustomEvent extends Appointment {
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 10,
-                      color: Colors.blueGrey,
+                      color: textColor,
                     ),
                   ),
                 ],

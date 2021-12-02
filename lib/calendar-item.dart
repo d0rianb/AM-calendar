@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'calendar-event.dart';
+import 'events/calendar-event.dart';
 
 class CalendarItem extends Hero {
   final CalendarEvent event;
