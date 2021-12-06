@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:package_info/package_info.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,6 +25,7 @@ class LoginViewState extends State<LoginView> {
   final TextEditingController userIdFieldController = TextEditingController();
   final TextEditingController passwordFieldController = TextEditingController();
   late SharedPreferences? prefs;
+  late PackageInfo packageInfo = PackageInfo(appName: '', packageName: '', version: '', buildNumber: '');
   String userId = '';
   String password = '';
   bool isLoading = false;
@@ -39,6 +41,12 @@ class LoginViewState extends State<LoginView> {
           userId = prefs!.getString('id') ?? '2021-';
           password = prefs!.getString('password') ?? '';
         }));
+    initPackageInfo();
+  }
+
+  Future<void> initPackageInfo() async {
+    packageInfo = await PackageInfo.fromPlatform();
+    setState(() {});
   }
 
   Future<void> initSharedPreferences() async => prefs = await SharedPreferences.getInstance();
@@ -103,7 +111,8 @@ class LoginViewState extends State<LoginView> {
                                 textInputAction: TextInputAction.next,
                                 onChanged: (id) => setState(() {
                                   userId = id.trim();
-                                  if (userId == 'web-login') webLoginCallback();
+                                  if (userId == 'web-login')
+                                    webLoginCallback();
                                   else if (userId == 'debug') debugCallback();
                                 }),
                               ),
@@ -137,7 +146,8 @@ class LoginViewState extends State<LoginView> {
                             child: ElevatedButton(
                               child: Text(!isLoading ? 'Se connecter' : 'Annuler'),
                               onPressed: () {
-                                if (userId == 'web-login') return webLoginCallback();
+                                if (userId == 'web-login')
+                                  return webLoginCallback();
                                 else if (userId == 'debug') return debugCallback();
                                 prefs?.setString('id', userId);
                                 prefs?.setString('password', password);
@@ -200,6 +210,18 @@ class LoginViewState extends State<LoginView> {
           ],
         ),
       ),
+        bottomNavigationBar: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                '${packageInfo.appName} -  v${packageInfo.version}',
+                style: TextStyle(color: Colors.grey[500], backgroundColor: Colors.transparent),
+              ),
+            ),
+          ],
+        ),
     );
   }
 }
