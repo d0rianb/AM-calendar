@@ -40,9 +40,9 @@ class SettingsState extends State<Settings> {
     super.initState();
     initSharedPreferences().whenComplete(() => setState(() {
           tbk = prefs!.getString('tbk') ?? 'Chalon\'s';
-          userIdFieldController.text = prefs?.getString('id') ?? '2021-';
-          numsFieldController.text = prefs?.getString('nums') ?? '';
-          promsFieldController.text = prefs?.getString('proms') ?? '';
+          userIdFieldController.text = prefs!.getString('id') ?? '2021-';
+          numsFieldController.text = prefs!.getString('nums') ?? '';
+          promsFieldController.text = prefs!.getString('proms') ?? '';
         }));
   }
 
@@ -52,8 +52,6 @@ class SettingsState extends State<Settings> {
     if (nums == '' || proms == '') return;
     if (proms == '220') {
       switch (int.tryParse(nums)) {
-        case 53:
-          return showSnackBar(context, 'OuinOuin');
         case 58:
           return showSnackBar(context, 'Il s\'agirait d\'avoir le matos');
         case 74:
@@ -65,6 +63,11 @@ class SettingsState extends State<Settings> {
           break;
         case 139:
           return showSnackBar(context, 'Ca va t\'es cool avec le seau ?');
+      }
+    } else if (proms == '221') {
+      switch (int.tryParse(nums)) {
+        case 37:
+          return showSnackBar(context, 'Adnan grosse shymen');
       }
     }
   }
@@ -139,7 +142,7 @@ class SettingsState extends State<Settings> {
                           icon: Icon(Icons.location_city),
                           hintText: 'Choisissez votre TBK',
                           labelText: 'TBK',
-                          border: const UnderlineInputBorder(borderSide: BorderSide(color: VIOLET)),
+                          border: const OutlineInputBorder(borderSide: BorderSide(color: VIOLET)),
                         ),
                         value: tbk,
                         icon: const Icon(Icons.arrow_downward, color: VIOLET),
@@ -150,7 +153,7 @@ class SettingsState extends State<Settings> {
                           tbk = value!;
                           prefs?.setString('tbk', value);
                         }),
-                        items: TBKList.map((value) => DropdownMenuItem<String>(value: value, child: Text(value))).toList(),
+                        items: TBKList.map((value) => DropdownMenuItem<String>(value: value, child: InkWell(child: Text(value)))).toList(),
                       ),
                     ),
                     Padding(
