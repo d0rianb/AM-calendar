@@ -3,9 +3,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'routes/infos.dart';
-import 'helpers/localization_extendibility.dart';
 import 'calendar.dart';
+import 'helpers/localization_extendibility.dart';
+import 'routes/infos.dart';
 import 'routes/login-view.dart';
 import 'routes/login-webview.dart';
 import 'routes/splash-screen.dart';
@@ -26,36 +26,35 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'AM Calendar',
-      debugShowCheckedModeBanner: false,
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        SfLocalizationsFrDelegate(),
-      ],
-      supportedLocales: const [
-        Locale('en'),
-        Locale('fr'),
-      ],
-      locale: const Locale('fr'),
-      theme: ThemeData(
-        primarySwatch: Colors.amber,
-        primaryColor: VIOLET,
-        colorScheme: ColorScheme.fromSwatch(
-          primaryColorDark: VIOLET,
-          accentColor: ORANGE,
+        title: 'AM Calendar',
+        debugShowCheckedModeBanner: false,
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          SfLocalizationsFrDelegate(),
+        ],
+        supportedLocales: const [
+          Locale('en'),
+          Locale('fr'),
+        ],
+        locale: const Locale('fr'),
+        theme: ThemeData(
+          primarySwatch: Colors.amber,
+          primaryColor: VIOLET,
+          colorScheme: ColorScheme.fromSwatch(
+            primaryColorDark: VIOLET,
+            accentColor: ORANGE,
+          ),
         ),
-      ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const SplashScreen(),
-        '/calendar': (context) => const CalendarPage(title: 'AM calendar'),
-        '/login': (context) => const LoginView(),
-        '/web-login': (context) => const LoginWebView(),
-        '/infos': (context) => const Infos(),
-        '/settings': (context) => const Settings(),
-      }
-    );
+        initialRoute: '/',
+        routes: {
+          '/': (context) => const SplashScreen(),
+          '/calendar': (context) => const CalendarPage(title: 'AM calendar'),
+          '/login': (context) => const LoginView(),
+          '/web-login': (context) => const LoginWebView(),
+          '/infos': (context) => const Infos(),
+          '/settings': (context) => const Settings(),
+        });
   }
 }
 
@@ -88,7 +87,6 @@ class CalendarPage extends StatefulWidget {
 
 class CalendarPageState extends State<CalendarPage> {
   final Calendar calendar = Calendar();
-
 
   @override
   void initState() {

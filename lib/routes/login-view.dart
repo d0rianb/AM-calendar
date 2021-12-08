@@ -155,6 +155,7 @@ class LoginViewState extends State<LoginView> {
                                   if (isLoading) {
                                     setState(() {
                                       isLoading = false;
+                                      connectionText = '';
                                     });
                                     return;
                                   }
@@ -210,18 +211,18 @@ class LoginViewState extends State<LoginView> {
           ],
         ),
       ),
-        bottomNavigationBar: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                '${packageInfo.appName} -  v${packageInfo.version}',
-                style: TextStyle(color: Colors.grey[500], backgroundColor: Colors.transparent),
-              ),
+      bottomNavigationBar: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              '${packageInfo.appName} -  v${packageInfo.version}',
+              style: TextStyle(color: Colors.grey[500], backgroundColor: Colors.transparent),
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,9 +1,11 @@
-import 'package:am_calendar/helpers/app-events.dart';
+import 'dart:io' show Platform;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'helpers/app-events.dart';
 import '../main.dart' show eventBus;
 
 const String initialUrl = 'https://ensam.campusm.exlibrisgroup.com/campusm/cmauth/login/5313';
@@ -17,7 +19,6 @@ const Map<String, String> JSPath = {
   'login-form': '#fm1',
   'etudiant-personnel': '#mOdAl_1_body > div > div.listview > ul > li:nth-child(1) > a',
 };
-
 
 class HeadlessLogin {
   static final CookieManager cookieManager = CookieManager.instance();
@@ -42,14 +43,19 @@ class HeadlessLogin {
     return controller.evaluateJavascript(source: '''
       let form = document.querySelector('${JSPath[JSpathIndex]}')
       let button = document.querySelector('${JSPath['submit']}')
-      if (form && button) form.requestSubmit(button)
+      if (form && button) {
+        if (form.requestSubmit) form.requestSubmit(button)
+        else {
+          button.disabled = false
+          button.click()
+        }
+      }
       ''');
   }
 
   static Future getInputValue(InAppWebViewController controller, String JSpathIndex) async {
     return controller.evaluateJavascript(source: '''document.querySelector('${JSPath[JSpathIndex]}').value''');
   }
-
 
   void login() async {
     eventBus.fire(LoginEvent('Initialisation de la connection'));
@@ -75,7 +81,7 @@ class HeadlessLogin {
       onLoadStop: (controller, url) async {
         eventBus.fire(LoginEvent('Connexion au serveur'));
         if (url.toString().startsWith('https://auth.ensam.eu/cas/login?')) {
-          if (++urlCount > 5) return; // To prevent DDOS & account blocking
+          if (++urlCount > 4) return; // To prevent DDOS & account blocking
           if (prefs.getString('id') == null || prefs.getString('id')!.isEmpty) return error('Identifiant incorrect');
           if (prefs.getString('password') == null || prefs.getString('password')!.isEmpty) return error('Mot de passe incorrect');
           fillField(controller, 'username', prefs.getString('id')!);

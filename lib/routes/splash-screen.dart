@@ -26,8 +26,10 @@ class SplashScreenState extends State<SplashScreen> {
   void toggleRoute(bool? hasLoginInfos, BuildContext context) {
     NavigatorState nav = Navigator.of(context);
     if (hasLoginInfos == null) return;
-    if (!hasLoginInfos) Future.microtask(() => nav.pushReplacementNamed('/login'));
-    else Future.microtask(() => nav.pushReplacementNamed('/calendar'));
+    if (!hasLoginInfos)
+      Future.microtask(() => nav.pushReplacementNamed('/login'));
+    else
+      Future.microtask(() => nav.pushReplacementNamed('/calendar'));
   }
 
   @override
@@ -56,5 +58,4 @@ class SplashScreenState extends State<SplashScreen> {
       },
     );
   }
-  
 }

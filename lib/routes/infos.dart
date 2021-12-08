@@ -1,4 +1,3 @@
-import 'package:am_calendar/helpers/snackbar.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +7,8 @@ import 'package:package_info/package_info.dart';
 import 'package:mailto/mailto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../helpers/snackbar.dart';
 
 const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
@@ -66,13 +67,21 @@ Future<Widget> generateDebugRapport(BuildContext context) async {
             child: Table(
               border: TableBorder.all(color: Colors.blueGrey[200]!, width: 1),
               defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-              children: (await getDebugData()).map((row) => TableRow(children: [
-                Padding(padding: const EdgeInsets.all(8.0), child: Text(row[0], style: TextStyle(fontWeight: FontWeight.bold))),
-                Padding(padding: const EdgeInsets.all(8.0), child: Text(row[1]),),
-              ])).toList(),
+              children: (await getDebugData())
+                  .map((row) => TableRow(children: [
+                        Padding(padding: const EdgeInsets.all(8.0), child: Text(row[0], style: TextStyle(fontWeight: FontWeight.bold))),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(row[1]),
+                        ),
+                      ]))
+                  .toList(),
             ),
           ),
-          Text(dateFormatter.format(DateTime.now()), style: TextStyle(fontStyle: FontStyle.italic, color: Colors.blueGrey[500]!),),
+          Text(
+            dateFormatter.format(DateTime.now()),
+            style: TextStyle(fontStyle: FontStyle.italic, color: Colors.blueGrey[500]!),
+          ),
         ],
       ),
     ),
@@ -129,7 +138,7 @@ class InfosState extends State<Infos> {
                 child: RichText(
                   text: TextSpan(
                     text: DISCLAIMER,
-                    style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey[800]),
+                    style: Theme.of(context).textTheme.bodyText1!.copyWith(fontStyle: FontStyle.italic),
                   ),
                   textAlign: TextAlign.justify,
                 ),
@@ -160,7 +169,6 @@ class InfosState extends State<Infos> {
                             TextButton(
                               child: const Text('Cancel', style: TextStyle(color: VIOLET)),
                               onPressed: () => Navigator.of(context).pop(),
-
                             ),
                             TextButton(
                               child: const Text('Copy', style: TextStyle(color: VIOLET)),
