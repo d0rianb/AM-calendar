@@ -116,7 +116,7 @@ class InfosState extends State<Infos> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('Infos')),
+        appBar: AppBar(title: const Text('Infos'), backgroundColor: VIOLET),
         body: Padding(
           padding: const EdgeInsets.all(10.0),
           child: Column(

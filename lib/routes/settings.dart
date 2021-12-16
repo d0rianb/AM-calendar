@@ -76,6 +76,7 @@ class SettingsState extends State<Settings> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: VIOLET,
         title: const Text('Paramètres'),
       ),
       body: Theme(
@@ -185,7 +186,7 @@ class SettingsState extends State<Settings> {
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.all(2.0),
+                                  padding: const EdgeInsets.fromLTRB(2.0, 2.0, 4.0, 2.0),
                                   child: Text(
                                     'Ch',
                                     style: TextStyle(fontSize: 18),
@@ -226,6 +227,16 @@ class SettingsState extends State<Settings> {
                                   });
                                 }),
                           ],
+                        ),
+                      ),
+                    ),
+                    Visibility(
+                      visible: false,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ElevatedButton(
+                          child: Text('Exporter vers Google Calendar'),
+                          onPressed: () => eventBus.fire(ExportCalendarEvent()),
                         ),
                       ),
                     ),

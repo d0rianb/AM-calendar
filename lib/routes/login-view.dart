@@ -72,6 +72,7 @@ class LoginViewState extends State<LoginView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Connection'),
+        backgroundColor: VIOLET,
       ),
       body: Padding(
         padding: const EdgeInsets.only(top: 16.0),

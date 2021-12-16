@@ -147,6 +147,9 @@ class SfLocalizationsFr extends SfLocalizations {
   String get pdfPaginationDialogCancelLabel => 'Annuler';
 
   String get weeknumberLabel => 'Semaine';
+
+  @override
+  String get allDayLabel => 'Tous les jours';
 }
 
 class SfLocalizationsFrDelegate extends LocalizationsDelegate<SfLocalizations> {
