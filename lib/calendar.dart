@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:collection/collection.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import "package:googleapis_auth/auth_io.dart";
+import 'package:googleapis/calendar/v3.dart' as GoogleCalendar;
+import 'package:url_launcher/url_launcher.dart';
 
 import 'events/no-info-event.dart';
 import 'events/pals-event.dart';
@@ -14,6 +18,7 @@ import 'cache.dart';
 import 'events/custom-event.dart';
 import 'helpers/datetime-helpers.dart';
 import 'helpers/app-events.dart';
+import 'credentials.dart';
 
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
 const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);
@@ -50,6 +55,7 @@ class CalendarState extends State<Calendar> {
           _showCM = prefs?.getBool('showCM') ?? true;
         }));
     eventBus.on<RecallGetEvent>().listen((event) => getEvents());
+    eventBus.on<ExportCalendarEvent>().listen((event) => exportToGoogleCalendar());
   }
 
   Future<void> initSharedPreferences() async {
@@ -118,6 +124,16 @@ class CalendarState extends State<Calendar> {
     int oldEventsLength = events.length;
     newEvents.forEach((event) => !events.contains(event) ? events.add(event) : null);
     return events.length - oldEventsLength;
+  }
+
+  void exportToGoogleCalendar() async {
+    const scopes = const [GoogleCalendar.CalendarApi.calendarScope];
+    ClientId clientId = new ClientId((Platform.isAndroid) ? OAuthAndroid : OAuthiOS);
+    List<GoogleCalendar.Event> gCalendarEvents = events.where((e) => e is CalendarEvent).map((e) => (e as CalendarEvent).exportToGoogleCalendar()).toList();
+    AuthClient client = await clientViaUserConsent(clientId, scopes, launch);
+    GoogleCalendar.CalendarApi calendarApi = GoogleCalendar.CalendarApi(client);
+    String calendarId = 'primary';
+    gCalendarEvents.forEach((event) => calendarApi.events.insert(event, calendarId));
   }
 
   @override

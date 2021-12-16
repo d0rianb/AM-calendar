@@ -6,6 +6,10 @@ class RecallGetEvent {
   RecallGetEvent();
 }
 
+class ExportCalendarEvent {
+  ExportCalendarEvent();
+}
+
 class LoginEvent {
   String text;
   bool? finished = false;

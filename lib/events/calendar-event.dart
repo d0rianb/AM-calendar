@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:googleapis/calendar/v3.dart' as GoogleCalendar;
 import 'package:intl/intl.dart';
 import '../sfcalendar/lib/calendar.dart';
 
@@ -150,45 +151,59 @@ class CalendarEvent extends Appointment {
     });
   }
 
+  GoogleCalendar.Event exportToGoogleCalendar() {
+    GoogleCalendar.EventDateTime start = GoogleCalendar.EventDateTime();
+    GoogleCalendar.EventDateTime end = GoogleCalendar.EventDateTime();
+    start.dateTime = startTime;
+    end.dateTime = startTime;
+    return GoogleCalendar.Event(
+      start: start,
+      end: end,
+      summary: subject,
+    );
+  }
+
   Widget build(BuildContext context, Size size) {
     return Listener(
       behavior: HitTestBehavior.opaque,
-      onPointerDown: (pointerDownEvent) => Navigator.push(
-        context,
-        new PageRouteBuilder(
-          pageBuilder: (context, animation, _) => CalendarEventPopup(this),
-          opaque: false,
-          transitionsBuilder: (context, animation, _, child) {
-            final tween = Tween<double>(begin: 0, end: 2.0);
-            animation.drive(tween);
-            return BlurTransition(
-              animation: tween.animate(animation),
-              child: Stack(
-                children: [
-                  BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: animation.value, sigmaY: animation.value),
-                    child: Scrollable(
-                      physics: NeverScrollableScrollPhysics(),
-                      viewportBuilder: (BuildContext context, _) => Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.2),
+      onPointerDown: (pointerDownEvent) => (shouldDisplay)
+          ? Navigator.push(
+              context,
+              new PageRouteBuilder(
+                pageBuilder: (context, animation, _) => CalendarEventPopup(this),
+                opaque: false,
+                transitionsBuilder: (context, animation, _, child) {
+                  final tween = Tween<double>(begin: 0, end: 2.0);
+                  animation.drive(tween);
+                  return BlurTransition(
+                    animation: tween.animate(animation),
+                    child: Stack(
+                      children: [
+                        BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: animation.value, sigmaY: animation.value),
+                          child: Scrollable(
+                            physics: NeverScrollableScrollPhysics(),
+                            viewportBuilder: (BuildContext context, _) => Container(
+                              width: MediaQuery.of(context).size.width,
+                              height: MediaQuery.of(context).size.height,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.withOpacity(0.2),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                        child,
+                      ],
                     ),
-                  ),
-                  child,
-                ],
+                  );
+                },
+                transitionDuration: const Duration(milliseconds: 300),
+                reverseTransitionDuration: const Duration(milliseconds: 250),
+                barrierDismissible: true,
               ),
-            );
-          },
-          transitionDuration: const Duration(milliseconds: 300),
-          reverseTransitionDuration: const Duration(milliseconds: 250),
-          barrierDismissible: true,
-        ),
-      ),
-      onPointerUp: (_) => Navigator.pop(context),
+            )
+          : null,
+      onPointerUp: (_) => (shouldDisplay) ? Navigator.pop(context) : null,
       child: CalendarItem(this, size, false),
     );
   }
