@@ -17,3 +17,9 @@ class LoginEvent {
 
   LoginEvent(this.text, {this.finished, this.error});
 }
+
+class RequestErrorEvent {
+  String text;
+
+  RequestErrorEvent(this.text);
+}

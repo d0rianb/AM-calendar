@@ -28,6 +28,7 @@ class CalendarEvent extends Appointment {
   String course = '';
   String classType = '';
   String? location = '';
+  String? description = '';
   String teacherName = '';
   String duration = '';
   String group = '';
@@ -40,6 +41,7 @@ class CalendarEvent extends Appointment {
     required this.course,
     required this.classType,
     this.location,
+    this.description,
     required this.teacherName,
     required this.group,
     required this.duration,
@@ -52,27 +54,31 @@ class CalendarEvent extends Appointment {
   static final RegExp endCharRegex = new RegExp(r'\\n');
   static final RegExp classeTypeRegex = new RegExp(r'TYPE_ACTIVITE\s:\s([\w_]+)\n', caseSensitive: false, multiLine: true);
   static final RegExp teacherNameRegex = new RegExp(r'INTERVENANTS\s:\s(.+)\n-\sDESCRIPTION');
+  static final RegExp descriptionRegex = new RegExp(r'DESCRIPTION\s:\s(.+)\n-\sGROUPES');
   static final RegExp groupRegex = new RegExp(r'GROUPES\s:\s(.*)\\n');
 
-  String get subject => List.from([formattedClassType, teacherName, duration].where((element) => element != '')).join(' - ');
+  String get subject => List.from([formattedClassType, description, teacherName, duration].where((element) => element != '' && element != ' ')).join(' - ');
 
   String get formattedLocation => (location ?? '').replaceAll('_', ' ');
 
   String get formattedClassType => classType.replaceAll('_', ' ');
 
-  Color get color => classColor.containsKey(classType)
-      ? classColor[classType]!
-      : isExam
-          ? classColor['EXAM']!
-          : classColor['OTHER']!;
+  Color get color {
+    String type = classType.replaceAll('_TEAMS', '');
+    return classColor.containsKey(type)
+        ? classColor[type]!
+        : isExam
+            ? classColor['EXAM']!
+            : classColor['OTHER']!;
+  }
 
   bool get shouldDisplay => classType != 'INDISP';
 
-  bool get isExam => title.toUpperCase().contains('EXAMEN') || title.toUpperCase().contains('TEST');
+  bool get isExam => title.toUpperCase().contains('EXAMEN') || title.toUpperCase().contains('TEST') || title.toUpperCase().contains('SOUTENANCE');
 
-  bool get isVisio => title.contains('VIA TEAMS');
+  bool get isVisio => title.contains('TEAMS') || title.contains('autonome');
 
-  Color get borderColor => isVisio ? classColor['TEAMS']! : darken(color, 10);
+  Color get borderColor => isVisio ? classColor['TEAMS']! : darken(color, 15);
 
   String get id => subject + startTime.millisecondsSinceEpoch.toString();
 
@@ -86,6 +92,7 @@ class CalendarEvent extends Appointment {
       classType: list[4],
       location: list[0],
       teacherName: list[5],
+      description: '',
       duration: list[6],
       group: list[8],
       startTime: dateParser.parse(event['start']),
@@ -100,10 +107,11 @@ class CalendarEvent extends Appointment {
     DateTime endTime = dateParser.parse(event['end']);
     return new CalendarEvent(
       title: (event['desc1'] + event['desc2']).replaceAll(endCharRegex, ''),
-      course: event['desc1'].replaceAll(endCharRegex, ''),
+      course: event['desc1'].replaceAll(endCharRegex, '').replaceAll('_', ''),
       classType: classeTypeRegex.firstMatch(event['desc2'])?.group(1) ?? '',
       location: event['locAdd1'].replaceAll(endCharRegex, ''),
       teacherName: teacherNameRegex.firstMatch(event['desc2'])?.group(1) ?? '',
+      description: descriptionRegex.firstMatch(event['desc2'])?.group(1) ?? '',
       group: groupRegex.firstMatch(event['desc2'])?.group(1) ?? '',
       duration: '${endTime.difference(startTime).inHours}h',
       startTime: startTime,
@@ -121,6 +129,7 @@ class CalendarEvent extends Appointment {
       classType: event['classType'],
       location: event['location'],
       teacherName: event['teacherName'],
+      description: event['description'],
       group: event['group'],
       duration: event['duration'],
       startTime: startTime,
@@ -143,6 +152,7 @@ class CalendarEvent extends Appointment {
       'classType': classType,
       'location': location,
       'teacherName': teacherName,
+      'description': description,
       'duration': duration,
       'group': group,
       'startTime': startTime.toIso8601String(),
