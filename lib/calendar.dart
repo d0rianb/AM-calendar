@@ -13,6 +13,7 @@ import 'main.dart' show eventBus;
 import 'sfcalendar/lib/calendar.dart';
 import 'events/calendar-event.dart';
 import 'helpers/requests.dart';
+import 'helpers/snackbar.dart';
 import 'week.dart';
 import 'cache.dart';
 import 'events/custom-event.dart';
@@ -39,12 +40,15 @@ class CalendarState extends State<Calendar> {
   SharedPreferences? prefs;
   bool? _showPals;
   bool? _showCM;
+  bool? _showTEAMS;
 
   bool get isLoading => loading || events.length == 0;
 
   bool get showPals => _showPals ?? prefs?.getBool('showPals') ?? false;
 
   bool get showCM => _showCM ?? prefs?.getBool('showCM') ?? true;
+
+  bool get showTEAMS => _showTEAMS ?? prefs?.getBool('showTEAMS') ?? true;
 
   @override
   void initState() {
@@ -53,6 +57,7 @@ class CalendarState extends State<Calendar> {
     eventBus.on<ReloadViewEvent>().listen((event) => setState(() {
           _showPals = prefs?.getBool('showPals') ?? false;
           _showCM = prefs?.getBool('showCM') ?? true;
+          _showTEAMS = prefs?.getBool('showTEAMS') ?? true;
         }));
     eventBus.on<RecallGetEvent>().listen((event) => getEvents());
     eventBus.on<ExportCalendarEvent>().listen((event) => exportToGoogleCalendar());
@@ -76,7 +81,6 @@ class CalendarState extends State<Calendar> {
     if (addedEventsFromCache > 0 && mounted) setState(() => loading = false);
     final List<CalendarEvent> networksEvents = await getEventsFromNetworks(week);
     int addedEventsFromNetwork = addEvents(networksEvents);
-    if (addedEventsFromNetwork > 0) print('$addedEventsFromNetwork new events');
     if (mounted) setState(() => loading = false);
   }
 
@@ -122,7 +126,7 @@ class CalendarState extends State<Calendar> {
   int addEvents(List<Appointment> newEvents) {
     if (IterableEquality().equals(events, newEvents)) return 0;
     int oldEventsLength = events.length;
-    newEvents.forEach((event) => !events.contains(event) ? events.add(event) : null);
+    newEvents.forEach((event) => events.where((e) => e.id == event.id).isEmpty ? events.add(event) : null);
     return events.length - oldEventsLength;
   }
 
@@ -138,6 +142,7 @@ class CalendarState extends State<Calendar> {
 
   @override
   Widget build(BuildContext context) {
+    eventBus.on<RequestErrorEvent>().listen((event) => showSnackBar(context, event.text));
     displayNoInfos = events.where((e) => week.isDayInside(e.startTime)).isEmpty;
     return Stack(
       children: [
@@ -185,8 +190,9 @@ class CalendarState extends State<Calendar> {
               ),
               appointmentBuilder: (BuildContext context, CalendarAppointmentDetails details) {
                 dynamic event = details.appointments.first;
-                if (event is CalendarEvent && event.classType == 'CM') {
-                  if (!showCM) return Container();
+                if (event is CalendarEvent) {
+                  if (event.classType.contains('CM') && !showCM) return Container();
+                  if (event.isVisio && !showTEAMS) return Container();
                 }
                 return event.build(context, details.bounds.size);
               },

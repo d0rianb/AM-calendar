@@ -5992,7 +5992,7 @@ class _SfCalendarState extends State<SfCalendar> with SingleTickerProviderStateM
     ));
 
     /// Restrict the pop up height with max height(200)
-    double height = (allowedViewLength + 3) * calendarViewTextHeight + 6;
+    double height = (allowedViewLength + 4) * calendarViewTextHeight + 6;
     // height = height > 200 ? 200 : height;
 
     double arrowWidth = 0;
@@ -6084,7 +6084,7 @@ class _SfCalendarState extends State<SfCalendar> with SingleTickerProviderStateM
         // left: left,
         right: 5,
         height: height,
-        width: 3.5 * 50,
+        width: 4 * 50,
         child: _PopupWidget(
             alignment: popupAlignment,
             child: Container(

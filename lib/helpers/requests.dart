@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'package:am_calendar/helpers/app-events.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../main.dart' show eventBus;
 
 // const String dorianAuthCookie =
 //     'cmAuthToken=eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiI4VWp0NERlS3dvcG9tM3RiRXdNb2pnIiwiaWF0IjoxNjMyOTg1MDUwLCJpc3MiOiJFeExpYnJpcyIsInN1YiI6IkNhbXB1c01Vc2VyIiwiZXhwIjoxNjM1NTc3MDUwLCJ1c2VybmFtZSI6IjIwMjEtMDY5OCIsIm1haWwiOiJkb3JpYW4uYmVhdWNoZXNuZUBlbnNhbS5ldSIsImZpcnN0TmFtZSI6IkRvcmlhbiIsImxhc3ROYW1lIjoiQkVBVUNIRVNORSIsImNtUGVyc29uSWQiOjUxOTMxODksImNtT3JnQ29kZSI6Njc5MiwiY21Qcm9maWxlR3JvdXBJZCI6NTMxMywiY21JbnRlZ3JhdGlvblByb2ZpbGVJZCI6OTAxLCJleHRyYUF0dHJzIjp7ImNhbXB1c25hbWUiOiJDSEFMT05TIiwidXNlclByaW5jaXBhbE5hbWUiOiJkb3JpYW4uYmVhdWNoZXNuZUBlbnNhbS5ldSIsIlN0dWRlbnRJZCI6IjIwMjEtMDY5OCJ9LCJhdXRoVHlwZSI6IkNNQVVUSCIsInJvbGVzSGFzaCI6IjlRSnFUcHh6TVpyYzdlOTZqZnIrelplQlgveVNqSXpvN3FxbmZPL3VvaUE9In0.KRMTuxLQb9UX6bnMrO739LCwO8okgCfvMKfmn_-5I-tai7CRizWCdmYwvpwIyl86LfP1VmLWxroDlwLn1k98VARm4uYnoOq0TyiBEDeD7Ia5Y2fGg1dsjWg1EYZNUZSUWJHg1i06zayNTlAB79pZE3xsig_7OD-l2AUOcvAL58jsjRkfd4E5OAq07alV2QwEWYxS-qhFKB_i-aOsfh1KmtHgUFmG-KB0x1OoXi0jSrsuGmXtzgvgOiUYyhH_N438GU6AlqHsEzMiXnMtarLd79yXwtPENSbW7rv3O1P8yaLWwY34fW2QWhn3UR4BefapNh5LxSlIJ3mtoH-raBsVWQ; a=de4c81413fc40bddtRuxhiUs%2FPeuD4Q3QXb5p%2FwQVO%2FXRmDStxjBSpOoBcCHiiqD2YIsNkGpu0cbRGv%2FlEULtRbfJETAbVGILhG6Cgu3VllcBKOaMk%2B%2FQHv9wxiNgW84tgmPzlthS2D80MaDUpTT5Y1kujuxse1FTxBrmZgURL8gd4pkfHuKpeyjfO%2FJ61VexSUUSfC1y8%2FP55URk0jwo1gPBRdQC1J4339RvQlrj2bLINN3EmIt0F%2F0K7EE3I%2B4axCMslNbnG6yZaKD8L2ZJDRMtzad5%2Fkc9MxaBkym36Jz3EgLJg1YDCSavAVjBefXrvfzkd8VKhosHabkNkRlYl8rlJlFbDxNg%2F%2BN%2BgxRTLYWuduiMD%2FPnTy8KEL3BbAeaRBh5QsgcPCn2FeYwnD%2Ft0IGoKBKJ0IqJeIAyYXvkAHaCBY%2BwWRH0UEmZr0jm6L3VrYNb7RDRYFUYgvmZY%2FHzwSXBRuCuKG8EZ0yKcCZxi56n70AX4M%2FhtKIBmIK5KzqIHJLWxj0oRoscAZe8TkaJ7qnfOTw7hdMj221b38J%2BQy%2B5LXduanwz%2FQhOVtWA%2FSmdRRUN5aL1imU1hJN7NV8DNHtZo3DskP2oQ6lE515hM%2Fi59SkQmUkR4JDRRcP1pjxXGkXn2se9rzydCDpLThYOkNDDLpitJvnY7DGzo%2Fim68%2B%2BFK9qrGK0rssrAg%3D; __a=fc348637bf477e2aa4646b21789b7c50';
@@ -79,6 +82,7 @@ class ENSAMRequest {
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
+      eventBus.fire(RequestErrorEvent('Erreur de connection  : ${response.statusCode} - ${response.reasonPhrase}'));
       throw new Exception('Error while fetching calendar : ${response.statusCode} - ${response.reasonPhrase}');
     }
   }
