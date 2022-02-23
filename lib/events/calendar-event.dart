@@ -6,8 +6,8 @@ import 'package:googleapis/calendar/v3.dart' as GoogleCalendar;
 import 'package:intl/intl.dart';
 import '../sfcalendar/lib/calendar.dart';
 
-import '../helpers/blur-transition.dart';
 import 'calendar-event-popup.dart';
+import '../helpers/blur-transition.dart';
 import '../calendar-item.dart';
 import '../calendar.dart';
 import '../helpers/color-helpers.dart';
@@ -76,7 +76,7 @@ class CalendarEvent extends Appointment {
 
   bool get isExam => title.toUpperCase().contains('EXAMEN') || title.toUpperCase().contains('TEST') || title.toUpperCase().contains('SOUTENANCE');
 
-  bool get isVisio => title.contains('TEAMS') || title.contains('autonome');
+  bool get isVisio => title.contains('TEAMS') || title.contains('autonom'); // match "ED en autonomie" | "ED autonome"
 
   Color get borderColor => isVisio ? classColor['TEAMS']! : darken(color, 15);
 
