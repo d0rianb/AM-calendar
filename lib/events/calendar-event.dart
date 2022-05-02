@@ -17,6 +17,7 @@ typedef JSON = Map<String, dynamic>;
 final Map<String, Color> classColor = {
   'CM': ORANGE,
   'ED_TD': HexColor.fromHex('#9b3471'),
+  'MISSION': HexColor.fromHex('#9b3471'),
   'TPS': HexColor.fromHex('#1976d2'),
   'OTHER': HexColor.fromHex('#607d8b'),
   'EXAM': HexColor.fromHex('#e53935'),
