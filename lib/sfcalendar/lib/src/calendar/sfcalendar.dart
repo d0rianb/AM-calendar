@@ -2721,8 +2721,10 @@ class _SfCalendarState extends State<SfCalendar> with SingleTickerProviderStateM
     _minHeight = 300;
     final SfCalendarThemeData calendarThemeData = SfCalendarTheme.of(context);
     final ThemeData themeData = Theme.of(context);
-    _calendarTheme =
-        calendarThemeData.copyWith(todayHighlightColor: calendarThemeData.todayHighlightColor ?? themeData.colorScheme.secondary, selectionBorderColor: calendarThemeData.selectionBorderColor ?? themeData.colorScheme.secondary, timeIndicatorTextStyle: calendarThemeData.timeIndicatorTextStyle.copyWith(color: calendarThemeData.timeIndicatorTextStyle.color ?? themeData.colorScheme.secondary));
+    _calendarTheme = calendarThemeData.copyWith(
+      todayHighlightColor: calendarThemeData.todayHighlightColor ?? themeData.colorScheme.secondary,
+      selectionBorderColor: calendarThemeData.selectionBorderColor ?? themeData.colorScheme.secondary,
+    );
     //// localeOf(context) returns the locale from material app when SfCalendar locale value as null
     _locale = Localizations.localeOf(context).toString();
     _localizations = SfLocalizations.of(context);
@@ -5992,7 +5994,8 @@ class _SfCalendarState extends State<SfCalendar> with SingleTickerProviderStateM
     ));
 
     /// Restrict the pop up height with max height(200)
-    double height = (allowedViewLength + 4) * calendarViewTextHeight + 6;
+    /// 5 is the number of items
+    double height = (allowedViewLength + 5) * calendarViewTextHeight;
     // height = height > 200 ? 200 : height;
 
     double arrowWidth = 0;
@@ -6435,17 +6438,6 @@ class _SfCalendarState extends State<SfCalendar> with SingleTickerProviderStateM
                   minDate: widget.minDate,
                   maxDate: widget.maxDate,
                   selectionColor: todayTextColor,
-                  //// For disabling the picker dates based on the calendar non working days.
-                  selectableDayPredicate: _view != CalendarView.workWeek && _view != CalendarView.timelineWorkWeek
-                      ? null
-                      : (DateTime dateTime) {
-                          for (int i = 0; i < widget.timeSlotViewSettings.nonWorkingDays.length; i++) {
-                            if (dateTime.weekday == widget.timeSlotViewSettings.nonWorkingDays[i]) {
-                              return false;
-                            }
-                          }
-                          return true;
-                        },
                   headerStyle: DateRangePickerHeaderStyle(
                     textAlign: _isMobilePlatform ? TextAlign.center : TextAlign.left,
                   ),
@@ -7068,7 +7060,7 @@ class _CalendarHeaderViewState extends State<_CalendarHeaderView> {
       } else {
         headerWidth = headerTextWidth;
       }
-      final Size weekNumberPanelSize = _getTextWidgetWidth(widget.localizations.weeknumberLabel + weekNumberString + ' ', headerHeight, weekNumberPanelWidth, context, style: weekNumberTextStyle);
+      final Size weekNumberPanelSize = Size(0, 0); // _getTextWidgetWidth(widget.localizations.weeknumberLabel + weekNumberString + ' ', headerHeight, weekNumberPanelWidth, context, style: weekNumberTextStyle);
       weekNumberTextWidth = weekNumberPanelSize.width > weekNumberPanelWidth ? weekNumberPanelWidth : weekNumberPanelSize.width + padding;
       weekNumberPanelHeight = weekNumberPanelSize.height;
       final double occupiedWidth = widget.width - calendarViewWidth - todayIconWidth - dividerWidth - totalArrowWidth - weekNumberPanelWidth - headerWidth;
@@ -7224,7 +7216,7 @@ class _CalendarHeaderViewState extends State<_CalendarHeaderView> {
                   children: <Widget>[
                     Flexible(
                         child: Text(
-                      widget.localizations.weeknumberLabel,
+                      'widget.localizations.weeknumberLabel',
                       textAlign: TextAlign.center,
                       textScaleFactor: widget.textScaleFactor,
                       style: weekNumberTextStyle,

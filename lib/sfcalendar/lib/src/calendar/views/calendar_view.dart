@@ -7255,7 +7255,7 @@ class _ViewHeaderViewPainter extends CustomPainter {
       final TextStyle weekNumberTextStyle = weekNumberStyle.textStyle ?? calendarTheme.weekNumberTextStyle;
       final double xPosition = isRTL ? (size.width - weekNumberPanelWidth) : 0;
 
-      _updateDayTextPainter(weekNumberTextStyle, weekNumberPanelWidth, localizations.weeknumberLabel);
+      _updateDayTextPainter(weekNumberTextStyle, weekNumberPanelWidth, 'localizations.weeknumberLabel');
 
       /// Condition added to remove the ellipsis, when the width is too small
       /// the ellipsis alone displayed, hence to resolve this removed ecclipsis
@@ -7375,7 +7375,7 @@ class _ViewHeaderViewPainter extends CustomPainter {
         canvas.drawRRect(roundedRect, _linePainter);
         _dateTextPainter.paint(canvas, Offset(weekNumberPosition, weekNumberYPosition));
         final double xPosition = isRTL ? (size.width - timeLabelWidth) : 0;
-        _updateDayTextPainter(weekNumberTextStyle, timeLabelWidth, localizations.weeknumberLabel);
+        // _updateDayTextPainter(weekNumberTextStyle, timeLabelWidth, localizations.weeknumberLabel);
         _dayTextPainter.paint(canvas, Offset(xPosition + (timeLabelWidth / 2 - _dayTextPainter.width / 2), yPosition));
       }
 
@@ -8616,7 +8616,7 @@ class _ResizingAppointmentPainter extends CustomPainter {
 
     final TextSpan span = TextSpan(
       text: DateFormat(dragAndDropSettings.indicatorTimeFormat).format(resizingDetails.value.resizingTime!).toString(),
-      style: dragAndDropSettings.timeIndicatorStyle ?? calendarTheme.timeIndicatorTextStyle,
+      style: dragAndDropSettings.timeIndicatorStyle, //?? calendarTheme.timeIndicatorTextStyle,
     );
     _updateTextPainter(span);
     _textPainter.layout(minWidth: 0, maxWidth: isTimelineView ? timeIntervalHeight : timeLabelWidth);
@@ -9249,7 +9249,7 @@ class _DraggingAppointmentRenderObject extends RenderBox with RenderObjectWithCh
 
     final TextSpan span = TextSpan(
       text: DateFormat(dragAndDropSettings.indicatorTimeFormat).format(dragDetails.draggingTime!).toString(),
-      style: dragAndDropSettings.timeIndicatorStyle ?? calendarTheme.timeIndicatorTextStyle,
+      style: dragAndDropSettings.timeIndicatorStyle, // ?? calendarTheme.timeIndicatorTextStyle,
     );
     _textPainter.text = span;
     _textPainter.maxLines = 1;

@@ -15,6 +15,7 @@ class PopupMenuBar extends StatefulWidget {
 class PopupMenuBarState extends State<PopupMenuBar> {
   bool showCM = true;
   bool showTEAMS = true;
+  bool showReunion = true;
   SharedPreferences? prefs;
 
   @override
@@ -23,6 +24,7 @@ class PopupMenuBarState extends State<PopupMenuBar> {
     initSharedPreferences().whenComplete(() => setState(() {
           showCM = prefs!.getBool('showCM') ?? true;
           showTEAMS = prefs!.getBool('showTEAMS') ?? true;
+          showReunion = prefs!.getBool('showReunion') ?? true;
         }));
   }
 
@@ -76,6 +78,20 @@ class PopupMenuBarState extends State<PopupMenuBar> {
             setState(() {
               showTEAMS = value ?? true;
               prefs!.setBool('showTEAMS', showTEAMS);
+              eventBus.fire(ReloadViewEvent());
+            });
+          },
+        )),
+        InkWell(
+            child: CheckboxListTile(
+          title: const Text("Afficher les réunions", style: TextStyle(color: ORANGE, fontSize: 14)),
+          contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+          dense: true,
+          value: showReunion,
+          onChanged: (value) {
+            setState(() {
+              showReunion = value ?? true;
+              prefs!.setBool('showReunion', showReunion);
               eventBus.fire(ReloadViewEvent());
             });
           },
