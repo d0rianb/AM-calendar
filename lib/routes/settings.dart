@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -6,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../main.dart' show eventBus;
 import '../helpers/app-events.dart';
-import '../helpers/snackbar.dart';
 
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
 const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);
@@ -52,22 +50,20 @@ class SettingsState extends State<Settings> {
     if (nums == '' || proms == '') return;
     if (proms == '220') {
       switch (int.tryParse(nums)) {
-        case 58:
-          return showSnackBar(context, 'Il s\'agirait d\'avoir le matos');
-        case 74:
-          return showSnackBar(context, 'Il s\'agirait de courir plus vite le matin dans le pal\'s');
         case 16:
         case 108:
           showDialog(barrierDismissible: false, context: context, builder: (_) => AlertDialog(content: Text('C\'est clairement zocké pour toi')));
           Future.delayed(const Duration(milliseconds: 500), () => SystemChannels.platform.invokeMethod('SystemNavigator.pop'));
           break;
-        case 139:
-          return showSnackBar(context, 'Ca va t\'es cool avec le seau ?');
       }
     } else if (proms == '221') {
       switch (int.tryParse(nums)) {
-        case 37:
-          return showSnackBar(context, 'Adnan grosse shymen');
+        case 41:
+        case 69:
+        case 88:
+        case 106:
+        case 133:
+          prefs?.setString('startupSound', 'true');
       }
     }
   }

@@ -41,6 +41,7 @@ class CalendarState extends State<Calendar> {
   bool? _showPals;
   bool? _showCM;
   bool? _showTEAMS;
+  bool? _showReunion;
 
   bool get isLoading => loading || events.length == 0;
 
@@ -50,6 +51,8 @@ class CalendarState extends State<Calendar> {
 
   bool get showTEAMS => _showTEAMS ?? prefs?.getBool('showTEAMS') ?? true;
 
+  bool get showReunion => _showReunion ?? prefs?.getBool('showReunion') ?? true;
+
   @override
   void initState() {
     super.initState();
@@ -58,6 +61,7 @@ class CalendarState extends State<Calendar> {
           _showPals = prefs?.getBool('showPals') ?? false;
           _showCM = prefs?.getBool('showCM') ?? true;
           _showTEAMS = prefs?.getBool('showTEAMS') ?? true;
+          _showReunion = prefs?.getBool('showReunion') ?? true;
         }));
     eventBus.on<RecallGetEvent>().listen((event) => getEvents());
     eventBus.on<ExportCalendarEvent>().listen((event) => exportToGoogleCalendar());
@@ -192,6 +196,7 @@ class CalendarState extends State<Calendar> {
                 dynamic event = details.appointments.first;
                 if (event is CalendarEvent) {
                   if (event.classType.contains('CM') && !showCM) return Container();
+                  if (event.classType.contains('REUNION') && !showReunion) return Container();
                   if (event.isVisio && !showTEAMS) return Container();
                 }
                 return event.build(context, details.bounds.size);

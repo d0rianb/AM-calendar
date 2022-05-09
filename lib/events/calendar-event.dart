@@ -21,6 +21,7 @@ final Map<String, Color> classColor = {
   'TPS': HexColor.fromHex('#1976d2'),
   'OTHER': HexColor.fromHex('#607d8b'),
   'EXAM': HexColor.fromHex('#e53935'),
+  'REUNION': HexColor.fromHex('#7986cb'),
   'TEAMS': HexColor.fromHex('#4caf50'),
 };
 
