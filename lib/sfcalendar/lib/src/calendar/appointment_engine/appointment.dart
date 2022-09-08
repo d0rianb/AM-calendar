@@ -1,10 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart'
-    show IterableDiagnostics;
+import 'package:syncfusion_flutter_datepicker/datepicker.dart' show IterableDiagnostics;
 
 import '../../../calendar.dart';
-import '../common/enums.dart';
 
 /// Appointment data for calendar.
 ///
@@ -1012,14 +1010,11 @@ class Appointment with Diagnosticable {
     properties.add(ColorProperty('color', color));
     properties.add(DiagnosticsProperty<Object>('recurrenceId', recurrenceId));
     properties.add(DiagnosticsProperty<Object>('id', id));
-    properties
-        .add(EnumProperty<AppointmentType>('appointmentType', appointmentType));
+    properties.add(EnumProperty<AppointmentType>('appointmentType', appointmentType));
     properties.add(DiagnosticsProperty<DateTime>('startTime', startTime));
     properties.add(DiagnosticsProperty<DateTime>('endTime', endTime));
-    properties.add(IterableDiagnostics<DateTime>(recurrenceExceptionDates)
-        .toDiagnosticsNode(name: 'recurrenceExceptionDates'));
-    properties.add(IterableDiagnostics<Object>(resourceIds)
-        .toDiagnosticsNode(name: 'resourceIds'));
+    properties.add(IterableDiagnostics<DateTime>(recurrenceExceptionDates).toDiagnosticsNode(name: 'recurrenceExceptionDates'));
+    properties.add(IterableDiagnostics<Object>(resourceIds).toDiagnosticsNode(name: 'resourceIds'));
     properties.add(DiagnosticsProperty<bool>('isAllDay', isAllDay));
   }
 }

@@ -4,7 +4,6 @@ import '../../../calendar.dart';
 import '../common/calendar_view_helper.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 
-import '../common/calendar_view_helper.dart';
 import '../common/event_args.dart';
 import '../settings/resource_view_settings.dart';
 import 'calendar_resource.dart';

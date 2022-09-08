@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:googleapis/calendar/v3.dart' as GoogleCalendar;
 import 'package:intl/intl.dart';
 import '../sfcalendar/lib/calendar.dart';
 
@@ -164,18 +163,6 @@ class CalendarEvent extends Appointment {
       'endTime': endTime.toIso8601String(),
       'isAllDay': isAllDay,
     });
-  }
-
-  GoogleCalendar.Event exportToGoogleCalendar() {
-    GoogleCalendar.EventDateTime start = GoogleCalendar.EventDateTime();
-    GoogleCalendar.EventDateTime end = GoogleCalendar.EventDateTime();
-    start.dateTime = startTime;
-    end.dateTime = startTime;
-    return GoogleCalendar.Event(
-      start: start,
-      end: end,
-      summary: subject,
-    );
   }
 
   Widget build(BuildContext context, Size size) {

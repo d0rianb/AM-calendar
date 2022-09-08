@@ -148,35 +148,20 @@ class SfLocalizationsFr extends SfLocalizations {
 
   String get weeknumberLabel => 'Semaine';
 
-  @override
   String get allDayLabel => 'Tous les jours';
 
-  @override
-  // TODO: implement passwordDialogContentLabel
   String get passwordDialogContentLabel => throw UnimplementedError();
 
-  @override
-  // TODO: implement passwordDialogHeaderTextLabel
   String get passwordDialogHeaderTextLabel => throw UnimplementedError();
 
-  @override
-  // TODO: implement passwordDialogHintTextLabel
   String get passwordDialogHintTextLabel => throw UnimplementedError();
 
-  @override
-  // TODO: implement passwordDialogInvalidPasswordLabel
   String get passwordDialogInvalidPasswordLabel => throw UnimplementedError();
 
-  @override
-  // TODO: implement pdfPasswordDialogCancelLabel
   String get pdfPasswordDialogCancelLabel => throw UnimplementedError();
 
-  @override
-  // TODO: implement pdfPasswordDialogOpenLabel
   String get pdfPasswordDialogOpenLabel => throw UnimplementedError();
 
-  @override
-  // TODO: implement rowsPerPageDataPagerLabel
   String get rowsPerPageDataPagerLabel => throw UnimplementedError();
 }
 
