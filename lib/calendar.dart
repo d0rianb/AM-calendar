@@ -194,10 +194,11 @@ class CalendarState extends State<Calendar> {
               ),
               appointmentBuilder: (BuildContext context, CalendarAppointmentDetails details) {
                 dynamic event = details.appointments.first;
+                const Widget dumbWidget = const Center();
                 if (event is CalendarEvent) {
-                  if (event.classType.contains('CM') && !showCM) return Container();
-                  if (event.classType.contains('REUNION') && !showReunion) return Container();
-                  if (event.isVisio && !showTEAMS) return Container();
+                  if (event.classType.contains('CM') && !showCM) return dumbWidget;
+                  if (event.classType.contains('REUNION') && !showReunion) return dumbWidget;
+                  if (event.isVisio && !showTEAMS) return dumbWidget;
                 }
                 return event.build(context, details.bounds.size);
               },

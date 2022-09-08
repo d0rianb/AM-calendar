@@ -19,6 +19,7 @@ final Map<String, Color> classColor = {
   'ED_TD': HexColor.fromHex('#9b3471'),
   'MISSION': HexColor.fromHex('#9b3471'),
   'TPS': HexColor.fromHex('#1976d2'),
+  'TPF': HexColor.fromHex('#1976d2'),
   'OTHER': HexColor.fromHex('#607d8b'),
   'EXAM': HexColor.fromHex('#e53935'),
   'REUNION': HexColor.fromHex('#7986cb'),
@@ -78,7 +79,7 @@ class CalendarEvent extends Appointment {
 
   bool get isExam => title.toUpperCase().contains('EXAMEN') || title.toUpperCase().contains('TEST') || title.toUpperCase().contains('SOUTENANCE');
 
-  bool get isVisio => title.contains('TEAMS') || title.contains('autonom'); // match "ED en autonomie" | "ED autonome"
+  bool get isVisio => title.contains('TEAMS') || (location != null && location!.contains('TEAMS')) || title.contains('autonom'); // match "ED en autonomie" | "ED autonome"
 
   Color get borderColor => isVisio ? classColor['TEAMS']! : darken(color, 15);
 
@@ -107,6 +108,8 @@ class CalendarEvent extends Appointment {
   static CalendarEvent fromENSAMCampus(JSON event) {
     DateTime startTime = dateParser.parse(event['start']);
     DateTime endTime = dateParser.parse(event['end']);
+    Duration rawDuration = endTime.difference(startTime);
+    String duration = (rawDuration.inMinutes % 60 == 0) ? '${rawDuration.inHours}h' : '${rawDuration.inHours}h${rawDuration.inMinutes - rawDuration.inHours * 60}';
     return new CalendarEvent(
       title: (event['desc1'] + event['desc2']).replaceAll(endCharRegex, ''),
       course: event['desc1'].replaceAll(endCharRegex, '').replaceAll('_', ''),
@@ -115,7 +118,7 @@ class CalendarEvent extends Appointment {
       teacherName: teacherNameRegex.firstMatch(event['desc2'])?.group(1) ?? '',
       description: descriptionRegex.firstMatch(event['desc2'])?.group(1) ?? '',
       group: groupRegex.firstMatch(event['desc2'])?.group(1) ?? '',
-      duration: '${endTime.difference(startTime).inHours}h',
+      duration: duration,
       startTime: startTime,
       endTime: endTime,
       isAllDay: event['meeting'] == 'true',
