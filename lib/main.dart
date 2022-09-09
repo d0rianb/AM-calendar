@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:event_bus/event_bus.dart';
+import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'calendar.dart';
@@ -18,7 +19,15 @@ const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // SharedPreferences.getInstance().then((prefs) => prefs.clear());
+  SharedPreferences.getInstance().then((prefs) async {
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    final String versionNumber = packageInfo.version;
+    final bool shouldResetCache = prefs.getString('versionNumber') != versionNumber;
+    if (shouldResetCache) {
+      prefs.getKeys().where((key) => key.startsWith('week:')).forEach((eventName) => prefs.remove(eventName));
+      prefs.setString('versionNumber', versionNumber);
+    }
+  });
   runApp(App());
 }
 

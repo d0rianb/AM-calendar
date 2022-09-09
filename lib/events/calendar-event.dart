@@ -82,7 +82,7 @@ class CalendarEvent extends Appointment {
 
   Color get borderColor => isVisio ? classColor['TEAMS']! : darken(color, 15);
 
-  String get id => subject + startTime.millisecondsSinceEpoch.toString();
+  String get id => (location ?? '') + teacherName + group + startTime.millisecondsSinceEpoch.toString();
 
   static CalendarEvent fromLiseObject(JSON event) {
     List<String> list = event['title'].split(' - ');
