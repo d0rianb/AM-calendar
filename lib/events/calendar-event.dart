@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../sfcalendar/lib/calendar.dart';
+import '../sfcalendar/calendar.dart';
 
 import 'calendar-event-popup.dart';
 import '../helpers/blur-transition.dart';

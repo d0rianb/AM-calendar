@@ -5,8 +5,8 @@ class NoInformationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: const Text(
+    return const Center(
+      child: Text(
         'Pas d\'information disponible',
         style: TextStyle(
           color: Colors.blueGrey,

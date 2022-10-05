@@ -1,25 +1,31 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:syncfusion_flutter_core/theme.dart';
 
+import 'cache.dart';
+import 'events/calendar-event.dart';
+import 'events/custom-event.dart';
 import 'events/no-info-event.dart';
 import 'events/pals-event.dart';
-import 'main.dart' show eventBus;
-import 'sfcalendar/lib/calendar.dart';
-import 'events/calendar-event.dart';
+import 'helpers/app-events.dart';
+import 'helpers/cache-handler.dart';
+import 'helpers/datetime-helpers.dart';
+import 'helpers/prefs-helper.dart';
+import 'helpers/refresh-indicator.dart';
 import 'helpers/requests.dart';
 import 'helpers/snackbar.dart';
+import 'main.dart' show eventBus;
+import 'sfcalendar/calendar.dart';
 import 'week.dart';
-import 'cache.dart';
-import 'events/custom-event.dart';
-import 'helpers/datetime-helpers.dart';
-import 'helpers/app-events.dart';
 
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
 const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);
 
 class Calendar extends StatefulWidget {
-  Calendar() : super();
+  final SharedPreferences prefs;
+
+  Calendar(this.prefs) : super();
 
   @override
   State<Calendar> createState() => CalendarState();
@@ -27,11 +33,11 @@ class Calendar extends StatefulWidget {
 
 class CalendarState extends State<Calendar> {
   final CalendarController controller = CalendarController();
+  late SharedPreferences prefs = widget.prefs;
   List<Appointment> events = [];
   Week week = Week.fromDateTime(DateTime.now());
   bool loading = false;
   bool displayNoInfos = false;
-  SharedPreferences? prefs;
   bool? _showPals;
   bool? _showCM;
   bool? _showTEAMS;
@@ -39,29 +45,30 @@ class CalendarState extends State<Calendar> {
 
   bool get isLoading => loading || events.length == 0;
 
-  bool get showPals => _showPals ?? prefs?.getBool('showPals') ?? false;
+  bool get showPals => _showPals ?? prefs.getBool('showPals') ?? false;
 
-  bool get showCM => _showCM ?? prefs?.getBool('showCM') ?? true;
+  bool get showCM => _showCM ?? prefs.getBool('showCM') ?? true;
 
-  bool get showTEAMS => _showTEAMS ?? prefs?.getBool('showTEAMS') ?? true;
+  bool get showTEAMS => _showTEAMS ?? prefs.getBool('showTEAMS') ?? true;
 
-  bool get showReunion => _showReunion ?? prefs?.getBool('showReunion') ?? true;
+  bool get showReunion => _showReunion ?? prefs.getBool('showReunion') ?? true;
 
   @override
   void initState() {
     super.initState();
-    initSharedPreferences().then((_) => getEvents());
-    eventBus.on<ReloadViewEvent>().listen((event) => setState(() {
-          _showPals = prefs?.getBool('showPals') ?? false;
-          _showCM = prefs?.getBool('showCM') ?? true;
-          _showTEAMS = prefs?.getBool('showTEAMS') ?? true;
-          _showReunion = prefs?.getBool('showReunion') ?? true;
-        }));
-    eventBus.on<RecallGetEvent>().listen((event) => getEvents());
-  }
-
-  Future<void> initSharedPreferences() async {
-    prefs = await SharedPreferences.getInstance();
+    getEvents();
+    eventBus.on<RecallGetEvent>().listen((event) {
+      clearEventCache(prefs);
+      getEvents();
+    });
+    eventBus.on<ReloadViewEvent>().listen(
+          (event) => setState(() {
+            _showPals = prefs.getBool('showPals') ?? false;
+            _showCM = prefs.getBool('showCM') ?? true;
+            _showTEAMS = prefs.getBool('showTEAMS') ?? true;
+            _showReunion = prefs.getBool('showReunion') ?? true;
+          }),
+        );
   }
 
   Future<void> getEvents() async {
@@ -83,9 +90,8 @@ class CalendarState extends State<Calendar> {
 
   List<CalendarEvent> getCachedEvents() {
     // TODO: filter too old events
-    if (prefs == null) return [];
-    final Iterable<String> cachedWeeksId = prefs!.getKeys().where((key) => key.startsWith('week:'));
-    return cachedWeeksId.map((id) => {'id': id, 'value': prefs!.getString(id)}).map((obj) => Cache.fromString(obj['id']!, obj['value'])).where((cache) => cache.isValid).map((cache) => cache.object).flattened.toList();
+    final Iterable<String> cachedWeeksId = prefs.getKeys().where((key) => key.startsWith('week:'));
+    return cachedWeeksId.map((id) => {'id': id, 'value': prefs.getString(id)}).map((obj) => Cache.fromString(obj['id']!, obj['value'])).where((cache) => cache.isValid).map((cache) => cache.object).flattened.toList();
   }
 
   List<CustomEvent> getPals() {
@@ -131,72 +137,79 @@ class CalendarState extends State<Calendar> {
   Widget build(BuildContext context) {
     eventBus.on<RequestErrorEvent>().listen((event) => showSnackBar(context, event.text));
     displayNoInfos = events.where((e) => week.isDayInside(e.startTime)).isEmpty;
+    final ThemeData theme = Theme.of(context);
+    final bool isDarkMode = theme.brightness == Brightness.dark;
     return Stack(
       children: [
-        Stack(
-          children: [
-            SfCalendar(
-              view: CalendarView.workWeek,
-              controller: controller,
-              dataSource: AppointmentDataSource(events),
-              allowedViews: [
-                CalendarView.day,
-                CalendarView.workWeek,
-              ],
-              showDatePickerButton: false,
-              timeZone: 'W. Europe Standard Time',
-              timeSlotViewSettings: TimeSlotViewSettings(
-                timeInterval: const Duration(minutes: 60),
-                timeIntervalHeight: 45,
-                timeFormat: 'Hm',
-                startHour: 7,
-                endHour: showPals ? 22 : 19,
-              ),
-              viewHeaderStyle: const ViewHeaderStyle(
-                dayTextStyle: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.black54,
-                  fontWeight: FontWeight.w500,
-                ),
-                dateTextStyle: const TextStyle(
-                  fontSize: 15,
-                  color: ORANGE,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              headerStyle: const CalendarHeaderStyle(
-                textAlign: TextAlign.center,
-                textStyle: const TextStyle(
-                  fontSize: 20,
-                  color: ORANGE,
-                ),
-              ),
-              headerDateFormat: 'MMMM yyy',
-              todayTextStyle: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-              appointmentBuilder: (BuildContext context, CalendarAppointmentDetails details) {
-                dynamic event = details.appointments.first;
-                const Widget dumbWidget = const Center();
-                if (event is CalendarEvent) {
-                  if (event.classType.contains('CM') && !showCM) return dumbWidget;
-                  if (event.classType.contains('REUNION') && !showReunion) return dumbWidget;
-                  if (event.isVisio && !showTEAMS) return dumbWidget;
-                }
-                return event.build(context, details.bounds.size);
-              },
+        SfCalendarTheme(
+          data: SfCalendarThemeData(
+            brightness: getBrightness(prefs, context),
+            backgroundColor: theme.backgroundColor,
+            selectionBorderColor: ORANGE,
+            cellBorderColor: isDarkMode ? Colors.white12 : Colors.black12,
+            headerTextStyle: TextStyle(fontSize: 20, color: ORANGE),
+            todayTextStyle: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: theme.backgroundColor,
             ),
-            Visibility(
-              visible: isLoading,
-              child: Positioned(
-                top: 75,
-                left: MediaQuery.of(context).size.width / 2 - 25,
-                width: 50,
-                height: 50,
-                child: const RefreshProgressIndicator(color: VIOLET, strokeWidth: 2.5),
+            timeTextStyle: TextStyle(color: theme.textTheme.subtitle2?.color?.withOpacity(0.7), fontWeight: FontWeight.w500, fontSize: 10),
+          ),
+          child: SfCalendar(
+            view: CalendarView.workWeek,
+            controller: controller,
+            dataSource: AppointmentDataSource(events),
+            allowedViews: [
+              CalendarView.day,
+              CalendarView.workWeek,
+            ],
+            showDatePickerButton: false,
+            timeZone: 'W. Europe Standard Time',
+            todayHighlightColor: ORANGE,
+            timeSlotViewSettings: TimeSlotViewSettings(
+              timeInterval: const Duration(minutes: 60),
+              timeIntervalHeight: 47,
+              timeFormat: 'Hm',
+              startHour: 7,
+              endHour: showPals ? 22 : 19,
+            ),
+            viewHeaderStyle: ViewHeaderStyle(
+              dayTextStyle: TextStyle(
+                fontSize: 12,
+                color: theme.textTheme.subtitle1?.color,
+                fontWeight: FontWeight.w500,
+              ),
+              dateTextStyle: const TextStyle(
+                fontSize: 15,
+                color: ORANGE,
+                fontWeight: FontWeight.w600,
               ),
             ),
-          ],
+            headerStyle: const CalendarHeaderStyle(
+              textAlign: TextAlign.center,
+            ),
+            headerDateFormat: 'MMMM yyy',
+            appointmentBuilder: (BuildContext context, CalendarAppointmentDetails details) {
+              dynamic event = details.appointments.first;
+              const Widget dumbWidget = const Center(); // Empty widget
+              if (event is CalendarEvent) {
+                if (event.classType.contains('CM') && !showCM) return dumbWidget;
+                if (event.classType.contains('REUNION') && !showReunion) return dumbWidget;
+                if (event.isVisio && !showTEAMS) return dumbWidget;
+              }
+              return event.build(context, details.bounds.size);
+            },
+          ),
+        ),
+        Visibility(
+          // Loader
+          visible: isLoading,
+          child: Positioned(
+            top: 75,
+            left: MediaQuery.of(context).size.width / 2 - 25,
+            width: 50,
+            height: 50,
+            child: ShadowedRefreshIndicator(color: theme.primaryColor),
+          ),
         ),
       ],
     );

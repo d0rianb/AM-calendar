@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../sfcalendar/lib/calendar.dart';
+import '../sfcalendar/calendar.dart';
 
 class CustomEvent extends Appointment {
   String type = '';

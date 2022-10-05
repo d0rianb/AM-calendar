@@ -163,6 +163,21 @@ class SfLocalizationsFr extends SfLocalizations {
   String get pdfPasswordDialogOpenLabel => throw UnimplementedError();
 
   String get rowsPerPageDataPagerLabel => throw UnimplementedError();
+
+  @override
+  String get pdfHyperlinkContentLabel => throw UnimplementedError();
+
+  @override
+  String get pdfHyperlinkDialogCancelLabel => throw UnimplementedError();
+
+  @override
+  String get pdfHyperlinkDialogOpenLabel => throw UnimplementedError();
+
+  @override
+  String get pdfHyperlinkLabel => throw UnimplementedError();
+
+  @override
+  String get series => throw UnimplementedError();
 }
 
 class SfLocalizationsFrDelegate extends LocalizationsDelegate<SfLocalizations> {
