@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../helpers/refresh-indicator.dart';
 import '../helpers/snackbar.dart';
 
 const String initialUrl = 'https://ensam.campusm.exlibrisgroup.com/campusm/cmauth/login/5313';
@@ -36,70 +37,76 @@ class LoginWebViewState extends State<LoginWebView> {
   void dispose() => super.dispose();
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Identification')),
-        body: SafeArea(
-          child: Stack(
-            children: [
-              InAppWebView(
-                initialUrlRequest: URLRequest(url: Uri.parse(initialUrl)),
-                initialOptions: InAppWebViewGroupOptions(
-                  crossPlatform: InAppWebViewOptions(
-                    useShouldOverrideUrlLoading: true,
-                    mediaPlaybackRequiresUserGesture: false,
-                    incognito: true,
-                  ),
-                  android: AndroidInAppWebViewOptions(useHybridComposition: true),
-                  ios: IOSInAppWebViewOptions(allowsInlineMediaPlayback: true),
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Identification'),
+        leading: BackButton(color: theme.appBarTheme.foregroundColor),
+      ),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            InAppWebView(
+              initialUrlRequest: URLRequest(url: Uri.parse(initialUrl)),
+              initialOptions: InAppWebViewGroupOptions(
+                crossPlatform: InAppWebViewOptions(
+                  useShouldOverrideUrlLoading: true,
+                  mediaPlaybackRequiresUserGesture: false,
+                  incognito: true,
                 ),
-                onWebViewCreated: (controller) async {
-                  prefs = await SharedPreferences.getInstance();
-                  webViewController = controller;
-                },
-                onLoadStart: (controller, url) {
-                  if (url.toString().startsWith('https://auth.ensam.eu/cas/login')) {
-                    controller.evaluateJavascript(source: '''
+                android: AndroidInAppWebViewOptions(useHybridComposition: true),
+                ios: IOSInAppWebViewOptions(allowsInlineMediaPlayback: true),
+              ),
+              onWebViewCreated: (controller) async {
+                prefs = await SharedPreferences.getInstance();
+                webViewController = controller;
+              },
+              onLoadStart: (controller, url) {
+                if (url.toString().startsWith('https://auth.ensam.eu/cas/login')) {
+                  controller.evaluateJavascript(source: '''
                       window.onload = () => {
                         document.querySelector('header').hidden = true
                         document.querySelector('footer').hidden = true
                       }''');
-                  }
-                },
-                androidOnPermissionRequest: (controller, origin, resources) async => PermissionRequestResponse(resources: resources, action: PermissionRequestResponseAction.GRANT),
-                shouldOverrideUrlLoading: (controller, navigationAction) async => NavigationActionPolicy.ALLOW,
-                onLoadStop: (controller, url) async {
-                  if (url.toString().startsWith('https://auth.ensam.eu/cas/login?')) {
-                    controller.evaluateJavascript(source: '''document.querySelector("#fm1").onsubmit = () => console.log('internalSubmitForm')''');
-                    if (url.toString() == 'https://ensam.campusm.exlibrisgroup.com/cmauth/saml/sso') {
-                      setState(() => isLoading = true);
-                      final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse('https://ensam.campusm.exlibrisgroup.com'));
-                      final int cmAuthTokenIndex = cookies.indexWhere((cookie) => cookie.name == 'cmAuthToken');
-                      if (cmAuthTokenIndex > -1) {
-                        prefs.setString('cmAuthToken', cookies[cmAuthTokenIndex].value);
-                        Navigator.of(context).pushNamed('/calendar');
-                      } else {
-                        print('No auth cookie detected');
-                        showSnackBar(context, 'No auth cookie detected');
-                      }
+                }
+              },
+              androidOnPermissionRequest: (controller, origin, resources) async => PermissionRequestResponse(resources: resources, action: PermissionRequestResponseAction.GRANT),
+              shouldOverrideUrlLoading: (controller, navigationAction) async => NavigationActionPolicy.ALLOW,
+              onLoadStop: (controller, url) async {
+                if (url.toString().startsWith('https://auth.ensam.eu/cas/login?')) {
+                  controller.evaluateJavascript(source: '''document.querySelector("#fm1").onsubmit = () => console.log('internalSubmitForm')''');
+                  if (url.toString() == 'https://ensam.campusm.exlibrisgroup.com/cmauth/saml/sso') {
+                    setState(() => isLoading = true);
+                    final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse('https://ensam.campusm.exlibrisgroup.com'));
+                    final int cmAuthTokenIndex = cookies.indexWhere((cookie) => cookie.name == 'cmAuthToken');
+                    if (cmAuthTokenIndex > -1) {
+                      prefs.setString('cmAuthToken', cookies[cmAuthTokenIndex].value);
+                      Navigator.of(context).pushNamed('/calendar');
+                    } else {
+                      print('No auth cookie detected');
+                      showSnackBar(context, 'No auth cookie detected');
                     }
                   }
-                },
-                onLoadHttpError: (controller, url, code, message) => print('HTTP error $code : $message'),
-                onUpdateVisitedHistory: (controller, url, androidIsReload) {},
-                onConsoleMessage: (controller, consoleMessage) => consoleMessage.message == 'internalSubmitForm' ? setState(() => hasLoadLoginPage = true) : print('[Embedded console] : $consoleMessage'),
+                }
+              },
+              onLoadHttpError: (controller, url, code, message) => print('HTTP error $code : $message'),
+              onUpdateVisitedHistory: (controller, url, androidIsReload) {},
+              onConsoleMessage: (controller, consoleMessage) => consoleMessage.message == 'internalSubmitForm' ? setState(() => hasLoadLoginPage = true) : print('[Embedded console] : $consoleMessage'),
+            ),
+            Visibility(
+              visible: isLoading || hasLoadLoginPage,
+              child: Positioned(
+                top: 50,
+                left: MediaQuery.of(context).size.width / 2 - 25,
+                width: 50,
+                height: 50,
+                child: ShadowedRefreshIndicator(color: theme.primaryColor),
               ),
-              Visibility(
-                visible: isLoading || hasLoadLoginPage,
-                child: Positioned(
-                  top: 50,
-                  left: MediaQuery.of(context).size.width / 2 - 25,
-                  width: 50,
-                  height: 50,
-                  child: const RefreshProgressIndicator(color: VIOLET, strokeWidth: 2.5),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }

@@ -8,6 +8,7 @@ import 'package:mailto/mailto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../helpers/color-helpers.dart';
 import '../helpers/snackbar.dart';
 
 const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);
@@ -19,16 +20,6 @@ const String tabIndent = '        ';
 const String DISCLAIMER = '''${tabIndent}Ce calendrier n'est pas une application officielle Arts&Métiers. 
 Elle a été crée par un élève voulant simplement avoir accès à son emploi du temps s'il vous plait ne me faite pas de procès.''';
 const String USAGE = '''${tabIndent}Ce calendrier utilise les données de l'application Arts&Métiers Campus. Les données de l'agenda ne sont disponibles que sur 2 semaines. L'application s'actualise en arrière-plan à chaque ouverture.''';
-final Widget CONTACT = RichText(
-  text: TextSpan(children: [
-    TextSpan(text: '${tabIndent}Pour toute réclamation, bug, demande quelconque, veuillez envoyer un mail à ', style: TextStyle(color: Colors.grey[800])),
-    TextSpan(text: 'cette adresse', recognizer: TapGestureRecognizer()..onTap = () => launch(Mailto(to: ['dorian.beauchesne@gmail.com'], subject: 'AM Calendar - Feedback').toString()), style: TextStyle(color: Colors.blue[900])),
-    TextSpan(text: '. Pour un soutien financier, somme toute très apprécié, voici mon ', style: TextStyle(color: Colors.grey[800])),
-    TextSpan(text: 'PayPal', recognizer: TapGestureRecognizer()..onTap = () => launch('https://paypal.me/d0rianb?country.x=FR&locale.x=fr_FR' ''), style: TextStyle(color: Colors.blue[900])),
-    TextSpan(text: '.', style: TextStyle(color: Colors.grey[800])),
-  ]),
-  textAlign: TextAlign.justify,
-);
 
 String crypt(String? str) {
   if (str == null) return '';
@@ -111,12 +102,20 @@ class InfosState extends State<Infos> {
     setState(() {});
   }
 
-  TextStyle titleStyle(BuildContext context) => Theme.of(context).textTheme.headline5!.copyWith(color: VIOLET, fontFamily: 'Cloister');
+  TextStyle titleStyle(BuildContext context) => Theme.of(context).textTheme.headline5!.copyWith(color: lighten(VIOLET, 5), fontFamily: 'Cloister');
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final bool isDarkMode = theme.brightness == Brightness.dark;
+    final TextStyle textStyle = TextStyle(color: isDarkMode ? Colors.white70 : Colors.grey[800]!);
+    final TextStyle linkTextStyle = TextStyle(color: isDarkMode ? Colors.blue[600]! : Colors.blue[900]!);
+    final Color primaryColor = VIOLET;
     return Scaffold(
-        appBar: AppBar(title: const Text('Infos'), backgroundColor: VIOLET),
+        appBar: AppBar(
+          title: const Text('Infos'),
+          leading: BackButton(color: theme.appBarTheme.foregroundColor),
+        ),
         body: Padding(
           padding: const EdgeInsets.all(10.0),
           child: Column(
@@ -127,7 +126,7 @@ class InfosState extends State<Infos> {
               RichText(
                 text: TextSpan(
                   text: USAGE,
-                  style: TextStyle(color: Colors.grey[800]),
+                  style: textStyle,
                 ),
                 textAlign: TextAlign.justify,
               ),
@@ -138,21 +137,31 @@ class InfosState extends State<Infos> {
                 child: RichText(
                   text: TextSpan(
                     text: DISCLAIMER,
-                    style: Theme.of(context).textTheme.bodyText1!.copyWith(fontStyle: FontStyle.italic),
+                    style: textStyle,
                   ),
                   textAlign: TextAlign.justify,
                 ),
               ),
               Separator,
               Text('Contact', style: titleStyle(context)),
-              CONTACT,
+              RichText(
+                text: TextSpan(style: textStyle, children: [
+                  TextSpan(text: '${tabIndent}Pour toute réclamation, bug, demande quelconque, veuillez envoyer un mail à '),
+                  TextSpan(text: 'cette adresse', recognizer: TapGestureRecognizer()..onTap = () => launch(Mailto(to: ['dorian.beauchesne@gmail.com'], subject: 'AM Calendar - Feedback').toString()), style: linkTextStyle),
+                  TextSpan(text: '. Pour un soutien financier, somme toute très apprécié, voici mon '),
+                  TextSpan(text: 'PayPal', recognizer: TapGestureRecognizer()..onTap = () => launch('https://paypal.me/d0rianb?country.x=FR&locale.x=fr_FR' ''), style: linkTextStyle),
+                  TextSpan(text: '.'),
+                ]),
+                textAlign: TextAlign.justify,
+              ),
               Center(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12.0),
                   child: ElevatedButton(
                     child: const Text('Génerer un rapport de debug'),
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(VIOLET),
+                      backgroundColor: MaterialStateProperty.all(primaryColor),
+                      foregroundColor: MaterialStateProperty.all(isDarkMode ? Colors.white70 : Colors.white),
                     ),
                     onPressed: () async {
                       final debugContent = await generateDebugRapport(context);
@@ -165,13 +174,13 @@ class InfosState extends State<Infos> {
                           ),
                           contentPadding: const EdgeInsets.all(2.0),
                           content: debugContent,
-                          actions: <Widget>[
+                          actions: [
                             TextButton(
-                              child: const Text('Cancel', style: TextStyle(color: VIOLET)),
+                              child: Text('Cancel', style: TextStyle(color: primaryColor)),
                               onPressed: () => Navigator.of(context).pop(),
                             ),
                             TextButton(
-                              child: const Text('Copy', style: TextStyle(color: VIOLET)),
+                              child: Text('Copy', style: TextStyle(color: primaryColor)),
                               onPressed: () async {
                                 Clipboard.setData(ClipboardData(text: (await getDebugData()).map((row) => row.join(': ')).toList().join('\n')));
                                 Navigator.of(context).pop();
