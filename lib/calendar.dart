@@ -42,7 +42,7 @@ class CalendarState extends State<Calendar> {
   bool? _showPals;
   bool? _showCM;
   bool? _showTEAMS;
-  bool? _showReunion;
+  bool? _applyFilters;
 
   bool get isLoading => loading || events.length == 0;
 
@@ -52,7 +52,7 @@ class CalendarState extends State<Calendar> {
 
   bool get showTEAMS => _showTEAMS ?? prefs.getBool('showTEAMS') ?? true;
 
-  bool get showReunion => _showReunion ?? prefs.getBool('showReunion') ?? true;
+  bool get applyFilters => _applyFilters ?? prefs.getBool('applyFilters') ?? true;
 
   @override
   void initState() {
@@ -67,7 +67,7 @@ class CalendarState extends State<Calendar> {
             _showPals = prefs.getBool('showPals') ?? false;
             _showCM = prefs.getBool('showCM') ?? true;
             _showTEAMS = prefs.getBool('showTEAMS') ?? true;
-            _showReunion = prefs.getBool('showReunion') ?? true;
+            _applyFilters = prefs.getBool('applyFilters') ?? true;
           }),
         );
   }
@@ -122,7 +122,7 @@ class CalendarState extends State<Calendar> {
     final response = await ENSAMRequest.getCalendar(week.firstDay, week.getNextWeek().lastDay);
     final List<CalendarEvent> events = List.from(response['events'].map((e) => CalendarEvent.fromENSAMCampus(e)));
     final Cache cache = Cache.create(week.stringId, events);
-    prefs!.setString(cache.id, cache.serialized);
+    prefs.setString(cache.id, cache.serialized);
     return events;
   }
 
@@ -132,6 +132,20 @@ class CalendarState extends State<Calendar> {
     int oldEventsLength = events.length;
     newEvents.forEach((event) => events.where((e) => e.id == event.id).isEmpty ? events.add(event) : null);
     return events.length - oldEventsLength;
+  }
+
+  bool isFiltered(CalendarEvent event) {
+    String filtersString = prefs.getString('filters') ?? '';
+    List<String> filters = filtersString.split(',').map((filter) => filter.toLowerCase()).where((filter) => filter.isNotEmpty).toList();
+    bool isFiltered = false;
+    String title = event.title.toLowerCase();
+    for (String filter in filters) {
+      if (title.contains(filter)) {
+        isFiltered = true;
+        break;
+      }
+    }
+    return isFiltered;
   }
 
   @override
@@ -196,9 +210,9 @@ class CalendarState extends State<Calendar> {
               dynamic event = details.appointments.first;
               const Widget dumbWidget = const Center(); // Empty widget
               if (event is CalendarEvent) {
-                if (event.classType.contains('CM') && !showCM) return dumbWidget;
-                if (event.classType.contains('REUNION') && !showReunion) return dumbWidget;
-                if (event.isVisio && !showTEAMS) return dumbWidget;
+                if (!showCM && event.classType.contains('CM')) return dumbWidget;
+                if (applyFilters && isFiltered(event)) return dumbWidget;
+                if (!showTEAMS && event.isVisio) return dumbWidget;
               }
               return event.build(context, details.bounds.size);
             },

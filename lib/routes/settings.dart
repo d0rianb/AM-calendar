@@ -25,6 +25,7 @@ class SettingsState extends State<Settings> {
   final TextEditingController passwordFieldController = TextEditingController();
   final TextEditingController numsFieldController = TextEditingController();
   final TextEditingController promsFieldController = TextEditingController();
+  final TextEditingController filtersFieldController = TextEditingController();
   late SharedPreferences prefs;
   String userId = '';
   String password = '';
@@ -32,6 +33,7 @@ class SettingsState extends State<Settings> {
   String proms = '';
   String tbk = "Chalon's";
   String brightness = 'system';
+  String filters = '';
 
   static const List<String> TBKList = ["Chalon's", "Siber's", "Boquette", "Birse", "Paris", "KIN", "Bordel's", "Clun's"];
 
@@ -46,6 +48,7 @@ class SettingsState extends State<Settings> {
     userIdFieldController.text = prefs.getString('id') ?? '2021-';
     numsFieldController.text = prefs.getString('nums') ?? '';
     promsFieldController.text = prefs.getString('proms') ?? '';
+    filtersFieldController.text = prefs.getString('filters') ?? '';
     eventBus.on<DeleteAllCacheEvent>().listen((event) {
       setState(() => clearAllCache(prefs));
     });
@@ -122,7 +125,7 @@ class SettingsState extends State<Settings> {
                       controller: userIdFieldController,
                       textInputAction: TextInputAction.next,
                       onChanged: (id) => setState(() {
-                        prefs.setString('id', userId);
+                        prefs.setString('id', id);
                         userId = id;
                       }),
                     ),
@@ -271,6 +274,33 @@ class SettingsState extends State<Settings> {
                         DropdownMenuItem<String>(value: 'dark', child: InkWell(child: Text('Foncé'))),
                         DropdownMenuItem<String>(value: 'system', child: InkWell(child: Text('Automatique'))),
                       ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
+                      decoration: const InputDecoration(
+                        icon: Icon(Icons.filter_alt),
+                        hintText: 'Filtres',
+                        labelText: 'Filtres',
+                        suffixIcon: Tooltip(
+                          message: "Les cours contenant le texte d\'un des filtres ne seront pas affichés. Les filtres sont séparés par des virgules, et ne sont pas sensibles à la casse.",
+                          triggerMode: TooltipTriggerMode.tap,
+                          preferBelow: false,
+                          waitDuration: Duration(microseconds: 0),
+                          showDuration: Duration(seconds: 2),
+                          child: Icon(Icons.info_outline),
+                        ),
+                        border: OutlineInputBorder(),
+                      ),
+                      cursorColor: primaryColor,
+                      controller: filtersFieldController,
+                      textInputAction: TextInputAction.next,
+                      onChanged: (value) => setState(() {
+                        prefs.setString('filters', value);
+                        filters = value;
+                        eventBus.fire(ReloadViewEvent());
+                      }),
                     ),
                   ),
                   Padding(
