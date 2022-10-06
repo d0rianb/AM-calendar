@@ -15,7 +15,7 @@ class PopupMenuBar extends StatefulWidget {
 class PopupMenuBarState extends State<PopupMenuBar> {
   bool showCM = true;
   bool showTEAMS = true;
-  bool showReunion = true;
+  bool applyFilters = true;
   SharedPreferences? prefs;
 
   @override
@@ -24,7 +24,7 @@ class PopupMenuBarState extends State<PopupMenuBar> {
     initSharedPreferences().whenComplete(() => setState(() {
           showCM = prefs!.getBool('showCM') ?? true;
           showTEAMS = prefs!.getBool('showTEAMS') ?? true;
-          showReunion = prefs!.getBool('showReunion') ?? true;
+          applyFilters = prefs!.getBool('applyFilters') ?? true;
         }));
   }
 
@@ -84,14 +84,14 @@ class PopupMenuBarState extends State<PopupMenuBar> {
         )),
         InkWell(
             child: CheckboxListTile(
-          title: const Text("Afficher les réunions", style: TextStyle(color: ORANGE, fontSize: 14)),
+          title: const Text("Appliquer les filtres", style: TextStyle(color: ORANGE, fontSize: 14)),
           contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 10),
           dense: true,
-          value: showReunion,
+          value: applyFilters,
           onChanged: (value) {
             setState(() {
-              showReunion = value ?? true;
-              prefs!.setBool('showReunion', showReunion);
+              applyFilters = value ?? true;
+              prefs!.setBool('applyFilters', applyFilters);
               eventBus.fire(ReloadViewEvent());
             });
           },
