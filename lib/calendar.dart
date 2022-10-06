@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 
@@ -139,6 +140,9 @@ class CalendarState extends State<Calendar> {
     displayNoInfos = events.where((e) => week.isDayInside(e.startTime)).isEmpty;
     final ThemeData theme = Theme.of(context);
     final bool isDarkMode = theme.brightness == Brightness.dark;
+    if (!isDarkMode) {
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+    }
     return Stack(
       children: [
         SfCalendarTheme(

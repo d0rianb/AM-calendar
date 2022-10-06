@@ -5,7 +5,6 @@ import 'package:package_info/package_info.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../helpers/color-helpers.dart';
 import '../main.dart' show eventBus;
 import '../helpers/app-events.dart';
 import '../headless-login.dart';
@@ -69,7 +68,7 @@ class LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDarkMode = theme.brightness == Brightness.dark;
-    final Color primaryColor = isDarkMode ? lighten(VIOLET, 10) : VIOLET;
+    final Color primaryColor = isDarkMode ? ORANGE : VIOLET;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Connection'),
@@ -151,8 +150,11 @@ class LoginViewState extends State<LoginView> {
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 55.0),
-                          child: ElevatedButton(
+                          child: OutlinedButton(
                             child: Text(!isLoading ? 'Se connecter' : 'Annuler'),
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(width: 1.5, color: primaryColor),
+                            ),
                             onPressed: () {
                               if (userId == 'web-login')
                                 return webLoginCallback();

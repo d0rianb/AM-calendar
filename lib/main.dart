@@ -1,6 +1,6 @@
+import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:event_bus/event_bus.dart';
 import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_10y.dart' as tz;
@@ -13,8 +13,8 @@ import 'helpers/prefs-helper.dart';
 import 'routes/infos.dart';
 import 'routes/login-view.dart';
 import 'routes/login-webview.dart';
-import 'routes/splash-screen.dart';
 import 'routes/settings.dart';
+import 'routes/splash-screen.dart';
 
 EventBus eventBus = EventBus();
 
@@ -68,10 +68,7 @@ class AppState extends State<App> {
           GlobalWidgetsLocalizations.delegate,
           SfLocalizationsFrDelegate(),
         ],
-        supportedLocales: const [
-          Locale('en'),
-          Locale('fr'),
-        ],
+        supportedLocales: const [Locale('en'), Locale('fr')],
         locale: const Locale('fr'),
         themeMode: theme,
         theme: ThemeData(
@@ -81,7 +78,7 @@ class AppState extends State<App> {
             primaryColorDark: VIOLET,
             accentColor: ORANGE,
           ),
-          backgroundColor: const Color(0xfafafaff),
+          backgroundColor: const Color(0xfffafafa),
           textTheme: const TextTheme(
             subtitle1: TextStyle(color: Colors.black54),
             subtitle2: TextStyle(color: Colors.black45),
@@ -104,7 +101,7 @@ class AppState extends State<App> {
           ),
           backgroundColor: const Color.fromRGBO(31, 26, 36, 1.0),
           primaryColorDark: VIOLET,
-          highlightColor: ORANGE,
+          highlightColor: Colors.grey[700],
           toggleableActiveColor: ORANGE,
           outlinedButtonTheme: OutlinedButtonThemeData(
               style: ButtonStyle(
@@ -114,7 +111,8 @@ class AppState extends State<App> {
             labelMedium: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.87)),
             subtitle1: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.6)),
             subtitle2: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)),
-            headline5: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.87)), // for the `infos` page
+            headline5: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.87)),
+            // for the `infos` page
             bodyText1: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.87)),
           ),
           appBarTheme: const AppBarTheme(
