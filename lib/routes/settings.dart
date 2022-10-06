@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/cache-handler.dart';
-import '../helpers/color-helpers.dart';
 import '../main.dart' show eventBus;
 import '../helpers/app-events.dart';
 
@@ -80,7 +79,7 @@ class SettingsState extends State<Settings> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDarkMode = theme.brightness == Brightness.dark;
-    final Color primaryColor = isDarkMode ? lighten(VIOLET, 10) : VIOLET;
+    final Color primaryColor = isDarkMode ? ORANGE : VIOLET;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Paramètres'),

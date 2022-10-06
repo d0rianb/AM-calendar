@@ -1,8 +1,8 @@
-import 'package:am_calendar/helpers/refresh-indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../calendar.dart';
+import '../helpers/refresh-indicator.dart';
 
 class SplashScreen extends StatefulWidget {
   final SharedPreferences prefs;

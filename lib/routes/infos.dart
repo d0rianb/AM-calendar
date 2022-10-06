@@ -102,7 +102,10 @@ class InfosState extends State<Infos> {
     setState(() {});
   }
 
-  TextStyle titleStyle(BuildContext context) => Theme.of(context).textTheme.headline5!.copyWith(color: lighten(VIOLET, 5), fontFamily: 'Cloister');
+  TextStyle titleStyle(BuildContext context) => Theme.of(context).textTheme.headline5!.copyWith(
+        color: lighten(VIOLET, 8),
+        fontFamily: 'Cloister',
+      );
 
   @override
   Widget build(BuildContext context) {
