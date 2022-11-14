@@ -82,7 +82,11 @@ class ENSAMRequest {
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      eventBus.fire(RequestErrorEvent('Erreur de connexion  : ${response.statusCode} - ${response.reasonPhrase}'));
+      String errorMsg = 'Erreur de connexion  : ${response.statusCode} - ${response.reasonPhrase}';
+      if (response.statusCode == 403) {
+        errorMsg += ' : Essayez de vous déconnecter puis de vous reconnecter';
+      }
+      eventBus.fire(RequestErrorEvent(errorMsg));
       throw new Exception('Error while fetching calendar : ${response.statusCode} - ${response.reasonPhrase}');
     }
   }
