@@ -167,6 +167,7 @@ class SettingsState extends State<Settings> {
                       style: TextStyle(color: primaryColor),
                       onChanged: (value) => setState(() {
                         tbk = value!;
+                        if (tbk != "Chalon's") prefs.setBool('showPals', false);
                         prefs.setString('tbk', value);
                       }),
                       items: TBKList.map((value) => DropdownMenuItem<String>(value: value, child: InkWell(child: Text(value)))).toList(),
