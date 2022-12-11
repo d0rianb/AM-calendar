@@ -80,6 +80,7 @@ class HeadlessLogin {
         eventBus.fire(LoginEvent('Connexion au serveur'));
         if (url.toString().startsWith('https://auth.ensam.eu/cas/login?')) {
           if (++urlCount > 4) return; // To prevent DDOS & account blocking
+          controller.evaluateJavascript(source: '''document.querySelector('input[name="continue"]').click()'''); // To solve the change password popup issue
           if (prefs.getString('id') == null || prefs.getString('id')!.isEmpty) return error('Identifiant incorrect');
           if (prefs.getString('password') == null || prefs.getString('password')!.isEmpty) return error('Mot de passe incorrect');
           fillField(controller, 'username', prefs.getString('id')!);

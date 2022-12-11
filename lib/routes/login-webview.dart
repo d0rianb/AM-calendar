@@ -76,17 +76,18 @@ class LoginWebViewState extends State<LoginWebView> {
               onLoadStop: (controller, url) async {
                 if (url.toString().startsWith('https://auth.ensam.eu/cas/login?')) {
                   controller.evaluateJavascript(source: '''document.querySelector("#fm1").onsubmit = () => console.log('internalSubmitForm')''');
-                  if (url.toString() == 'https://ensam.campusm.exlibrisgroup.com/cmauth/saml/sso') {
-                    setState(() => isLoading = true);
-                    final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse('https://ensam.campusm.exlibrisgroup.com'));
-                    final int cmAuthTokenIndex = cookies.indexWhere((cookie) => cookie.name == 'cmAuthToken');
-                    if (cmAuthTokenIndex > -1) {
-                      prefs.setString('cmAuthToken', cookies[cmAuthTokenIndex].value);
-                      Navigator.of(context).pushNamed('/calendar');
-                    } else {
-                      print('No auth cookie detected');
-                      showSnackBar(context, 'No auth cookie detected');
-                    }
+                  controller.evaluateJavascript(source: '''document.querySelector('input[name="continue"]').click()'''); // To solve the change password popup issue
+                }
+                if (url.toString() == 'https://ensam.campusm.exlibrisgroup.com/cmauth/saml/sso') {
+                  setState(() => isLoading = true);
+                  final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse('https://ensam.campusm.exlibrisgroup.com'));
+                  final int cmAuthTokenIndex = cookies.indexWhere((cookie) => cookie.name == 'cmAuthToken');
+                  if (cmAuthTokenIndex > -1) {
+                    prefs.setString('cmAuthToken', cookies[cmAuthTokenIndex].value);
+                    Navigator.of(context).pushNamed('/calendar');
+                  } else {
+                    print('No auth cookie detected');
+                    showSnackBar(context, 'No auth cookie detected');
                   }
                 }
               },
