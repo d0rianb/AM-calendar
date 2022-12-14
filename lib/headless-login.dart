@@ -13,7 +13,8 @@ const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);
 const Map<String, String> JSPath = {
   'username': '#username',
   'password': '#password',
-  'submit': '#fm1 > section.row.btn-row > input.btn.btn-submit.btn-block',
+  // 'submit': '#fm1 > section.row.btn-row > input.btn.btn-submit.btn-block', // old one
+  'submit': '#login-form-controls > button',
   'login-form': '#fm1',
   'etudiant-personnel': '#mOdAl_1_body > div > div.listview > ul > li:nth-child(1) > a',
 };
