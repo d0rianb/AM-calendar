@@ -102,7 +102,7 @@ class InfosState extends State<Infos> {
     setState(() {});
   }
 
-  TextStyle titleStyle(BuildContext context) => Theme.of(context).textTheme.headline5!.copyWith(
+  TextStyle titleStyle(BuildContext context) => Theme.of(context).textTheme.headlineSmall!.copyWith(
         color: lighten(VIOLET, 8),
         fontFamily: 'Cloister',
       );
@@ -150,9 +150,9 @@ class InfosState extends State<Infos> {
               RichText(
                 text: TextSpan(style: textStyle, children: [
                   TextSpan(text: '${tabIndent}Pour toute réclamation, bug, demande quelconque, veuillez envoyer un mail à '),
-                  TextSpan(text: 'cette adresse', recognizer: TapGestureRecognizer()..onTap = () => launch(Mailto(to: ['dorian.beauchesne@gmail.com'], subject: 'AM Calendar - Feedback').toString()), style: linkTextStyle),
+                  TextSpan(text: 'cette adresse', recognizer: TapGestureRecognizer()..onTap = () => launchUrl(Uri.parse(Mailto(to: ['dorian.beauchesne@gmail.com'], subject: 'AM Calendar - Feedback').toString())), style: linkTextStyle),
                   TextSpan(text: '. Pour un soutien financier, somme toute très apprécié, voici mon '),
-                  TextSpan(text: 'PayPal', recognizer: TapGestureRecognizer()..onTap = () => launch('https://paypal.me/d0rianb?country.x=FR&locale.x=fr_FR' ''), style: linkTextStyle),
+                  TextSpan(text: 'PayPal', recognizer: TapGestureRecognizer()..onTap = () => launchUrl(Uri.parse('https://paypal.me/d0rianb?country.x=FR&locale.x=fr_FR' '')), style: linkTextStyle),
                   TextSpan(text: '.'),
                 ]),
                 textAlign: TextAlign.justify,
@@ -167,7 +167,7 @@ class InfosState extends State<Infos> {
                       foregroundColor: MaterialStateProperty.all(isDarkMode ? Colors.white70 : Colors.white),
                     ),
                     onPressed: () async {
-                      final debugContent = await generateDebugRapport(context);
+                      final Widget debugContent = await generateDebugRapport(context);
                       return showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
@@ -175,6 +175,7 @@ class InfosState extends State<Infos> {
                             padding: const EdgeInsets.only(bottom: 8.0),
                             child: const Text('Rapport de debug', textAlign: TextAlign.center),
                           ),
+                          backgroundColor: Colors.white,
                           contentPadding: const EdgeInsets.all(2.0),
                           content: debugContent,
                           actions: [

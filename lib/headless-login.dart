@@ -27,18 +27,21 @@ class HeadlessLogin {
   int urlCount = 0;
 
   static Future click(InAppWebViewController controller, String JSpathIndex) async {
+    print('click ${JSpathIndex}');
     return controller.evaluateJavascript(source: '''
       document.querySelector('${JSPath[JSpathIndex]}')?.click()
       ''');
   }
 
   static Future fillField(InAppWebViewController controller, String JSpathIndex, String value) async {
+    print('fillField ${JSpathIndex}');
     return controller.evaluateJavascript(source: '''
       document.querySelector('${JSPath[JSpathIndex]}').value = String.raw`$value`
       ''');
   }
 
   static Future submit(InAppWebViewController controller, String JSpathIndex) async {
+    print('submit ${JSpathIndex}');
     return controller.evaluateJavascript(source: '''
       let form = document.querySelector('${JSPath[JSpathIndex]}')
       let button = document.querySelector('${JSPath['submit']}')
@@ -59,15 +62,14 @@ class HeadlessLogin {
   void login() async {
     eventBus.fire(LoginEvent('Initialisation de la connection'));
     HeadlessInAppWebView headlessWebView = HeadlessInAppWebView(
-      initialUrlRequest: URLRequest(url: Uri.parse(initialUrl)),
-      initialOptions: InAppWebViewGroupOptions(
-        crossPlatform: InAppWebViewOptions(
-          useShouldOverrideUrlLoading: true,
-          mediaPlaybackRequiresUserGesture: false,
-          incognito: true,
-        ),
-        android: AndroidInAppWebViewOptions(useHybridComposition: true),
-        ios: IOSInAppWebViewOptions(allowsInlineMediaPlayback: true),
+      initialUrlRequest: URLRequest(url: WebUri(initialUrl)),
+      initialSettings: InAppWebViewSettings(
+        useShouldOverrideUrlLoading: true,
+        mediaPlaybackRequiresUserGesture: false,
+        incognito: false,
+        useHybridComposition: true,
+        sharedCookiesEnabled: true,
+        loadsImagesAutomatically: false,
       ),
       onWebViewCreated: (controller) async {
         prefs = await SharedPreferences.getInstance();
@@ -75,13 +77,13 @@ class HeadlessLogin {
         eventBus.fire(LoginEvent('Création de la vue Web'));
       },
       onLoadStart: (controller, url) => eventBus.fire(LoginEvent('Chargement de l\'interface CAS')),
-      androidOnPermissionRequest: (controller, origin, resources) async => PermissionRequestResponse(resources: resources, action: PermissionRequestResponseAction.GRANT),
+      onPermissionRequest: (controller, request) async => PermissionResponse(action: PermissionResponseAction.GRANT),
       shouldOverrideUrlLoading: (controller, navigationAction) async => NavigationActionPolicy.ALLOW,
       onLoadStop: (controller, url) async {
         eventBus.fire(LoginEvent('Connexion au serveur'));
         if (url.toString().startsWith('https://auth.ensam.eu/cas/login?')) {
           if (++urlCount > 4) return; // To prevent DDOS & account blocking
-          controller.evaluateJavascript(source: '''document.querySelector('input[name="continue"]').click()'''); // To solve the change password popup issue
+          controller.evaluateJavascript(source: '''document.querySelector('button[name="continue"]').click()'''); // To solve the change password popup issue
           if (prefs.getString('id') == null || prefs.getString('id')!.isEmpty) return error('Identifiant incorrect');
           if (prefs.getString('password') == null || prefs.getString('password')!.isEmpty) return error('Mot de passe incorrect');
           fillField(controller, 'username', prefs.getString('id')!);
@@ -89,8 +91,8 @@ class HeadlessLogin {
           submit(controller, 'login-form');
           eventBus.fire(LoginEvent('Envoi des données au server'));
         }
-        if (url.toString() == 'https://ensam.campusm.exlibrisgroup.com/cmauth/saml/sso') {
-          final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse('https://ensam.campusm.exlibrisgroup.com'));
+        if (url.toString().startsWith('https://ensam.campusm.exlibrisgroup.com/cmauth')) {
+          final List<Cookie> cookies = await cookieManager.getCookies(url: WebUri('https://ensam.campusm.exlibrisgroup.com'));
           final int cmAuthTokenIndex = cookies.indexWhere((cookie) => cookie.name == 'cmAuthToken');
           eventBus.fire(LoginEvent('Réception des informations de connections'));
           if (cmAuthTokenIndex > -1) {
@@ -101,7 +103,9 @@ class HeadlessLogin {
           }
         }
       },
-      onLoadHttpError: (controller, url, code, message) {
+      onReceivedHttpError: (controller, request, response) {
+        int code = response.statusCode ?? 400;
+        String message = response.reasonPhrase ?? '';
         if (code == 401) error('Identifiant ou mot de passe incorrect');
         print('HTTP error $code : $message');
       },

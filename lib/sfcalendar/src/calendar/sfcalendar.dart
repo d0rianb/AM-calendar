@@ -3556,7 +3556,7 @@ class _SfCalendarState extends State<SfCalendar> with SingleTickerProviderStateM
 
   /// loads the time zone data base to handle the time zone for calendar
   Future<bool> _loadDataBase() async {
-    final ByteData byteData = await rootBundle.load('packages/timezone/data/2020a.tzf');
+    final ByteData byteData = await rootBundle.load('packages/timezone/data/latest_10y.tzf');
     initializeDatabase(byteData.buffer.asUint8List());
     _timeZoneLoaded = true;
     return true;

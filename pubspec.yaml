@@ -1,25 +1,25 @@
 name: am_calendar
 description: A calendar for the ENSAM students
-version: 1.6.1+20
+version: 1.7.0+23
 
 environment:
-  sdk: ">=2.13.0 <3.0.0"
+  sdk: ">=3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
   cupertino_icons: ^1.0.2
-  syncfusion_flutter_core: ^20.2.50
-  syncfusion_flutter_datepicker: ^20.2.50
-  timezone: 0.8.0
-  shared_preferences: ^2.0.15
+  syncfusion_flutter_core: 20.4.44
+  syncfusion_flutter_datepicker: 20.4.44
+  timezone: ^0.9.1
+  shared_preferences: ^2.0.18
   http: ^0.13.3
-  flutter_launcher_icons: ^0.9.2
+  flutter_launcher_icons: ^0.12.0
   flutter_localizations:
     sdk: flutter
-  intl: 0.17.0
-  flutter_inappwebview: ^5.4.4
+  intl: ^0.18.0  # 0.17.0
+  flutter_inappwebview: 6.0.0-beta.22
   collection: ^1.15.0
   package_info: ^2.0.2
   mailto: ^2.0.0
@@ -30,20 +30,20 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  lints: ^1.0.1
+  lints: ^2.0.1
 
 flutter_icons:
   android: true
   ios: true
-  remove_alpha_ios: true
   image_path: 'resources/icons/am-logo.png'
+  image_path_ios: 'resources/icons/am-logo-ios.png'
 
 flutter:
   uses-material-design: true
   assets:
     - resources/icons/am-logo.png
     - packages/timezone/data/latest_10y.tzf
-    - packages/timezone/data/2020a.tzf
+#    - packages/timezone/data/2020a.tzf
   fonts:
     - family: Cloister
       fonts:

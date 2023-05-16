@@ -72,52 +72,85 @@ class AppState extends State<App> {
         locale: const Locale('fr'),
         themeMode: theme,
         theme: ThemeData(
-          primarySwatch: Colors.amber,
           primaryColor: VIOLET,
-          colorScheme: ColorScheme.fromSwatch(
-            primaryColorDark: VIOLET,
-            accentColor: ORANGE,
-          ),
-          backgroundColor: const Color(0xfffafafa),
           textTheme: const TextTheme(
-            subtitle1: TextStyle(color: Colors.black54),
-            subtitle2: TextStyle(color: Colors.black45),
-            headline5: TextStyle(color: Colors.black), // for the `infos` page
-            bodyText1: TextStyle(color: Colors.black),
+            titleMedium: TextStyle(color: Colors.black54),
+            titleSmall: TextStyle(color: Colors.black45),
+            headlineSmall: TextStyle(color: Colors.black), // for the `infos` page
+            bodyLarge: TextStyle(color: Colors.black),
           ),
           appBarTheme: const AppBarTheme(
             backgroundColor: VIOLET,
             foregroundColor: Colors.white,
           ),
           useMaterial3: true,
+          colorScheme: ColorScheme.fromSwatch(primaryColorDark: VIOLET, accentColor: ORANGE, backgroundColor: const Color(0xfffafafa),).copyWith(secondary: ORANGE),
         ),
         darkTheme: ThemeData.dark(useMaterial3: true).copyWith(
           brightness: Brightness.dark,
           applyElevationOverlayColor: true,
           primaryColor: ORANGE,
-          colorScheme: ColorScheme.fromSwatch(
-            primaryColorDark: ORANGE,
-            accentColor: ORANGE,
-          ),
-          backgroundColor: const Color.fromRGBO(31, 26, 36, 1.0),
+          colorScheme: ColorScheme.fromSwatch(primaryColorDark: ORANGE, accentColor: ORANGE, backgroundColor: const Color.fromRGBO(31, 26, 36, 1.0)),
           primaryColorDark: VIOLET,
           highlightColor: Colors.grey[700],
-          toggleableActiveColor: ORANGE,
           outlinedButtonTheme: OutlinedButtonThemeData(
               style: ButtonStyle(
             overlayColor: MaterialStateProperty.all(VIOLET),
           )),
+          dividerTheme: DividerTheme.of(context).copyWith(color: Colors.white10),
           textTheme: const TextTheme(
             labelMedium: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.87)),
-            subtitle1: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.6)),
-            subtitle2: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)),
-            headline5: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.87)),
+            titleMedium: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.6)),
+            titleSmall: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.5)),
+            headlineSmall: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.87)),
             // for the `infos` page
-            bodyText1: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.87)),
+            bodyLarge: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.87)),
           ),
           appBarTheme: const AppBarTheme(
             backgroundColor: VIOLET,
             foregroundColor: Colors.white70,
+          ),
+          checkboxTheme: CheckboxThemeData(
+            fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+              if (states.contains(MaterialState.disabled)) {
+                return null;
+              }
+              if (states.contains(MaterialState.selected)) {
+                return ORANGE;
+              }
+              return null;
+            }),
+          ),
+          radioTheme: RadioThemeData(
+            fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+              if (states.contains(MaterialState.disabled)) {
+                return null;
+              }
+              if (states.contains(MaterialState.selected)) {
+                return ORANGE;
+              }
+              return null;
+            }),
+          ),
+          switchTheme: SwitchThemeData(
+            thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+              if (states.contains(MaterialState.disabled)) {
+                return null;
+              }
+              if (states.contains(MaterialState.selected)) {
+                return ORANGE;
+              }
+              return null;
+            }),
+            trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+              if (states.contains(MaterialState.disabled)) {
+                return null;
+              }
+              if (states.contains(MaterialState.selected)) {
+                return ORANGE;
+              }
+              return null;
+            }),
           ),
         ),
         initialRoute: '/',
