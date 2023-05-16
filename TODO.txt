@@ -1,4 +1,6 @@
-- Select source from app/lise - No
+BUGS :  
+  - Vider le cache --> deconnect or save the authCookie
 
-- Display Week with no information
-- Dark Mode
+ FEATURES : 
+  - export to iCal with the link : webcal://lise.ensam.eu/ical_apprenant/login 
+

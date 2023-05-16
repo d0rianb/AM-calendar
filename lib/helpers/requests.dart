@@ -88,6 +88,7 @@ class ENSAMRequest {
       }
       eventBus.fire(RequestErrorEvent(errorMsg));
       throw new Exception('Error while fetching calendar : ${response.statusCode} - ${response.reasonPhrase}');
+      // TODO: handdle deconnection
     }
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/cache-handler.dart';
+import '../helpers/snackbar.dart';
 import '../main.dart' show eventBus;
 import '../helpers/app-events.dart';
 
@@ -83,6 +84,7 @@ class SettingsState extends State<Settings> {
     final ThemeData theme = Theme.of(context);
     final bool isDarkMode = theme.brightness == Brightness.dark;
     final Color primaryColor = isDarkMode ? ORANGE : VIOLET;
+    final Color textColor = isDarkMode ? Colors.white60 : Colors.black;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Paramètres'),
@@ -92,6 +94,9 @@ class SettingsState extends State<Settings> {
         data: theme.copyWith(
           primaryColor: primaryColor,
           inputDecorationTheme: InputDecorationTheme(
+            floatingLabelStyle: TextStyle(color: textColor),
+            labelStyle: TextStyle(color: textColor),
+            helperStyle: TextStyle(color: textColor),
             enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(
                 color: isDarkMode ? Colors.white24 : Colors.grey,
@@ -209,7 +214,7 @@ class SettingsState extends State<Settings> {
                                 padding: const EdgeInsets.fromLTRB(2.0, 2.0, 4.0, 2.0),
                                 child: Text(
                                   'Ch',
-                                  style: TextStyle(fontSize: 18, color: theme.textTheme.subtitle2?.color),
+                                  style: TextStyle(fontSize: 18, color: theme.textTheme.titleSmall?.color),
                                 ),
                               ),
                               Flexible(
@@ -311,7 +316,13 @@ class SettingsState extends State<Settings> {
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(width: 1.5, color: primaryColor),
                       ),
-                      onPressed: () => eventBus.fire(DeleteAllCacheEvent()),
+                      onPressed: () async {
+                        eventBus.fire(DeleteAllCacheEvent());
+                        showSnackBar(context, 'Le cache à bien été vidé');
+                        final pref = await SharedPreferences.getInstance();
+                        pref.remove('cmAuthToken');
+                        Navigator.of(context).pushNamed('/login');
+                      },
                     ),
                   ),
                 ],

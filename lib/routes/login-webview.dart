@@ -32,6 +32,7 @@ class LoginWebViewState extends State<LoginWebView> {
   bool isLoading = true;
   bool hasLoadLoginPage = false;
   String? filledPassword;
+  int urlLoadingRestart = 0;
 
   @override
   void dispose() => super.dispose();
@@ -39,6 +40,7 @@ class LoginWebViewState extends State<LoginWebView> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    print('Entering inAppWebView');
     return Scaffold(
       appBar: AppBar(
         title: const Text('Identification'),
@@ -48,21 +50,21 @@ class LoginWebViewState extends State<LoginWebView> {
         child: Stack(
           children: [
             InAppWebView(
-              initialUrlRequest: URLRequest(url: Uri.parse(initialUrl)),
-              initialOptions: InAppWebViewGroupOptions(
-                crossPlatform: InAppWebViewOptions(
-                  useShouldOverrideUrlLoading: true,
-                  mediaPlaybackRequiresUserGesture: false,
-                  incognito: true,
-                ),
-                android: AndroidInAppWebViewOptions(useHybridComposition: true),
-                ios: IOSInAppWebViewOptions(allowsInlineMediaPlayback: true),
+              initialUrlRequest: URLRequest(url: WebUri(initialUrl)),
+              initialSettings: InAppWebViewSettings(
+                useShouldOverrideUrlLoading: true,
+                mediaPlaybackRequiresUserGesture: false,
+                incognito: false,
+                useHybridComposition: true,
+                sharedCookiesEnabled: true,
+                loadsImagesAutomatically: false,
               ),
               onWebViewCreated: (controller) async {
                 prefs = await SharedPreferences.getInstance();
                 webViewController = controller;
               },
               onLoadStart: (controller, url) {
+                print('Load start : ' + url.toString());
                 if (url.toString().startsWith('https://auth.ensam.eu/cas/login')) {
                   controller.evaluateJavascript(source: '''
                       window.onload = () => {
@@ -71,16 +73,16 @@ class LoginWebViewState extends State<LoginWebView> {
                       }''');
                 }
               },
-              androidOnPermissionRequest: (controller, origin, resources) async => PermissionRequestResponse(resources: resources, action: PermissionRequestResponseAction.GRANT),
+              onPermissionRequest: (controller, request) async => PermissionResponse(action: PermissionResponseAction.GRANT),
               shouldOverrideUrlLoading: (controller, navigationAction) async => NavigationActionPolicy.ALLOW,
               onLoadStop: (controller, url) async {
                 if (url.toString().startsWith('https://auth.ensam.eu/cas/login?')) {
                   controller.evaluateJavascript(source: '''document.querySelector("#fm1").onsubmit = () => console.log('internalSubmitForm')''');
-                  controller.evaluateJavascript(source: '''document.querySelector('input[name="continue"]').click()'''); // To solve the change password popup issue
+                  controller.evaluateJavascript(source: '''document.querySelector('button[name="continue"]').click()'''); // To solve the change password popup issue
                 }
-                if (url.toString() == 'https://ensam.campusm.exlibrisgroup.com/cmauth/saml/sso') {
-                  setState(() => isLoading = true);
-                  final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse('https://ensam.campusm.exlibrisgroup.com'));
+                if (url.toString().startsWith('https://ensam.campusm.exlibrisgroup.com/cmauth')) {
+                  setState(() => isLoading = false);
+                  final List<Cookie> cookies = await cookieManager.getCookies(url: WebUri('https://ensam.campusm.exlibrisgroup.com'));
                   final int cmAuthTokenIndex = cookies.indexWhere((cookie) => cookie.name == 'cmAuthToken');
                   if (cmAuthTokenIndex > -1) {
                     prefs.setString('cmAuthToken', cookies[cmAuthTokenIndex].value);
@@ -91,7 +93,6 @@ class LoginWebViewState extends State<LoginWebView> {
                   }
                 }
               },
-              onLoadHttpError: (controller, url, code, message) => print('HTTP error $code : $message'),
               onUpdateVisitedHistory: (controller, url, androidIsReload) {},
               onConsoleMessage: (controller, consoleMessage) => consoleMessage.message == 'internalSubmitForm' ? setState(() => hasLoadLoginPage = true) : print('[Embedded console] : $consoleMessage'),
             ),

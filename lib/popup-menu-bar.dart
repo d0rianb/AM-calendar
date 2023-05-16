@@ -30,6 +30,16 @@ class PopupMenuBarState extends State<PopupMenuBar> {
 
   Future<void> initSharedPreferences() async => prefs = await SharedPreferences.getInstance();
 
+  MaterialStateProperty<Color?> getCheckboxFillColor() => MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return null;
+        }
+        if (states.contains(MaterialState.selected)) {
+          return ORANGE;
+        }
+        return null;
+      });
+
   @override
   Widget build(BuildContext context) {
     const iconColor = ORANGE;
@@ -59,6 +69,7 @@ class PopupMenuBarState extends State<PopupMenuBar> {
           title: const Text("Afficher les CM", style: TextStyle(color: ORANGE, fontSize: 14)),
           contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 10),
           dense: true,
+          fillColor: getCheckboxFillColor(),
           value: showCM,
           onChanged: (value) {
             setState(() {
@@ -73,6 +84,7 @@ class PopupMenuBarState extends State<PopupMenuBar> {
           title: const Text("Afficher les TEAMS", style: TextStyle(color: ORANGE, fontSize: 14)),
           contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 10),
           dense: true,
+          fillColor: getCheckboxFillColor(),
           value: showTEAMS,
           onChanged: (value) {
             setState(() {
@@ -87,6 +99,7 @@ class PopupMenuBarState extends State<PopupMenuBar> {
           title: const Text("Appliquer les filtres", style: TextStyle(color: ORANGE, fontSize: 14)),
           contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 10),
           dense: true,
+          fillColor: getCheckboxFillColor(),
           value: applyFilters,
           onChanged: (value) {
             setState(() {

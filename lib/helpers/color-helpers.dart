@@ -1,8 +1,7 @@
-// From : https://stackoverflow.com/questions/58360989/programmatically-lighten-or-darken-a-hex-color-in-dart
 import 'package:flutter/material.dart';
+// From : https://stackoverflow.com/questions/58360989/programmatically-lighten-or-darken-a-hex-color-in-dart
 
 /// Darken a color by [percent] amount (100 = black)
-// ........................................................
 Color darken(Color c, [int percent = 10]) {
   assert(1 <= percent && percent <= 100);
   var f = 1 - percent / 100;
@@ -15,7 +14,6 @@ Color darken(Color c, [int percent = 10]) {
 }
 
 /// Lighten a color by [percent] amount (100 = white)
-// ........................................................
 Color lighten(Color c, [int percent = 10]) {
   assert(1 <= percent && percent <= 100);
   var p = percent / 100;

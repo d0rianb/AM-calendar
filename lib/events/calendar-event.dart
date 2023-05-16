@@ -165,6 +165,7 @@ class CalendarEvent extends Appointment {
     });
   }
 
+  // TODO: close popup wehn touching outside
   Widget build(BuildContext context, Size size) {
     return Listener(
       behavior: HitTestBehavior.opaque,
@@ -174,6 +175,7 @@ class CalendarEvent extends Appointment {
               new PageRouteBuilder(
                 pageBuilder: (context, animation, _) => CalendarEventPopup(this),
                 opaque: false,
+                barrierDismissible: true,
                 transitionsBuilder: (context, animation, _, child) {
                   final tween = Tween<double>(begin: 0, end: 2.0);
                   animation.drive(tween);
@@ -201,11 +203,11 @@ class CalendarEvent extends Appointment {
                 },
                 transitionDuration: const Duration(milliseconds: 300),
                 reverseTransitionDuration: const Duration(milliseconds: 250),
-                barrierDismissible: true,
               ),
             )
           : null,
       onPointerUp: (_) => (shouldDisplay) ? Navigator.pop(context) : null,
+      onPointerCancel: (_) => (shouldDisplay) ? Navigator.pop(context) : null,
       child: CalendarItem(this, size, false),
     );
   }

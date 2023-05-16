@@ -69,9 +69,10 @@ class LoginViewState extends State<LoginView> {
     final ThemeData theme = Theme.of(context);
     final bool isDarkMode = theme.brightness == Brightness.dark;
     final Color primaryColor = isDarkMode ? ORANGE : VIOLET;
+    final Color textColor = isDarkMode ? Colors.white60 : Colors.black;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Connection'),
+        title: const Text('Connexion'),
         backgroundColor: VIOLET,
       ),
       body: Padding(
@@ -82,6 +83,9 @@ class LoginViewState extends State<LoginView> {
               data: theme.copyWith(
                 primaryColor: primaryColor,
                 inputDecorationTheme: InputDecorationTheme(
+                  floatingLabelStyle: TextStyle(color: textColor),
+                  labelStyle: TextStyle(color: textColor),
+                  helperStyle: TextStyle(color: textColor),
                   enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(
                       color: isDarkMode ? Colors.white24 : Colors.grey,
@@ -196,7 +200,7 @@ class LoginViewState extends State<LoginView> {
                               connectionText,
                               style: TextStyle(
                                 fontStyle: FontStyle.italic,
-                                color: !hasError ? theme.textTheme.subtitle1?.color : Colors.red[800],
+                                color: !hasError ? theme.textTheme.titleMedium?.color : Colors.red[800],
                               ),
                             ),
                           ),

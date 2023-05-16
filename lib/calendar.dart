@@ -92,7 +92,11 @@ class CalendarState extends State<Calendar> {
   List<CalendarEvent> getCachedEvents() {
     // TODO: filter too old events
     final Iterable<String> cachedWeeksId = prefs.getKeys().where((key) => key.startsWith('week:'));
-    return cachedWeeksId.map((id) => {'id': id, 'value': prefs.getString(id)}).map((obj) => Cache.fromString(obj['id']!, obj['value'])).where((cache) => cache.isValid).map((cache) => cache.object).flattened.toList();
+    return cachedWeeksId
+        .map((id) => {'id': id, 'value': prefs.getString(id)})
+        .map((obj) => Cache.fromString(obj['id']!, obj['value']))
+        .where((cache) => cache.isValid).map((cache) => cache.object)
+        .flattened.toList();
   }
 
   List<CustomEvent> getPals() {
@@ -162,15 +166,15 @@ class CalendarState extends State<Calendar> {
         SfCalendarTheme(
           data: SfCalendarThemeData(
             brightness: getBrightness(prefs, context),
-            backgroundColor: theme.backgroundColor,
+            backgroundColor: theme.colorScheme.background,
             selectionBorderColor: ORANGE,
             cellBorderColor: isDarkMode ? Colors.white12 : Colors.black12,
             headerTextStyle: TextStyle(fontSize: 20, color: ORANGE),
             todayTextStyle: TextStyle(
               fontWeight: FontWeight.bold,
-              color: theme.backgroundColor,
+              color: theme.colorScheme.background,
             ),
-            timeTextStyle: TextStyle(color: theme.textTheme.subtitle2?.color?.withOpacity(0.7), fontWeight: FontWeight.w500, fontSize: 10),
+            timeTextStyle: TextStyle(color: theme.textTheme.titleSmall?.color?.withOpacity(0.7), fontWeight: FontWeight.w500, fontSize: 10),
           ),
           child: SfCalendar(
             view: CalendarView.workWeek,
@@ -185,7 +189,7 @@ class CalendarState extends State<Calendar> {
             todayHighlightColor: ORANGE,
             timeSlotViewSettings: TimeSlotViewSettings(
               timeInterval: const Duration(minutes: 60),
-              timeIntervalHeight: 47,
+              timeIntervalHeight: -1,
               timeFormat: 'Hm',
               startHour: 7,
               endHour: showPals ? 22 : 19,
@@ -193,7 +197,7 @@ class CalendarState extends State<Calendar> {
             viewHeaderStyle: ViewHeaderStyle(
               dayTextStyle: TextStyle(
                 fontSize: 12,
-                color: theme.textTheme.subtitle1?.color,
+                color: theme.textTheme.titleMedium?.color,
                 fontWeight: FontWeight.w500,
               ),
               dateTextStyle: const TextStyle(
