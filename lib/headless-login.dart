@@ -60,7 +60,7 @@ class HeadlessLogin {
   }
 
   void login() async {
-    eventBus.fire(LoginEvent('Initialisation de la connection'));
+    eventBus.fire(LoginEvent('Initialisation de la connexion'));
     HeadlessInAppWebView headlessWebView = HeadlessInAppWebView(
       initialUrlRequest: URLRequest(url: WebUri(initialUrl)),
       initialSettings: InAppWebViewSettings(
