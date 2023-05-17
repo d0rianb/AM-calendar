@@ -80,7 +80,7 @@ class HeadlessLogin {
       onPermissionRequest: (controller, request) async => PermissionResponse(action: PermissionResponseAction.GRANT),
       shouldOverrideUrlLoading: (controller, navigationAction) async => NavigationActionPolicy.ALLOW,
       onLoadStop: (controller, url) async {
-        eventBus.fire(LoginEvent('Connexion au serveur'));
+        eventBus.fire(LoginEvent('Connexion au serveur ...'));
         if (url.toString().startsWith('https://auth.ensam.eu/cas/login?')) {
           if (++urlCount > 4) return; // To prevent DDOS & account blocking
           controller.evaluateJavascript(source: '''document.querySelector('button[name="continue"]').click()'''); // To solve the change password popup issue
@@ -94,7 +94,7 @@ class HeadlessLogin {
         if (url.toString().startsWith('https://ensam.campusm.exlibrisgroup.com/cmauth')) {
           final List<Cookie> cookies = await cookieManager.getCookies(url: WebUri('https://ensam.campusm.exlibrisgroup.com'));
           final int cmAuthTokenIndex = cookies.indexWhere((cookie) => cookie.name == 'cmAuthToken');
-          eventBus.fire(LoginEvent('Réception des informations de connections'));
+          eventBus.fire(LoginEvent('Réception des informations de connexions'));
           if (cmAuthTokenIndex > -1) {
             prefs.setString('cmAuthToken', cookies[cmAuthTokenIndex].value);
             eventBus.fire(LoginEvent('Connexion réussie', finished: true));
@@ -116,7 +116,7 @@ class HeadlessLogin {
   }
 
   void error([String? reason]) {
-    eventBus.fire(LoginEvent('Erreur de connection : $reason', error: true));
+    eventBus.fire(LoginEvent('Erreur de connexion : $reason', error: true));
     throw 'Error : $reason';
   }
 }
