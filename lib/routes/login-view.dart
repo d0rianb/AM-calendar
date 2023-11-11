@@ -73,6 +73,7 @@ class LoginViewState extends State<LoginView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Connexion'),
+        automaticallyImplyLeading: false,
         backgroundColor: VIOLET,
       ),
       body: Padding(

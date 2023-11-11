@@ -1,6 +1,11 @@
 BUGS :  
-  - Vider le cache --> deconnect or save the authCookie
+  - Cache non persistant
+  - Error snackbar : Looking up a deactivated widget's ancestor is unsafe.
+  - Dot menu height
+  - Cours supprimés / Conflits
+  --> rework du cache
 
- FEATURES : 
-  - export to iCal with the link : webcal://lise.ensam.eu/ical_apprenant/login 
+ V2 :
+  - new data source : webcal://lise.ensam.eu/ical_apprenant/login
+  - slide down to reload
 

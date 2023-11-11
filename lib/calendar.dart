@@ -36,6 +36,7 @@ class CalendarState extends State<Calendar> {
   final CalendarController controller = CalendarController();
   late SharedPreferences prefs = widget.prefs;
   List<Appointment> events = [];
+  List<String> filters = [];
   Week week = Week.fromDateTime(DateTime.now());
   bool loading = false;
   bool displayNoInfos = false;
@@ -58,16 +59,19 @@ class CalendarState extends State<Calendar> {
   void initState() {
     super.initState();
     getEvents();
-    eventBus.on<RecallGetEvent>().listen((event) {
-      clearEventCache(prefs);
-      getEvents();
-    });
+    // Load filters
+    String filtersString = prefs.getString('filters') ?? '';
+    filters = filtersString.split(',').map((filter) => filter.toLowerCase()).where((filter) => filter.isNotEmpty).toList();
+    eventBus.on<RecallGetEvent>().listen((event) => getEvents());
     eventBus.on<ReloadViewEvent>().listen(
           (event) => setState(() {
             _showPals = prefs.getBool('showPals') ?? false;
             _showCM = prefs.getBool('showCM') ?? true;
             _showTEAMS = prefs.getBool('showTEAMS') ?? true;
             _applyFilters = prefs.getBool('applyFilters') ?? true;
+
+            String filtersString = prefs.getString('filters') ?? '';
+            filters = filtersString.split(',').map((filter) => filter.toLowerCase()).where((filter) => filter.isNotEmpty).toList();
           }),
         );
   }
@@ -82,8 +86,8 @@ class CalendarState extends State<Calendar> {
     }
     addNoInfoEvents();
     final List<CalendarEvent> cachedEvents = getCachedEvents();
-    int addedEventsFromCache = addEvents(cachedEvents);
-    if (addedEventsFromCache > 0 && mounted) setState(() => loading = false);
+    // int addedEventsFromCache = addEvents(cachedEvents);
+    // if (mounted && addedEventsFromCache > 0) setState(() => loading = false);
     final List<CalendarEvent> networksEvents = await getEventsFromNetworks(week);
     int addedEventsFromNetwork = addEvents(networksEvents);
     if (mounted) setState(() => loading = false);
@@ -95,7 +99,8 @@ class CalendarState extends State<Calendar> {
     return cachedWeeksId
         .map((id) => {'id': id, 'value': prefs.getString(id)})
         .map((obj) => Cache.fromString(obj['id']!, obj['value']))
-        .where((cache) => cache.isValid).map((cache) => cache.object)
+        .where((cache) => cache.isValid)
+        .map((cache) => cache.object)
         .flattened.toList();
   }
 
@@ -123,8 +128,19 @@ class CalendarState extends State<Calendar> {
   }
 
   Future<List<CalendarEvent>> getEventsFromNetworks(Week week) async {
-    final response = await ENSAMRequest.getCalendar(week.firstDay, week.getNextWeek().lastDay);
-    final List<CalendarEvent> events = List.from(response['events'].map((e) => CalendarEvent.fromENSAMCampus(e)));
+    List<CalendarEvent> events = [];
+    String dataSource = widget.prefs.getString('source') ?? defaultSource.name;
+    if (dataSource == 'ICal' || dataSource == 'All') {
+      final iCalResponse = await ICalRequest.getCalendar();
+      final List<CalendarEvent> iCalEvents = List.from(iCalResponse['data'].map((e) => CalendarEvent.fromICal(e)));
+      events += iCalEvents;
+    }
+    if (dataSource == 'EnsamCampus' || dataSource == 'All') {
+      final ensamResponse = await ENSAMRequest.getCalendar(week.firstDay, week.getNextWeek().lastDay);
+      final List<CalendarEvent> ensamEvents = List.from(ensamResponse['events'].map((e) => CalendarEvent.fromENSAMCampus(e)));
+      events += ensamEvents;
+    }
+    // print(events);
     final Cache cache = Cache.create(week.stringId, events);
     prefs.setString(cache.id, cache.serialized);
     return events;
@@ -139,8 +155,6 @@ class CalendarState extends State<Calendar> {
   }
 
   bool isFiltered(CalendarEvent event) {
-    String filtersString = prefs.getString('filters') ?? '';
-    List<String> filters = filtersString.split(',').map((filter) => filter.toLowerCase()).where((filter) => filter.isNotEmpty).toList();
     bool isFiltered = false;
     String title = event.title.toLowerCase();
     for (String filter in filters) {

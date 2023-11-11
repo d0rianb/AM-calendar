@@ -8,6 +8,10 @@ class CalendarItem extends Hero {
 
   static const textColorDarkMode = Color(0xd9ffffff);
 
+  static const nullPadding = EdgeInsets.all(0.0);
+  static const largePadding = EdgeInsets.only(top: 16.0, bottom: 16.0);
+  static const regularPadding = EdgeInsets.only(top: 4.0, bottom: 4.0);
+
   CalendarItem(this.event, this.size, this.expanded)
       : super(
           tag: event.id,
@@ -38,38 +42,72 @@ class CalendarItem extends Hero {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
-                          event.course.length > 0 ? event.course : event.subject,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontWeight: FontWeight.w800, fontSize: expanded ? 24 : 10),
-                        ),
-                        // SizedBox(height: expanded ? 1 : 0),
-                        Text(
-                          event.formattedLocation,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontStyle: FontStyle.italic,
-                            fontSize: expanded ? 22 : 9,
+                        Padding(
+                          padding: expanded ? largePadding : nullPadding,
+                          child: Text(
+                            event.course.length > 0 ? event.course : event.subject,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontWeight: FontWeight.w800, fontSize: expanded ? 24 : 10),
                           ),
                         ),
                         // SizedBox(height: expanded ? 1 : 0),
-                        Text(
-                          event.getTimePeriod(),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: expanded ? 22 : 0,
-                            fontStyle: FontStyle.italic,
-                            color: expanded ? textColorDarkMode : event.color,
+                        Padding(
+                          padding: expanded ? largePadding : nullPadding,
+                          child: Text(
+                            event.location ?? '',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontStyle: FontStyle.italic,
+                              fontSize: expanded ? 22 : 9,
+                            ),
                           ),
                         ),
-                        // SizedBox(height: expanded ? 3 : 0),
-                        Text(
-                          event.subject,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: expanded ? 22 : 0,
-                          ),
-                        ),
+                        // The elements that are not visible when the widget is not expanded
+                        Visibility(visible: expanded, child: Column(
+                          children: [
+                            Padding(
+                              padding: expanded ? regularPadding : nullPadding,
+                              child: Text(
+                                event.getTimePeriod(),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontStyle: FontStyle.italic,
+                                  color: textColorDarkMode,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: expanded ? regularPadding : nullPadding,
+                              child: Text(
+                                event.classType + ' - ' + event.teacherName,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(fontSize: 22),
+                              ),
+                            ),
+                            Padding(
+                              padding: expanded ? regularPadding : nullPadding,
+                              child: Text(
+                                event.group,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(fontSize: 18),
+                              ),
+                            ),
+                            Padding(
+                              padding: expanded ? regularPadding : nullPadding,
+                              child: Text(
+                                event.duration,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(fontSize: 22),
+                              ),
+                            ),
+                            Text(
+                              event.source.name,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontSize: 22),
+                            ),
+                          ],
+                        ))
                       ],
                     ),
                   ),
