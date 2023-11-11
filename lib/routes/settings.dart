@@ -47,6 +47,7 @@ class SettingsState extends State<Settings> {
     super.initState();
     prefs = widget.prefs;
     tbk = prefs.getString('tbk') ?? "Chalon's";
+    source = DataSource.values.byName(prefs.getString('source') ?? defaultSource.name);
     brightness = prefs.getString('brightness') ?? 'system';
     userIdFieldController.text = prefs.getString('id') ?? '2021-';
     passwordFieldController.text = prefs.getString('password') ?? '';
@@ -176,12 +177,11 @@ class SettingsState extends State<Settings> {
                       style: TextStyle(color: primaryColor),
                       onChanged: (value) => setState(() {
                         source = value!;
-                        prefs.setString('source', value.toString());
+                        prefs.setString('source', value.name);
                         eventBus.fire(RecallGetEvent());
                       }),
                       items: DataSource.values
-                          // TODO: Add a nice naming to buttons
-                          .map((value) => DropdownMenuItem<DataSource>(value: value, child: InkWell(child: Text(value.toString()))))
+                          .map((value) => DropdownMenuItem<DataSource>(value: value, child: InkWell(child: Text(value.name))))
                           .toList(),
                     ),
                   ),

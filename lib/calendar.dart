@@ -87,21 +87,21 @@ class CalendarState extends State<Calendar> {
     addNoInfoEvents();
     final List<CalendarEvent> cachedEvents = getCachedEvents();
     // int addedEventsFromCache = addEvents(cachedEvents);
-    // if (mounted && addedEventsFromCache > 0) setState(() => loading = false);
+    // if (mounted && addedEventsFromCache > 0) setState(() => loading = false); // Update the view
     final List<CalendarEvent> networksEvents = await getEventsFromNetworks(week);
     int addedEventsFromNetwork = addEvents(networksEvents);
     if (mounted) setState(() => loading = false);
   }
 
   List<CalendarEvent> getCachedEvents() {
-    // TODO: filter too old events
     final Iterable<String> cachedWeeksId = prefs.getKeys().where((key) => key.startsWith('week:'));
     return cachedWeeksId
         .map((id) => {'id': id, 'value': prefs.getString(id)})
         .map((obj) => Cache.fromString(obj['id']!, obj['value']))
         .where((cache) => cache.isValid)
         .map((cache) => cache.object)
-        .flattened.toList();
+        .flattened
+        .toList();
   }
 
   List<CustomEvent> getPals() {
@@ -148,9 +148,17 @@ class CalendarState extends State<Calendar> {
 
   /// Return the number of events added
   int addEvents(List<Appointment> newEvents) {
-    if (IterableEquality().equals(events, newEvents)) return 0;
     int oldEventsLength = events.length;
-    newEvents.forEach((event) => events.where((e) => e.id == event.id).isEmpty ? events.add(event) : null);
+    // Filter the old events that have an update on the same period
+    events = events.where((oldEvent) {
+      for (Appointment newEvent in newEvents) {
+        if (newEvent.startTime == oldEvent.startTime && newEvent.endTime == oldEvent.endTime) {
+          return false;
+        }
+      }
+      return true;
+    }).toList();
+    events += newEvents; // add the new events
     return events.length - oldEventsLength;
   }
 
@@ -220,9 +228,7 @@ class CalendarState extends State<Calendar> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            headerStyle: const CalendarHeaderStyle(
-              textAlign: TextAlign.center,
-            ),
+            headerStyle: const CalendarHeaderStyle(textAlign: TextAlign.center),
             headerDateFormat: 'MMMM yyy',
             appointmentBuilder: (BuildContext context, CalendarAppointmentDetails details) {
               dynamic event = details.appointments.first;
