@@ -1,11 +1,12 @@
 import 'dart:convert';
-
 import 'package:intl/intl.dart';
 
 import 'events/calendar-event.dart';
 
 typedef JSON = Map<String, dynamic>;
-const cacheInvalidationDuration = const Duration(days: 3);
+
+// The cache is valid during 6 months
+const Duration cacheInvalidationDuration = const Duration(days: 30 * 6);
 final DateFormat dateParser = new DateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
 class Cache {
@@ -23,11 +24,6 @@ class Cache {
       });
 
   bool get isValid => Duration(milliseconds: DateTime.now().millisecondsSinceEpoch - age.millisecondsSinceEpoch) <= cacheInvalidationDuration;
-
-  void update(List<CalendarEvent> object) {
-    this.object = object;
-    this.age = DateTime.now();
-  }
 
   static Cache fromString(String key, String? str) {
     final dynamic decodedString = jsonDecode(str ?? '');

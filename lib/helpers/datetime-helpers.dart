@@ -21,3 +21,18 @@ extension DateTimeHelper<T extends DateTime> on T {
     );
   }
 }
+
+class ICalDateParser {
+  static DateTime parse(String datetime) {
+    // iCal ex: 20231106T091000
+    DateTime parsedDate = DateTime(
+      int.parse(datetime.substring(0, 4)),
+      int.parse(datetime.substring(4, 6)),
+      int.parse(datetime.substring(6, 8)),
+      int.parse(datetime.substring(9, 11)),
+      int.parse(datetime.substring(11, 13)),
+      int.parse(datetime.substring(13, 15)),
+    );
+    return parsedDate;
+  }
+}

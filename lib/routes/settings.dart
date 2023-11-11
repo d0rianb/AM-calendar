@@ -1,3 +1,4 @@
+import 'package:am_calendar/helpers/requests.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -21,13 +22,13 @@ class Settings extends StatefulWidget {
 }
 
 class SettingsState extends State<Settings> {
+  late SharedPreferences prefs;
   final formKey = GlobalKey<FormState>();
   final TextEditingController userIdFieldController = TextEditingController();
   final TextEditingController passwordFieldController = TextEditingController();
   final TextEditingController numsFieldController = TextEditingController();
   final TextEditingController promsFieldController = TextEditingController();
   final TextEditingController filtersFieldController = TextEditingController();
-  late SharedPreferences prefs;
   String userId = '';
   String password = '';
   String nums = '';
@@ -35,6 +36,7 @@ class SettingsState extends State<Settings> {
   String tbk = "Chalon's";
   String brightness = 'system';
   String filters = '';
+  DataSource source = defaultSource;
 
   static const List<String> TBKList = ["Chalon's", "Siber's", "Boquette", "Birse", "Paris", "KIN", "Bordel's", "Clun's"];
 
@@ -44,9 +46,10 @@ class SettingsState extends State<Settings> {
   void initState() {
     super.initState();
     prefs = widget.prefs;
-    tbk = prefs.getString('tbk') ?? 'Chalon\'s';
+    tbk = prefs.getString('tbk') ?? "Chalon's";
     brightness = prefs.getString('brightness') ?? 'system';
     userIdFieldController.text = prefs.getString('id') ?? '2021-';
+    passwordFieldController.text = prefs.getString('password') ?? '';
     numsFieldController.text = prefs.getString('nums') ?? '';
     promsFieldController.text = prefs.getString('proms') ?? '';
     filtersFieldController.text = prefs.getString('filters') ?? '';
@@ -68,7 +71,7 @@ class SettingsState extends State<Settings> {
     }
   }
 
-  ThemeMode getThemeModefromValue(String value) {
+  ThemeMode getThemeModeFromValue(String value) {
     switch (value) {
       case 'light':
         return ThemeMode.light;
@@ -106,7 +109,6 @@ class SettingsState extends State<Settings> {
           colorScheme: theme.colorScheme.copyWith(
             primary: primaryColor,
           ),
-          // inputDecorationTheme: InputDecorationTheme(border: OutlineInputBorder(borderSide: BorderSide(color: VIOLET))),
         ),
         child: Form(
           key: formKey,
@@ -135,6 +137,7 @@ class SettingsState extends State<Settings> {
                       }),
                     ),
                   ),
+
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextFormField(
@@ -156,6 +159,33 @@ class SettingsState extends State<Settings> {
                       }),
                     ),
                   ),
+
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: DropdownButtonFormField<DataSource>(
+                      decoration: const InputDecoration(
+                        icon: Icon(Icons.source),
+                        hintText: 'Source des données',
+                        labelText: 'Source',
+                        border: OutlineInputBorder(),
+                      ),
+                      value: source,
+                      icon: Icon(Icons.arrow_downward, color: primaryColor),
+                      iconSize: 16,
+                      elevation: 16,
+                      style: TextStyle(color: primaryColor),
+                      onChanged: (value) => setState(() {
+                        source = value!;
+                        prefs.setString('source', value.toString());
+                        eventBus.fire(RecallGetEvent());
+                      }),
+                      items: DataSource.values
+                          // TODO: Add a nice naming to buttons
+                          .map((value) => DropdownMenuItem<DataSource>(value: value, child: InkWell(child: Text(value.toString()))))
+                          .toList(),
+                    ),
+                  ),
+
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: DropdownButtonFormField<String>(
@@ -178,10 +208,11 @@ class SettingsState extends State<Settings> {
                       items: TBKList.map((value) => DropdownMenuItem<String>(value: value, child: InkWell(child: Text(value)))).toList(),
                     ),
                   ),
+
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
                     child: Visibility(
-                      visible: tbk == 'Chalon\'s',
+                      visible: tbk == "Chalon's",
                       child: Column(
                         children: [
                           Row(
@@ -256,6 +287,7 @@ class SettingsState extends State<Settings> {
                       ),
                     ),
                   ),
+
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: DropdownButtonFormField<String>(
@@ -273,7 +305,7 @@ class SettingsState extends State<Settings> {
                       onChanged: (value) => setState(() {
                         brightness = value!;
                         prefs.setString('brightness', value);
-                        eventBus.fire(ThemeChangeEvent(getThemeModefromValue(value)));
+                        eventBus.fire(ThemeChangeEvent(getThemeModeFromValue(value)));
                       }),
                       items: const [
                         DropdownMenuItem<String>(value: 'light', child: InkWell(child: Text('Clair'))),
@@ -282,6 +314,7 @@ class SettingsState extends State<Settings> {
                       ],
                     ),
                   ),
+
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextFormField(
@@ -309,6 +342,7 @@ class SettingsState extends State<Settings> {
                       }),
                     ),
                   ),
+
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: OutlinedButton(

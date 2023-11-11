@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:core';
 import 'dart:ui';
 
+import 'package:am_calendar/helpers/requests.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../helpers/datetime-helpers.dart';
 import '../sfcalendar/calendar.dart';
 
 import 'calendar-event-popup.dart';
@@ -15,7 +18,7 @@ typedef JSON = Map<String, dynamic>;
 
 final Map<String, Color> classColor = {
   'CM': ORANGE,
-  'ED_TD': HexColor.fromHex('#9b3471'),
+  'ED TD': HexColor.fromHex('#9b3471'),
   'MISSION': HexColor.fromHex('#9b3471'),
   'TPS': HexColor.fromHex('#1976d2'),
   'TPF': HexColor.fromHex('#1976d2'),
@@ -24,6 +27,24 @@ final Map<String, Color> classColor = {
   'REUNION': HexColor.fromHex('#7986cb'),
   'TEAMS': HexColor.fromHex('#4caf50'),
 };
+
+final class EnsamCampusRegex {
+  static final RegExp all = new RegExp(r'(.*)');
+  static final RegExp endChar = new RegExp(r'\\n');
+  static final RegExp classeType = new RegExp(r'TYPE_ACTIVITE\s:\s([\w_]+)\n', caseSensitive: false, multiLine: true);
+  static final RegExp teacherName = new RegExp(r'INTERVENANTS\s:\s(.+)\n-\sDESCRIPTION');
+  static final RegExp description = new RegExp(r'DESCRIPTION\s:\s(.+)\n-\sGROUPES');
+  static final RegExp group = new RegExp(r'GROUPES\s:\s(.*)\n');
+}
+
+final class ICalRegex {
+  static final RegExp all = new RegExp(r'(.*)');
+  static final RegExp endChar = new RegExp(r'\\n');
+  static final RegExp classeType = new RegExp(r'TYPE_ACTIVITE\s:\s([\w_]+)\\n', caseSensitive: false, multiLine: true);
+  static final RegExp teacherName = new RegExp(r'INTERVENANTS\s:\s(.+)\\n-\sDESCRIPTION');
+  static final RegExp description = new RegExp(r'DESCRIPTION\s:\s(.+)\\n-\sGROUPES');
+  static final RegExp group = new RegExp(r'GROUPES\s:\s(.*)\\n');
+}
 
 class CalendarEvent extends Appointment {
   String title = '';
@@ -37,6 +58,8 @@ class CalendarEvent extends Appointment {
   DateTime startTime = DateTime.now();
   DateTime endTime = DateTime.now();
   bool isAllDay = false;
+  DataSource source = defaultSource;
+  DateTime fetchDate = DateTime.now(); // To update events based on their fetch date
 
   CalendarEvent({
     required this.title,
@@ -49,21 +72,15 @@ class CalendarEvent extends Appointment {
     required this.duration,
     required this.startTime,
     required this.endTime,
+    required this.fetchDate,
     this.isAllDay = false,
+    this.source = defaultSource,
   }) : super(startTime: startTime, endTime: endTime);
 
-  static final DateFormat dateParser = new DateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-  static final RegExp endCharRegex = new RegExp(r'\\n');
-  static final RegExp classeTypeRegex = new RegExp(r'TYPE_ACTIVITE\s:\s([\w_]+)\n', caseSensitive: false, multiLine: true);
-  static final RegExp teacherNameRegex = new RegExp(r'INTERVENANTS\s:\s(.+)\n-\sDESCRIPTION');
-  static final RegExp descriptionRegex = new RegExp(r'DESCRIPTION\s:\s(.+)\n-\sGROUPES');
-  static final RegExp groupRegex = new RegExp(r'GROUPES\s:\s(.*)\\n');
+  // For ENSAM Campus parsing
+  static final DateFormat Iso8601DateParser = new DateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
-  String get subject => List.from([formattedClassType, description, teacherName, duration].where((element) => element != '' && element != ' ')).join(' - ');
-
-  String get formattedLocation => (location ?? '').replaceAll('_', ' ');
-
-  String get formattedClassType => classType.replaceAll('_', ' ');
+  String get subject => List.from([classType, description, teacherName, duration].where((element) => element != '' && element != ' ')).join(' - ');
 
   Color get color {
     String type = classType.replaceAll('_TEAMS', '');
@@ -82,51 +99,79 @@ class CalendarEvent extends Appointment {
 
   Color get borderColor => isVisio ? classColor['TEAMS']! : darken(color, 15);
 
-  String get id => (location ?? '') + teacherName + group + startTime.millisecondsSinceEpoch.toString();
+  String get id => (location ?? '') + teacherName + group + startTime.millisecondsSinceEpoch.toString() + source.toString();
 
-  static CalendarEvent fromLiseObject(JSON event) {
-    List<String> list = event['title'].split(' - ');
-    String subject = list[3];
-
-    CalendarEvent calendarEvent = new CalendarEvent(
-      title: event['title'],
-      course: subject,
-      classType: list[4],
-      location: list[0],
-      teacherName: list[5],
-      description: '',
-      duration: list[6],
-      group: list[8],
-      startTime: dateParser.parse(event['start']),
-      endTime: dateParser.parse(event['end']),
-      isAllDay: event['allDay'] as bool,
-    );
-    return calendarEvent;
+  /// Get the first group and format the result of the regex by taking of the \n and the _
+  /// The XXXRegexp.all permit just the formatting
+  static String getFormattedRegexResult(RegExp re, String input, { bool formatUnderscore = true, formatEndLine = true }) {
+    String result = re.firstMatch(input)?.group(1) ?? '';
+    if (formatUnderscore) result = result .replaceAll('_', ' ');
+    if (formatEndLine) result = result.replaceAll(EnsamCampusRegex.endChar, '');
+    return result;
   }
 
   static CalendarEvent fromENSAMCampus(JSON event) {
-    DateTime startTime = dateParser.parse(event['start']);
-    DateTime endTime = dateParser.parse(event['end']);
+    DateTime startTime = Iso8601DateParser.parse(event['start']);
+    DateTime endTime = Iso8601DateParser.parse(event['end']);
     Duration rawDuration = endTime.difference(startTime);
     String duration = (rawDuration.inMinutes % 60 == 0) ? '${rawDuration.inHours}h' : '${rawDuration.inHours}h${rawDuration.inMinutes - rawDuration.inHours * 60}';
+
+    String desc1 = event['desc1'];
+    String desc2 = event['desc2'];
+
     return new CalendarEvent(
-      title: (event['desc1'] + event['desc2']).replaceAll(endCharRegex, ''),
-      course: event['desc1'].replaceAll(endCharRegex, '').replaceAll('_', ''),
-      classType: classeTypeRegex.firstMatch(event['desc2'])?.group(1) ?? '',
-      location: event['locAdd1'].replaceAll(endCharRegex, ''),
-      teacherName: teacherNameRegex.firstMatch(event['desc2'])?.group(1) ?? '',
-      description: descriptionRegex.firstMatch(event['desc2'])?.group(1) ?? '',
-      group: groupRegex.firstMatch(event['desc2'])?.group(1) ?? '',
+      title: desc1 + desc2,
+      course: getFormattedRegexResult(EnsamCampusRegex.all, desc1),
+      classType: getFormattedRegexResult(EnsamCampusRegex.classeType, desc2),
+      location: getFormattedRegexResult(EnsamCampusRegex.all, event['locAdd1']),
+      teacherName: getFormattedRegexResult(EnsamCampusRegex.teacherName, desc2),
+      description: getFormattedRegexResult(EnsamCampusRegex.description, desc2),
+      group: getFormattedRegexResult(EnsamCampusRegex.group, desc2),
       duration: duration,
       startTime: startTime,
       endTime: endTime,
       isAllDay: event['meeting'] == 'true',
+      source: DataSource.EnsamCampus,
+      fetchDate: DateTime.now(),
     );
   }
 
+  static CalendarEvent fromICal(JSON event) {
+    if (event['type'] != 'VEVENT') {
+      print('from ICal [Error]');
+      print(event);
+    }
+
+    DateTime startTime = ICalDateParser.parse(event['dtstart']['dt']);
+    DateTime endTime = ICalDateParser.parse(event['dtend']['dt']);
+    Duration rawDuration = endTime.difference(startTime);
+    String duration = (rawDuration.inMinutes % 60 == 0) ? '${rawDuration.inHours}h' : '${rawDuration.inHours}h${rawDuration.inMinutes - rawDuration.inHours * 60}';
+
+    String description = event['description'];
+    String summary = event['summary'];
+
+    return new CalendarEvent(
+        title: summary + description,
+        course: getFormattedRegexResult(ICalRegex.all, summary),
+        classType: getFormattedRegexResult(ICalRegex.classeType, description),
+        location: getFormattedRegexResult(ICalRegex.all, event['location']),
+        teacherName: getFormattedRegexResult(ICalRegex.teacherName, description),
+        description: getFormattedRegexResult(ICalRegex.description, description),
+        group: getFormattedRegexResult(ICalRegex.group, description),
+        duration: duration,
+        startTime: startTime,
+        endTime: endTime,
+        isAllDay: rawDuration.inHours >= 7 ,
+        source: DataSource.ICal,
+        fetchDate: DateTime.now(),
+    );
+  }
+
+  // From cache
   static CalendarEvent fromJSON(JSON event) {
-    DateTime startTime = dateParser.parse(event['startTime']);
-    DateTime endTime = dateParser.parse(event['endTime']);
+    DateTime startTime = Iso8601DateParser.parse(event['startTime']);
+    DateTime endTime = Iso8601DateParser.parse(event['endTime']);
+    DateTime fetchDate = Iso8601DateParser.parse(event['fetchDate']);
     return new CalendarEvent(
       title: event['title'],
       course: event['course'],
@@ -139,6 +184,8 @@ class CalendarEvent extends Appointment {
       startTime: startTime,
       endTime: endTime,
       isAllDay: event['isAllDay'],
+      source: DataSource.values.byName(event['source']),
+      fetchDate: fetchDate,
     );
   }
 
@@ -162,14 +209,21 @@ class CalendarEvent extends Appointment {
       'startTime': startTime.toIso8601String(),
       'endTime': endTime.toIso8601String(),
       'isAllDay': isAllDay,
+      'source': source.name,
+      'fetchDate': fetchDate.toIso8601String()
     });
   }
 
-  // TODO: close popup wehn touching outside
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
+    return toJSON();
+  }
+
+  // TODO: close popup when touching outside
   Widget build(BuildContext context, Size size) {
     return Listener(
       behavior: HitTestBehavior.opaque,
-      onPointerDown: (pointerDownEvent) => (shouldDisplay)
+      onPointerDown: (pointerDownEvent) => shouldDisplay
           ? Navigator.push(
               context,
               new PageRouteBuilder(
@@ -206,8 +260,8 @@ class CalendarEvent extends Appointment {
               ),
             )
           : null,
-      onPointerUp: (_) => (shouldDisplay) ? Navigator.pop(context) : null,
-      onPointerCancel: (_) => (shouldDisplay) ? Navigator.pop(context) : null,
+      onPointerUp: (_) => shouldDisplay ? Navigator.pop(context) : null,
+      onPointerCancel: (_) => shouldDisplay ? Navigator.pop(context) : null,
       child: CalendarItem(this, size, false),
     );
   }

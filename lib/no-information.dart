@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+
+// Simple "no info" widget displayed after the 2 weeks of data
 class NoInformationWidget extends StatelessWidget {
   const NoInformationWidget();
 

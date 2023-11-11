@@ -28,7 +28,7 @@ void main() async {
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
   final String versionNumber = packageInfo.version;
   final bool shouldResetCache = prefs.getString('versionNumber') != versionNumber;
-  if (shouldResetCache) {
+  if (shouldResetCache) { // reset the cache after an update, in case of serialisation issue
     clearEventCache(prefs);
     prefs.setString('versionNumber', versionNumber);
   }
