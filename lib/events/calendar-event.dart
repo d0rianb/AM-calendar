@@ -78,7 +78,9 @@ class CalendarEvent extends Appointment {
   // For ENSAM Campus parsing
   static final DateFormat Iso8601DateParser = new DateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
-  String get subject => List.from([classType, description, teacherName, duration].where((element) => element != '' && element != ' ')).join(' - ');
+  String get subject => List.from([classType, description, teacherName].where((element) => element != '' && element != ' ')).join(' - ');
+
+  String get formattedLocation => location ?? '';
 
   Color get color {
     String type = classType.replaceAll('_TEAMS', '');
@@ -146,12 +148,13 @@ class CalendarEvent extends Appointment {
 
     String description = event['description'];
     String summary = event['summary'];
+    String location = event.containsKey('location') ? event['location'] : '';
 
     return new CalendarEvent(
         title: summary + description,
         course: getFormattedRegexResult(ICalRegex.all, summary),
         classType: getFormattedRegexResult(ICalRegex.classeType, description),
-        location: getFormattedRegexResult(ICalRegex.all, event['location'] ?? ''),
+        location: getFormattedRegexResult(ICalRegex.all, location),
         teacherName: getFormattedRegexResult(ICalRegex.teacherName, description),
         description: getFormattedRegexResult(ICalRegex.description, description),
         group: getFormattedRegexResult(ICalRegex.group, description),

@@ -39,7 +39,7 @@ class CalendarItem extends Hero {
                   child: SingleChildScrollView(
                     controller: ScrollController(),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Padding(
@@ -52,9 +52,9 @@ class CalendarItem extends Hero {
                         ),
                         // SizedBox(height: expanded ? 1 : 0),
                         Padding(
-                          padding: expanded ? largePadding : nullPadding,
+                          padding: (expanded && event.formattedLocation.length > 0) ? largePadding : nullPadding,
                           child: Text(
-                            event.location ?? '',
+                            event.formattedLocation,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontStyle: FontStyle.italic,
@@ -68,7 +68,7 @@ class CalendarItem extends Hero {
                             Padding(
                               padding: expanded ? regularPadding : nullPadding,
                               child: Text(
-                                event.getTimePeriod(),
+                                event.getTimePeriod() + '  (${event.duration})',
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   fontSize: 22,
@@ -80,7 +80,7 @@ class CalendarItem extends Hero {
                             Padding(
                               padding: expanded ? regularPadding : nullPadding,
                               child: Text(
-                                event.classType + ' - ' + event.teacherName,
+                                event.subject,
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(fontSize: 22),
                               ),
@@ -90,15 +90,7 @@ class CalendarItem extends Hero {
                               child: Text(
                                 event.group,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 18),
-                              ),
-                            ),
-                            Padding(
-                              padding: expanded ? regularPadding : nullPadding,
-                              child: Text(
-                                event.duration,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 22),
+                                style: const TextStyle(fontSize: 20),
                               ),
                             ),
                             Text(
