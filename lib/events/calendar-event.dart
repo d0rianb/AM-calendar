@@ -59,7 +59,6 @@ class CalendarEvent extends Appointment {
   DateTime endTime = DateTime.now();
   bool isAllDay = false;
   DataSource source = defaultSource;
-  DateTime fetchDate = DateTime.now(); // To update events based on their fetch date
 
   CalendarEvent({
     required this.title,
@@ -72,7 +71,6 @@ class CalendarEvent extends Appointment {
     required this.duration,
     required this.startTime,
     required this.endTime,
-    required this.fetchDate,
     this.isAllDay = false,
     this.source = defaultSource,
   }) : super(startTime: startTime, endTime: endTime);
@@ -132,7 +130,6 @@ class CalendarEvent extends Appointment {
       endTime: endTime,
       isAllDay: event['meeting'] == 'true',
       source: DataSource.EnsamCampus,
-      fetchDate: DateTime.now(),
     );
   }
 
@@ -154,7 +151,7 @@ class CalendarEvent extends Appointment {
         title: summary + description,
         course: getFormattedRegexResult(ICalRegex.all, summary),
         classType: getFormattedRegexResult(ICalRegex.classeType, description),
-        location: getFormattedRegexResult(ICalRegex.all, event['location']),
+        location: getFormattedRegexResult(ICalRegex.all, event['location'] ?? ''),
         teacherName: getFormattedRegexResult(ICalRegex.teacherName, description),
         description: getFormattedRegexResult(ICalRegex.description, description),
         group: getFormattedRegexResult(ICalRegex.group, description),
@@ -163,7 +160,6 @@ class CalendarEvent extends Appointment {
         endTime: endTime,
         isAllDay: rawDuration.inHours >= 7 ,
         source: DataSource.ICal,
-        fetchDate: DateTime.now(),
     );
   }
 
@@ -171,7 +167,6 @@ class CalendarEvent extends Appointment {
   static CalendarEvent fromJSON(JSON event) {
     DateTime startTime = Iso8601DateParser.parse(event['startTime']);
     DateTime endTime = Iso8601DateParser.parse(event['endTime']);
-    DateTime fetchDate = Iso8601DateParser.parse(event['fetchDate']);
     return new CalendarEvent(
       title: event['title'],
       course: event['course'],
@@ -185,7 +180,6 @@ class CalendarEvent extends Appointment {
       endTime: endTime,
       isAllDay: event['isAllDay'],
       source: DataSource.values.byName(event['source']),
-      fetchDate: fetchDate,
     );
   }
 
@@ -210,7 +204,6 @@ class CalendarEvent extends Appointment {
       'endTime': endTime.toIso8601String(),
       'isAllDay': isAllDay,
       'source': source.name,
-      'fetchDate': fetchDate.toIso8601String()
     });
   }
 
@@ -219,7 +212,6 @@ class CalendarEvent extends Appointment {
     return toJSON();
   }
 
-  // TODO: close popup when touching outside
   Widget build(BuildContext context, Size size) {
     return Listener(
       behavior: HitTestBehavior.opaque,
