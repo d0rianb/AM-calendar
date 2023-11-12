@@ -28,7 +28,8 @@ void main() async {
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
   final String versionNumber = packageInfo.version;
   final bool shouldResetCache = prefs.getString('versionNumber') != versionNumber;
-  if (shouldResetCache) { // reset the cache after an update, in case of serialisation issue
+  if (shouldResetCache) {
+    // reset the cache after an update, in case of serialisation issue
     clearEventCache(prefs);
     prefs.setString('versionNumber', versionNumber);
   }
@@ -84,13 +85,21 @@ class AppState extends State<App> {
             foregroundColor: Colors.white,
           ),
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSwatch(primaryColorDark: VIOLET, accentColor: ORANGE, backgroundColor: const Color(0xfffafafa),).copyWith(secondary: ORANGE),
+          colorScheme: ColorScheme.light(
+            primary: VIOLET,
+            secondary: ORANGE,
+            background: const Color(0xfffafafa),
+            outlineVariant: Colors.grey[200],
+          ).copyWith(secondary: ORANGE),
         ),
         darkTheme: ThemeData.dark(useMaterial3: true).copyWith(
           brightness: Brightness.dark,
           applyElevationOverlayColor: true,
           primaryColor: ORANGE,
-          colorScheme: ColorScheme.fromSwatch(primaryColorDark: ORANGE, accentColor: ORANGE, backgroundColor: const Color.fromRGBO(31, 26, 36, 1.0)),
+          colorScheme: ColorScheme.dark(
+            primary: ORANGE,
+            background: const Color.fromRGBO(31, 26, 36, 1.0),
+          ),
           primaryColorDark: VIOLET,
           highlightColor: Colors.grey[700],
           outlinedButtonTheme: OutlinedButtonThemeData(
@@ -112,43 +121,27 @@ class AppState extends State<App> {
           ),
           checkboxTheme: CheckboxThemeData(
             fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-              if (states.contains(MaterialState.disabled)) {
-                return null;
-              }
-              if (states.contains(MaterialState.selected)) {
-                return ORANGE;
-              }
+              if (states.contains(MaterialState.disabled)) {return null;}
+              if (states.contains(MaterialState.selected)) {return ORANGE;}
               return null;
             }),
           ),
           radioTheme: RadioThemeData(
             fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-              if (states.contains(MaterialState.disabled)) {
-                return null;
-              }
-              if (states.contains(MaterialState.selected)) {
-                return ORANGE;
-              }
+              if (states.contains(MaterialState.disabled)) {return null;}
+              if (states.contains(MaterialState.selected)) {return ORANGE;}
               return null;
             }),
           ),
           switchTheme: SwitchThemeData(
             thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-              if (states.contains(MaterialState.disabled)) {
-                return null;
-              }
-              if (states.contains(MaterialState.selected)) {
-                return ORANGE;
-              }
+              if (states.contains(MaterialState.disabled)) {return null;}
+              if (states.contains(MaterialState.selected)) {return ORANGE;}
               return null;
             }),
             trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-              if (states.contains(MaterialState.disabled)) {
-                return null;
-              }
-              if (states.contains(MaterialState.selected)) {
-                return ORANGE;
-              }
+              if (states.contains(MaterialState.disabled)) { return null; }
+              if (states.contains(MaterialState.selected)) {return ORANGE;}
               return null;
             }),
           ),
