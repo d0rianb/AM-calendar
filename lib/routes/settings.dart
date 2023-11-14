@@ -47,7 +47,7 @@ class SettingsState extends State<Settings> {
     super.initState();
     prefs = widget.prefs;
     tbk = prefs.getString('tbk') ?? "Chalon's";
-    source = DataSource.values.byName(prefs.getString('source') ?? defaultSource.name);
+    source = getDataSourcefromPrefs(prefs);
     brightness = prefs.getString('brightness') ?? 'system';
     userIdFieldController.text = prefs.getString('id') ?? '2021-';
     passwordFieldController.text = prefs.getString('password') ?? '';

@@ -42,7 +42,7 @@ class LoginViewState extends State<LoginView> {
     passwordFieldController.text = prefs.getString('password') ?? '';
     userId = prefs.getString('id') ?? '2021-';
     password = prefs.getString('password') ?? '';
-    source = DataSource.values.byName(prefs.getString('source') ?? defaultSource.name);
+    source = getDataSourcefromPrefs(prefs);
     initPackageInfo();
   }
 

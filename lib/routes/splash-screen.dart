@@ -1,3 +1,4 @@
+import 'package:am_calendar/helpers/requests.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,7 +18,16 @@ class SplashScreenState extends State<SplashScreen> {
   @override
   void initState() => super.initState();
 
-  bool hasLoginInfos() => widget.prefs.containsKey('cmAuthToken');
+  bool hasLoginInfos() {
+    DataSource source = getDataSourcefromPrefs(widget.prefs);
+    switch (source) {
+      case DataSource.EnsamCampus:
+      case DataSource.All:
+        return widget.prefs.containsKey('cmAuthToken');
+      case DataSource.ICal:
+        return widget.prefs.containsKey('id');
+    }
+  }
 
   void toggleRoute(bool? hasLoginInfos, BuildContext context) {
     NavigatorState nav = Navigator.of(context);
