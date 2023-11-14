@@ -18,6 +18,10 @@ enum DataSource {
   All, // All sources - for debug purpose only
 }
 
+/// Helper to get `DataSource` from `SharedPreferences`
+DataSource getDataSourcefromPrefs(SharedPreferences prefs) => DataSource.values.byName(prefs.getString('source') ?? defaultSource.name);
+
+
 // For the v2 beta, the default source is ENSAM Campus as in v1
 const DataSource defaultSource = DataSource.ICal;
 

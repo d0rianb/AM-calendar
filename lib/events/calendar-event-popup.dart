@@ -9,9 +9,13 @@ class CalendarEventPopup extends Dialog {
   CalendarEventPopup(this.event);
 
   @override
-  Widget build(BuildContext context) => CalendarItem(
+  Widget build(BuildContext context) {
+    final double width = MediaQuery.of(context).size.width * 3 / 4;
+    final double height = MediaQuery.of(context).size.height / 2.2;
+    return CalendarItem(
         event,
-        Size(MediaQuery.of(context).size.width * 3 / 4, MediaQuery.of(context).size.height / 2.3),
+        Size(width, height),
         true,
       );
+  }
 }
