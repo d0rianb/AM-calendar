@@ -1,4 +1,5 @@
 import 'package:am_calendar/helpers/refresh-indicator.dart';
+import 'package:am_calendar/helpers/requests.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info/package_info.dart';
@@ -29,6 +30,7 @@ class LoginViewState extends State<LoginView> {
   late PackageInfo packageInfo = PackageInfo(appName: '', packageName: '', version: '', buildNumber: '');
   String userId = '';
   String password = '';
+  DataSource source = defaultSource;
   bool isLoading = false;
   bool hasError = false;
   String connectionText = '';
@@ -40,6 +42,7 @@ class LoginViewState extends State<LoginView> {
     passwordFieldController.text = prefs.getString('password') ?? '';
     userId = prefs.getString('id') ?? '2021-';
     password = prefs.getString('password') ?? '';
+    source = DataSource.values.byName(prefs.getString('source') ?? defaultSource.name);
     initPackageInfo();
   }
 
@@ -64,12 +67,152 @@ class LoginViewState extends State<LoginView> {
     );
   }
 
+  void connectToEnsamCampus(BuildContext context) {
+    if (userId == 'web-login') return webLoginCallback();
+    else if (userId == 'debug') return debugCallback();
+    prefs.setString('id', userId);
+    prefs.setString('password', password);
+    if (formKey.currentState!.validate()) {
+      if (isLoading) {
+        setState(() {
+          isLoading = false;
+          connectionText = '';
+        });
+        return;
+      }
+      setState(() {
+        hasError = false;
+        isLoading = true;
+      });
+      HeadlessLogin()..login();
+      showSnackBar(context, 'Connexion en cours');
+      eventBus.on<LoginEvent>().listen((event) {
+        if (hasError) return;
+        if (event.finished ?? false) Navigator.of(context).pushNamed('/calendar');
+        if (event.error ?? false)
+          setState(() {
+            isLoading = false;
+            hasError = true;
+          });
+        setState(() => connectionText = event.text + '...');
+      });
+    }
+  }
+
+  void connectToIcal(BuildContext context) {
+    // TODO: regex check
+    prefs.setString('id', userId);
+    Navigator.of(context).pushNamed('/calendar');
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDarkMode = theme.brightness == Brightness.dark;
     final Color primaryColor = isDarkMode ? ORANGE : VIOLET;
     final Color textColor = isDarkMode ? Colors.white60 : Colors.black;
+
+    List<Widget> formChildren = [
+      Transform.translate(
+        offset: const Offset(-12.0, 0.0),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: DropdownButtonFormField<DataSource>(
+            decoration: const InputDecoration(
+              icon: Icon(Icons.source),
+              hintText: 'Source des données',
+              labelText: 'Source',
+              border: OutlineInputBorder(),
+            ),
+            value: source,
+            icon: Icon(Icons.arrow_downward, color: primaryColor),
+            iconSize: 16,
+            elevation: 16,
+            style: TextStyle(color: primaryColor),
+            onChanged: (value) => setState(() {
+              prefs.setString('source', value!.name);
+              setState(() => source = value);
+            }),
+            items: DataSource.values
+                .map((value) => DropdownMenuItem<DataSource>(value: value, child: InkWell(child: Text(value.name))))
+                .toList(),
+          ),
+        ),
+      ),
+      Transform.translate(
+        offset: const Offset(-12.0, 0.0),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextFormField(
+            decoration: const InputDecoration(
+              icon: const Icon(Icons.perm_identity),
+              hintText: 'Entrez votre identifiant LISE',
+              labelText: 'Identifiant LISE',
+              border: const OutlineInputBorder(),
+            ),
+            cursorColor: primaryColor,
+            inputFormatters: [LengthLimitingTextInputFormatter(9)],
+            controller: userIdFieldController,
+            textInputAction: TextInputAction.next,
+            onChanged: (id) => setState(() {
+              userId = id.trim();
+              if (userId == 'web-login')
+                webLoginCallback();
+              else if (userId == 'debug') debugCallback();
+            }),
+          ),
+        ),
+      ),
+      if (source == DataSource.EnsamCampus || source == DataSource.All) Transform.translate(
+        offset: const Offset(-12.0, 0.0),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextFormField(
+            decoration: const InputDecoration(
+              icon: const Icon(Icons.password),
+              hintText: 'Entrez votre mot de passe',
+              labelText: 'Mot de passe',
+              border: const OutlineInputBorder(),
+            ),
+            cursorColor: primaryColor,
+            obscureText: true,
+            enableSuggestions: false,
+            autocorrect: false,
+            controller: passwordFieldController,
+            textInputAction: TextInputAction.next,
+            onChanged: (pswd) => setState(() {
+              password = pswd;
+            }),
+          ),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 55.0),
+        child: OutlinedButton(
+          child: Text(!isLoading ? 'Se connecter' : 'Annuler'),
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(width: 1.5, color: primaryColor),
+          ),
+          onPressed: () {
+            if (source == DataSource.EnsamCampus || source == DataSource.All) connectToEnsamCampus(context);
+            else if (source == DataSource.ICal) connectToIcal(context);
+          },
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Center(
+          child: Text(
+            connectionText,
+            style: TextStyle(
+              fontStyle: FontStyle.italic,
+              color: !hasError ? theme.textTheme.titleMedium?.color : Colors.red[800],
+            ),
+          ),
+        ),
+      )
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Connexion'),
@@ -105,108 +248,7 @@ class LoginViewState extends State<LoginView> {
                     width: MediaQuery.of(context).size.width * .85,
                     padding: const EdgeInsets.all(16.0),
                     child: ListView(
-                      children: [
-                        Transform.translate(
-                          offset: const Offset(-12.0, 0.0),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              decoration: const InputDecoration(
-                                icon: const Icon(Icons.perm_identity),
-                                hintText: 'Entrez votre identifiant LISE',
-                                labelText: 'Identifiant LISE',
-                                border: const OutlineInputBorder(),
-                              ),
-                              cursorColor: primaryColor,
-                              inputFormatters: [LengthLimitingTextInputFormatter(9)],
-                              controller: userIdFieldController,
-                              textInputAction: TextInputAction.next,
-                              onChanged: (id) => setState(() {
-                                userId = id.trim();
-                                if (userId == 'web-login')
-                                  webLoginCallback();
-                                else if (userId == 'debug') debugCallback();
-                              }),
-                            ),
-                          ),
-                        ),
-                        Transform.translate(
-                          offset: const Offset(-12.0, 0.0),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              decoration: const InputDecoration(
-                                icon: const Icon(Icons.password),
-                                hintText: 'Entrez votre mot de passe',
-                                labelText: 'Mot de passe',
-                                border: const OutlineInputBorder(),
-                              ),
-                              cursorColor: primaryColor,
-                              obscureText: true,
-                              enableSuggestions: false,
-                              autocorrect: false,
-                              controller: passwordFieldController,
-                              textInputAction: TextInputAction.next,
-                              onChanged: (pswd) => setState(() {
-                                password = pswd;
-                              }),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 55.0),
-                          child: OutlinedButton(
-                            child: Text(!isLoading ? 'Se connecter' : 'Annuler'),
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(width: 1.5, color: primaryColor),
-                            ),
-                            onPressed: () {
-                              if (userId == 'web-login')
-                                return webLoginCallback();
-                              else if (userId == 'debug') return debugCallback();
-                              prefs.setString('id', userId);
-                              prefs.setString('password', password);
-                              if (formKey.currentState!.validate()) {
-                                if (isLoading) {
-                                  setState(() {
-                                    isLoading = false;
-                                    connectionText = '';
-                                  });
-                                  return;
-                                }
-                                setState(() {
-                                  hasError = false;
-                                  isLoading = true;
-                                });
-                                HeadlessLogin()..login();
-                                showSnackBar(context, 'Connexion en cours');
-                                eventBus.on<LoginEvent>().listen((event) {
-                                  if (hasError) return;
-                                  if (event.finished ?? false) Navigator.of(context).pushNamed('/calendar');
-                                  if (event.error ?? false)
-                                    setState(() {
-                                      isLoading = false;
-                                      hasError = true;
-                                    });
-                                  setState(() => connectionText = event.text + '...');
-                                });
-                              }
-                            },
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Center(
-                            child: Text(
-                              connectionText,
-                              style: TextStyle(
-                                fontStyle: FontStyle.italic,
-                                color: !hasError ? theme.textTheme.titleMedium?.color : Colors.red[800],
-                              ),
-                            ),
-                          ),
-                        )
-                      ],
+                      children: formChildren,
                     ),
                   ),
                 ),

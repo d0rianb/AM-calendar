@@ -3,6 +3,7 @@ BUGS :
   - Error snackbar : Looking up a deactivated widget's ancestor is unsafe.
   - Dot menu height
   - Cours supprimés / Conflits
+  - ICal Network error : Unhandled Exception: ClientException with SocketException: Connection refused (OS Error:
   --> rework du cache
 
  V2 :
