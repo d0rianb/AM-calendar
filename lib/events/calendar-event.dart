@@ -147,7 +147,7 @@ class CalendarEvent extends Appointment {
     String duration = (rawDuration.inMinutes % 60 == 0) ? '${rawDuration.inHours}h' : '${rawDuration.inHours}h${rawDuration.inMinutes - rawDuration.inHours * 60}';
 
     String description = event['description'];
-    String summary = event['summary'];
+    String summary = event.containsKey('summary') ? event['summary'] : '';
     String location = event.containsKey('location') ? event['location'] : '';
 
     return new CalendarEvent(

@@ -6719,8 +6719,7 @@ class _SfCalendarState extends State<SfCalendar> with SingleTickerProviderStateM
           ]))),
     ));
 
-    /// 5 is the number of items
-    double height = (allowedViewLength + 6) * calendarViewTextHeight;
+    double height = (allowedViewLength + children.length) * calendarViewTextHeight; // (allowedViewLength + 6) * calendarViewTextHeight;
 
     double arrowWidth = 0;
     double iconWidth = _minWidth / 8;
@@ -6811,7 +6810,7 @@ class _SfCalendarState extends State<SfCalendar> with SingleTickerProviderStateM
         // left: left,
         right: 5,
         height: height,
-        width: 4 * 50 + 10, // arbitrary
+        width: 220, // arbitrary
         child: _PopupWidget(
             alignment: popupAlignment,
             child: Container(

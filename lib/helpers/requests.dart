@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:am_calendar/helpers/app-events.dart';
 import 'package:flutter/cupertino.dart';
@@ -18,7 +19,7 @@ enum DataSource {
 }
 
 // For the v2 beta, the default source is ENSAM Campus as in v1
-const DataSource defaultSource = DataSource.EnsamCampus;
+const DataSource defaultSource = DataSource.ICal;
 
 class ENSAMRequest {
   static const Map<String, String> ENSAMCampusHeaders = {
@@ -55,7 +56,6 @@ class ENSAMRequest {
       }
       eventBus.fire(RequestErrorEvent(errorMsg));
       throw new Exception('Error while fetching calendar : ${response.statusCode} - ${response.reasonPhrase}');
-      // TODO: handle deconnection
     }
   }
 }
@@ -68,24 +68,31 @@ class ICalRequest {
     final String id = prefs.getString('id') ?? '';
     if (id == '') return Future.error(ErrorHint('Empty id (2021-XXX), please provide one in the settings'));
     final Uri uri = Uri.https('lise.ensam.eu', 'ical_apprenant/$id');
-    final Response response = await get(uri, headers: ICalHeaders);
-    if (response.statusCode == 200) {
-      return response.body;
-    } else {
-      // TODO: manage error
-      print('[Error] getICalFile:');
-      print(response);
+    try {
+      final Response response = await get(uri, headers: ICalHeaders);
+      if (response.statusCode == 200) {
+        return response.body;
+      } else {
+        eventBus.fire(RequestErrorEvent('Erreur de connexion: $response'));
+      }
+    } on SocketException {
+      eventBus.fire(RequestErrorEvent('Erreur de connexion: pas de réseau détecté'));
     }
     return '';
   }
 
   static Future<JSON> getCalendar() async {
-    final String responseBody = await ICalRequest.getICalFile();
+    String responseBody = '';
+    responseBody = await ICalRequest.getICalFile();
+    if (responseBody == '') {
+      return {};
+    }
     ICalendar iCal = ICalendar.fromString(responseBody);
     JSON json = iCal.toJson();
     if (json.containsKey('data')) {
       return json;
     }
+    eventBus.fire(RequestErrorEvent('Erreur : Fichier ICal invalide'));
     return {};
   }
 }

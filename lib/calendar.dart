@@ -10,7 +10,6 @@ import 'events/custom-event.dart';
 import 'events/no-info-event.dart';
 import 'events/pals-event.dart';
 import 'helpers/app-events.dart';
-import 'helpers/cache-handler.dart';
 import 'helpers/datetime-helpers.dart';
 import 'helpers/prefs-helper.dart';
 import 'helpers/refresh-indicator.dart';
@@ -37,6 +36,7 @@ class CalendarState extends State<Calendar> {
   late SharedPreferences prefs = widget.prefs;
   List<Appointment> events = [];
   List<String> filters = [];
+  String error = '';
   Week week = Week.fromDateTime(DateTime.now());
   bool loading = false;
   bool displayNoInfos = false;
@@ -74,6 +74,11 @@ class CalendarState extends State<Calendar> {
             filters = filtersString.split(',').map((filter) => filter.toLowerCase()).where((filter) => filter.isNotEmpty).toList();
           }),
         );
+    eventBus.on<RequestErrorEvent>().listen((event) => setState(() {
+      error = event.text;
+      loading = false;
+    }));
+
   }
 
   Future<void> getEvents() async {
@@ -86,8 +91,8 @@ class CalendarState extends State<Calendar> {
     }
     addNoInfoEvents();
     final List<CalendarEvent> cachedEvents = getCachedEvents();
-    // int addedEventsFromCache = addEvents(cachedEvents);
-    // if (mounted && addedEventsFromCache > 0) setState(() => loading = false); // Update the view
+    int addedEventsFromCache = addEvents(cachedEvents);
+    if (mounted && addedEventsFromCache > 0) setState(() => loading = false); // Update the view
     final List<CalendarEvent> networksEvents = await getEventsFromNetworks(week);
     int addedEventsFromNetwork = addEvents(networksEvents);
     if (mounted) setState(() => loading = false);
@@ -132,15 +137,16 @@ class CalendarState extends State<Calendar> {
     String dataSource = widget.prefs.getString('source') ?? defaultSource.name;
     if (dataSource == 'ICal' || dataSource == 'All') {
       final iCalResponse = await ICalRequest.getCalendar();
+      if (!iCalResponse.containsKey('data')) { return []; }
       final List<CalendarEvent> iCalEvents = List.from(iCalResponse['data'].map((e) => CalendarEvent.fromICal(e)));
       events += iCalEvents;
     }
     if (dataSource == 'EnsamCampus' || dataSource == 'All') {
       final ensamResponse = await ENSAMRequest.getCalendar(week.firstDay, week.getNextWeek().lastDay);
+      if (!ensamResponse.containsKey('events')) { return []; }
       final List<CalendarEvent> ensamEvents = List.from(ensamResponse['events'].map((e) => CalendarEvent.fromENSAMCampus(e)));
       events += ensamEvents;
     }
-    // print(events);
     final Cache cache = Cache.create(week.stringId, events);
     prefs.setString(cache.id, cache.serialized);
     return events;
@@ -181,7 +187,12 @@ class CalendarState extends State<Calendar> {
     final ThemeData theme = Theme.of(context);
     final bool isDarkMode = theme.brightness == Brightness.dark;
     if (!isDarkMode) {
+      // Set the status bar (hour, wifi, etc) in dark
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+    }
+    if (error != '') {
+      showSnackBar(context, error);
+      error = '';
     }
     return Stack(
       children: [

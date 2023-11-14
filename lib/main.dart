@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -176,8 +178,19 @@ class CalendarPageState extends State<CalendarPage> {
 
   @override
   Widget build(BuildContext context) {
+    double textScaleFactor;
+    if (Platform.isIOS) {
+      textScaleFactor = 0.8;
+    } else {
+      textScaleFactor = 1.0;
+    }
     return Scaffold(
-      body: SafeArea(child: Calendar(widget.prefs)),
+      body: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+          child: SafeArea(child: 
+            Calendar(widget.prefs)
+          ),
+      ),
     );
   }
 }
