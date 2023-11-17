@@ -84,6 +84,9 @@ class AppState extends State<App> {
             backgroundColor: VIOLET,
             foregroundColor: Colors.white,
           ),
+          snackBarTheme: const SnackBarThemeData(
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(24.0)))
+          ),
           useMaterial3: true,
           colorScheme: ColorScheme.light(
             primary: VIOLET,
@@ -145,6 +148,13 @@ class AppState extends State<App> {
               return null;
             }),
           ),
+          snackBarTheme: const SnackBarThemeData(
+            backgroundColor: Color.fromRGBO(30, 30, 30, 1.0),
+            shape: const RoundedRectangleBorder(
+              side: BorderSide(color: Colors.grey, width: 1),
+              borderRadius: BorderRadius.all(Radius.circular(24.0)),
+            )
+          )
         ),
         initialRoute: '/',
         routes: {

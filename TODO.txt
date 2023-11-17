@@ -3,7 +3,5 @@ BUGS :
   - IOS font size ratio : only for calendar event 
 
  V2 :
-  - new data source : webcal://lise.ensam.eu/ical_apprenant/login
-  - slide down to reload
   - Logo de l'application
 

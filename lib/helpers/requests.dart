@@ -79,7 +79,8 @@ class ICalRequest {
       } else {
         eventBus.fire(RequestErrorEvent('Erreur de connexion: $response'));
       }
-    } on SocketException {
+    } on SocketException catch (e) {
+      print(e);
       eventBus.fire(RequestErrorEvent('Erreur de connexion: pas de réseau détecté'));
     }
     return '';
