@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:core';
+import 'dart:io' show Platform;
 import 'dart:ui';
 
 import 'package:am_calendar/helpers/requests.dart';
@@ -211,11 +212,15 @@ class CalendarEvent extends Appointment {
   }
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
-    return toJSON();
-  }
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) => toJSON();
 
   Widget build(BuildContext context, Size size) {
+    double textScaleFactor;
+    if (Platform.isIOS) {
+      textScaleFactor = 0.9;
+    } else {
+      textScaleFactor = 1.0;
+    }
     return Listener(
       behavior: HitTestBehavior.opaque,
       onPointerDown: (pointerDownEvent) => shouldDisplay
@@ -257,7 +262,10 @@ class CalendarEvent extends Appointment {
           : null,
       onPointerUp: (_) => shouldDisplay ? Navigator.pop(context) : null,
       onPointerCancel: (_) => shouldDisplay ? Navigator.pop(context) : null,
-      child: CalendarItem(this, size, false),
+      child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+          child: CalendarItem(this, size, false),
+      ),
     );
   }
 }
