@@ -33,7 +33,7 @@ lib/credentials.dart
 .pub-cache/
 .pub/
 /build/
-ios/*.ipa
+**/ios/**/*.ipa
 
 # Web related
 lib/generated_plugin_registrant.dart

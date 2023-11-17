@@ -48,6 +48,8 @@ class CalendarItem extends Hero {
                             child: Text(
                               event.course.length > 0 ? event.course : event.subject,
                               textAlign: TextAlign.center,
+                              maxLines: expanded ? null : 4, // The text is troncated after 4 lines when not expanded
+                              overflow: expanded ? null : TextOverflow.ellipsis,
                               style: TextStyle(fontWeight: FontWeight.w800, fontSize: expanded ? 24 : 10),
                             ),
                           ),
@@ -80,10 +82,22 @@ class CalendarItem extends Hero {
                               ),
                               Padding(
                                 padding: expanded ? regularPadding : nullPadding,
-                                child: Text(
-                                  event.group,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(fontSize: 20),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.white70),
+                                    borderRadius: BorderRadius.all(Radius.circular(100.0)), // radius of 50%
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: Text(
+                                      event.group,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.white70
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
                               Padding(
