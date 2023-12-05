@@ -3,8 +3,6 @@ import 'package:intl/intl.dart';
 
 import 'events/calendar-event.dart';
 
-typedef JSON = Map<String, dynamic>;
-
 // The cache is valid during 6 months
 const Duration cacheInvalidationDuration = const Duration(days: 30 * 6);
 final DateFormat dateParser = new DateFormat("yyyy-MM-dd'T'HH:mm:ssZ");

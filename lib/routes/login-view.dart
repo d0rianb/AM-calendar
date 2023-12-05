@@ -6,10 +6,11 @@ import 'package:package_info/package_info.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../cache.dart';
+import '../events/calendar-event.dart';
 import '../main.dart' show eventBus;
 import '../helpers/app-events.dart';
-import '../headless-login.dart';
-import '../helpers/snackbar.dart';
+import '../week.dart';
 
 const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
 const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);
@@ -25,25 +26,37 @@ class LoginView extends StatefulWidget {
 class LoginViewState extends State<LoginView> {
   final formKey = GlobalKey<FormState>();
   final TextEditingController userIdFieldController = TextEditingController();
-  final TextEditingController passwordFieldController = TextEditingController();
   late SharedPreferences prefs = widget.prefs;
   late PackageInfo packageInfo = PackageInfo(appName: '', packageName: '', version: '', buildNumber: '');
   String userId = '';
-  String password = '';
-  DataSource source = defaultSource;
   bool isLoading = false;
   bool hasError = false;
   String connectionText = '';
+  JSON iCalResponse = {}; // Cache the iCal response used to check the validity of the id
+
+  static RegExp idRegexp = RegExp(r'^\d{4}-\d{4}$');
 
   @override
   void initState() {
     super.initState();
-    userIdFieldController.text = prefs.getString('id') ?? '2021-';
-    passwordFieldController.text = prefs.getString('password') ?? '';
     userId = prefs.getString('id') ?? '2021-';
-    password = prefs.getString('password') ?? '';
-    source = getDataSourcefromPrefs(prefs);
+    userIdFieldController.text = userId;
     initPackageInfo();
+    eventBus.on<LoginEvent>().listen((event) {
+      if (hasError) return;
+      if (mounted) setState(() => connectionText = event.text + ' ...');
+      if (event.finished) launchCalendar();
+    });
+    eventBus.on<RequestErrorEvent>().listen((event) {
+      if (hasError) return;
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+          hasError = true;
+          connectionText = event.text;
+        });
+      }
+    });
   }
 
   Future<void> initPackageInfo() async {
@@ -51,57 +64,18 @@ class LoginViewState extends State<LoginView> {
     setState(() {});
   }
 
-  void webLoginCallback() => Navigator.of(context).pushNamed('/web-login');
-
-  void debugCallback() {
-    showDialog(
-      context: context,
-      builder: (_) => SimpleDialog(
-        title: const Text('Login Debug'),
-        contentPadding: const EdgeInsets.all(12.0),
-        children: [
-          Text('ID : ' + (prefs.getString('id') ?? '')),
-          Text('Password : ' + (prefs.getString('password') ?? '')),
-        ],
-      ),
-    );
+  void connectToICal(BuildContext context) async {
+    prefs.setString('id', userId);
+    iCalResponse = await ICalRequest.getCalendar();
   }
 
-  void connectToEnsamCampus(BuildContext context) {
-    if (userId == 'web-login') return webLoginCallback();
-    else if (userId == 'debug') return debugCallback();
-    prefs.setString('id', userId);
-    prefs.setString('password', password);
-    if (formKey.currentState!.validate()) {
-      if (isLoading) {
-        setState(() {
-          isLoading = false;
-          connectionText = '';
-        });
-        return;
-      }
-      setState(() {
-        hasError = false;
-        isLoading = true;
-      });
-      HeadlessLogin()..login();
-      showSnackBar(context, 'Connexion en cours');
-      eventBus.on<LoginEvent>().listen((event) {
-        if (hasError) return;
-        if (event.finished ?? false) Navigator.of(context).pushNamed('/calendar');
-        if (event.error ?? false)
-          setState(() {
-            isLoading = false;
-            hasError = true;
-          });
-        setState(() => connectionText = event.text + '...');
-      });
-    }
-  }
-
-  void connectToIcal(BuildContext context) {
-    // TODO: regex check
-    prefs.setString('id', userId);
+  void launchCalendar() async {
+    // Set cached events and load the calendar view
+    if (!iCalResponse.containsKey('data')) { return; }
+    final List<CalendarEvent> events = List.from(iCalResponse['data'].map((e) => CalendarEvent.fromICal(e)));
+    Week week = Week.fromDateTime(DateTime.now());
+    final Cache cache = Cache.create(week.stringId, events);
+    prefs.setString(cache.id, cache.serialized);
     Navigator.of(context).pushNamed('/calendar');
   }
 
@@ -117,32 +91,6 @@ class LoginViewState extends State<LoginView> {
         offset: const Offset(-12.0, 0.0),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: DropdownButtonFormField<DataSource>(
-            decoration: const InputDecoration(
-              icon: Icon(Icons.source),
-              hintText: 'Source des données',
-              labelText: 'Source',
-              border: OutlineInputBorder(),
-            ),
-            value: source,
-            icon: Icon(Icons.arrow_downward, color: primaryColor),
-            iconSize: 16,
-            elevation: 16,
-            style: TextStyle(color: primaryColor),
-            onChanged: (value) => setState(() {
-              prefs.setString('source', value!.name);
-              setState(() => source = value);
-            }),
-            items: DataSource.values
-                .map((value) => DropdownMenuItem<DataSource>(value: value, child: InkWell(child: Text(value.name))))
-                .toList(),
-          ),
-        ),
-      ),
-      Transform.translate(
-        offset: const Offset(-12.0, 0.0),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
           child: TextFormField(
             decoration: const InputDecoration(
               icon: const Icon(Icons.perm_identity),
@@ -152,36 +100,17 @@ class LoginViewState extends State<LoginView> {
             ),
             cursorColor: primaryColor,
             inputFormatters: [LengthLimitingTextInputFormatter(9)],
+            validator: (value) {
+              if (value  == null || value.isEmpty || !idRegexp.hasMatch(value)) {
+                return 'L\'identifiant doit être de la forme : 202X-XXXX';
+              } else {
+                return null;
+              }
+            },
             controller: userIdFieldController,
             textInputAction: TextInputAction.next,
             onChanged: (id) => setState(() {
               userId = id.trim();
-              if (userId == 'web-login')
-                webLoginCallback();
-              else if (userId == 'debug') debugCallback();
-            }),
-          ),
-        ),
-      ),
-      if (source == DataSource.EnsamCampus || source == DataSource.All) Transform.translate(
-        offset: const Offset(-12.0, 0.0),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextFormField(
-            decoration: const InputDecoration(
-              icon: const Icon(Icons.password),
-              hintText: 'Entrez votre mot de passe',
-              labelText: 'Mot de passe',
-              border: const OutlineInputBorder(),
-            ),
-            cursorColor: primaryColor,
-            obscureText: true,
-            enableSuggestions: false,
-            autocorrect: false,
-            controller: passwordFieldController,
-            textInputAction: TextInputAction.next,
-            onChanged: (pswd) => setState(() {
-              password = pswd;
             }),
           ),
         ),
@@ -194,8 +123,7 @@ class LoginViewState extends State<LoginView> {
             side: BorderSide(width: 1.5, color: primaryColor),
           ),
           onPressed: () {
-            if (source == DataSource.EnsamCampus || source == DataSource.All) connectToEnsamCampus(context);
-            else if (source == DataSource.ICal) connectToIcal(context);
+            connectToICal(context);
           },
         ),
       ),
@@ -239,7 +167,6 @@ class LoginViewState extends State<LoginView> {
                 colorScheme: theme.colorScheme.copyWith(
                   primary: primaryColor,
                 ),
-                // inputDecorationTheme: InputDecorationTheme(border: OutlineInputBorder(borderSide: BorderSide(color: VIOLET))),
               ),
               child: Form(
                 key: formKey,

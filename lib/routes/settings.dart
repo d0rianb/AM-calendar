@@ -1,4 +1,3 @@
-import 'package:am_calendar/helpers/requests.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -30,15 +29,13 @@ class SettingsState extends State<Settings> {
   final TextEditingController promsFieldController = TextEditingController();
   final TextEditingController filtersFieldController = TextEditingController();
   String userId = '';
-  String password = '';
-  String nums = '';
-  String proms = '';
   String tbk = "Chalon's";
   String brightness = 'system';
   String filters = '';
-  DataSource source = defaultSource;
 
   static const List<String> TBKList = ["Chalon's", "Siber's", "Boquette", "Birse", "Paris", "KIN", "Bordel's", "Clun's"];
+  static RegExp idRegexp = RegExp(r'^\d{4}-\d{4}$');
+
 
   bool get showPals => prefs.getBool('showPals') ?? false;
 
@@ -47,29 +44,12 @@ class SettingsState extends State<Settings> {
     super.initState();
     prefs = widget.prefs;
     tbk = prefs.getString('tbk') ?? "Chalon's";
-    source = getDataSourcefromPrefs(prefs);
     brightness = prefs.getString('brightness') ?? 'system';
     userIdFieldController.text = prefs.getString('id') ?? '2021-';
-    passwordFieldController.text = prefs.getString('password') ?? '';
-    numsFieldController.text = prefs.getString('nums') ?? '';
-    promsFieldController.text = prefs.getString('proms') ?? '';
     filtersFieldController.text = prefs.getString('filters') ?? '';
     eventBus.on<DeleteAllCacheEvent>().listen((event) {
       setState(() => clearAllCache(prefs));
     });
-  }
-
-  void checkNums(BuildContext context) {
-    if (nums == '' || proms == '') return;
-    if (proms == '220') {
-      switch (int.tryParse(nums)) {
-        case 16:
-        case 108:
-          showDialog(barrierDismissible: false, context: context, builder: (_) => AlertDialog(content: Text('C\'est clairement zocké pour toi')));
-          Future.delayed(const Duration(milliseconds: 500), () => SystemChannels.platform.invokeMethod('SystemNavigator.pop'));
-          break;
-      }
-    }
   }
 
   ThemeMode getThemeModeFromValue(String value) {
@@ -129,60 +109,21 @@ class SettingsState extends State<Settings> {
                         border: OutlineInputBorder(),
                       ),
                       cursorColor: primaryColor,
+                      keyboardType: TextInputType.number,
                       inputFormatters: [LengthLimitingTextInputFormatter(9)],
+                      validator: (value) {
+                        if (value  == null || value.isEmpty || !idRegexp.hasMatch(value)) {
+                          return 'L\'identifiant doit être de la forme : 202X-XXXX';
+                        } else {
+                          return null;
+                        }
+                      },
                       controller: userIdFieldController,
                       textInputAction: TextInputAction.next,
                       onChanged: (id) => setState(() {
                         prefs.setString('id', id);
                         userId = id;
                       }),
-                    ),
-                  ),
-
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextFormField(
-                      decoration: const InputDecoration(
-                        icon: Icon(Icons.password),
-                        hintText: 'Entrez votre mot de passe',
-                        labelText: 'Mot de passe',
-                        border: OutlineInputBorder(),
-                      ),
-                      cursorColor: primaryColor,
-                      obscureText: true,
-                      enableSuggestions: false,
-                      autocorrect: false,
-                      controller: passwordFieldController,
-                      textInputAction: TextInputAction.next,
-                      onChanged: (pswd) => setState(() {
-                        password = pswd;
-                        prefs.setString('password', pswd);
-                      }),
-                    ),
-                  ),
-
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: DropdownButtonFormField<DataSource>(
-                      decoration: const InputDecoration(
-                        icon: Icon(Icons.source),
-                        hintText: 'Source des données',
-                        labelText: 'Source',
-                        border: OutlineInputBorder(),
-                      ),
-                      value: source,
-                      icon: Icon(Icons.arrow_downward, color: primaryColor),
-                      iconSize: 16,
-                      elevation: 16,
-                      style: TextStyle(color: primaryColor),
-                      onChanged: (value) => setState(() {
-                        source = value!;
-                        prefs.setString('source', value.name);
-                        eventBus.fire(RecallGetEvent());
-                      }),
-                      items: DataSource.values
-                          .map((value) => DropdownMenuItem<DataSource>(value: value, child: InkWell(child: Text(value.name))))
-                          .toList(),
                     ),
                   ),
 
@@ -213,78 +154,21 @@ class SettingsState extends State<Settings> {
                     padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
                     child: Visibility(
                       visible: tbk == "Chalon's",
-                      child: Column(
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.baseline,
-                            textBaseline: TextBaseline.alphabetic,
-                            children: [
-                              Flexible(
-                                child: Directionality(
-                                  textDirection: TextDirection.rtl,
-                                  child: TextFormField(
-                                    decoration: InputDecoration(
-                                      alignLabelWithHint: true,
-                                      labelText: 'Num\'s',
-                                      isDense: true,
-                                      border: InputBorder.none,
-                                      enabledBorder: InputBorder.none,
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    controller: numsFieldController,
-                                    textAlign: TextAlign.right,
-                                    onChanged: (value) {
-                                      setState(() => nums = value);
-                                      prefs.setString('nums', value);
-                                      checkNums(context);
-                                    },
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(2.0, 2.0, 4.0, 2.0),
-                                child: Text(
-                                  'Ch',
-                                  style: TextStyle(fontSize: 18, color: theme.textTheme.titleSmall?.color),
-                                ),
-                              ),
-                              Flexible(
-                                child: TextFormField(
-                                  decoration: const InputDecoration(
-                                    alignLabelWithHint: true,
-                                    labelText: 'Prom\'s',
-                                    border: InputBorder.none,
-                                    enabledBorder: InputBorder.none,
-                                  ),
-                                  controller: promsFieldController,
-                                  keyboardType: TextInputType.number,
-                                  textAlign: TextAlign.left,
-                                  onChanged: (value) {
-                                    setState(() => proms = value);
-                                    prefs.setString('proms', value);
-                                    checkNums(context);
-                                  },
-                                ),
-                              )
-                            ],
+                      child: CheckboxListTile(
+                          title: const Text(
+                            'Afficher les pal\'s',
+                            textAlign: TextAlign.left,
                           ),
-                          CheckboxListTile(
-                              title: const Text(
-                                'Afficher les pal\'s',
-                                textAlign: TextAlign.left,
-                              ),
-                              controlAffinity: ListTileControlAffinity.leading,
-                              contentPadding: EdgeInsets.all(0),
-                              value: showPals,
-                              activeColor: primaryColor,
-                              onChanged: (value) {
-                                setState(() {
-                                  prefs.setBool('showPals', value!);
-                                  eventBus.fire(ReloadViewEvent());
-                                });
-                              }),
-                        ],
-                      ),
+                          controlAffinity: ListTileControlAffinity.leading,
+                          contentPadding: EdgeInsets.all(0),
+                          value: showPals,
+                          activeColor: primaryColor,
+                          onChanged: (value) {
+                            setState(() {
+                              prefs.setBool('showPals', value!);
+                              eventBus.fire(ReloadViewEvent());
+                            });
+                          }),
                     ),
                   ),
 
@@ -352,10 +236,9 @@ class SettingsState extends State<Settings> {
                       ),
                       onPressed: () async {
                         eventBus.fire(DeleteAllCacheEvent());
-                        showSnackBar(context, 'Le cache à bien été vidé');
-                        final pref = await SharedPreferences.getInstance();
-                        pref.remove('cmAuthToken');
+                        clearAllCache(prefs);
                         Navigator.of(context).pushNamed('/login');
+                        showSnackBar(context, 'Le cache à bien été vidé');
                       },
                     ),
                   ),

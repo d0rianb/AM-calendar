@@ -12,7 +12,6 @@ import 'helpers/localization_extendibility.dart';
 import 'helpers/prefs-helper.dart';
 import 'routes/infos.dart';
 import 'routes/login-view.dart';
-import 'routes/login-webview.dart';
 import 'routes/settings.dart';
 import 'routes/splash-screen.dart';
 
@@ -29,7 +28,7 @@ void main() async {
   final String versionNumber = packageInfo.version;
   final bool shouldResetCache = prefs.getString('versionNumber') != versionNumber;
   if (shouldResetCache) {
-    // reset the cache after an update, in case of serialisation issue
+    // Reset the cache after an update, in case of serialisation issue
     clearEventCache(prefs);
     prefs.setString('versionNumber', versionNumber);
   }
@@ -161,7 +160,6 @@ class AppState extends State<App> {
           '/': (context) => SplashScreen(prefs: widget.prefs),
           '/calendar': (context) => CalendarPage(title: 'AM calendar', prefs: widget.prefs),
           '/login': (context) => LoginView(prefs: widget.prefs),
-          '/web-login': (context) => const LoginWebView(),
           '/infos': (context) => const Infos(),
           '/settings': (context) => Settings(prefs: widget.prefs),
         });
