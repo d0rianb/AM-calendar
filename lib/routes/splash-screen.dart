@@ -19,14 +19,7 @@ class SplashScreenState extends State<SplashScreen> {
   void initState() => super.initState();
 
   bool hasLoginInfos() {
-    DataSource source = getDataSourcefromPrefs(widget.prefs);
-    switch (source) {
-      case DataSource.EnsamCampus:
-      case DataSource.All:
-        return widget.prefs.containsKey('cmAuthToken');
-      case DataSource.ICal:
-        return widget.prefs.containsKey('id');
-    }
+    return widget.prefs.containsKey('id');
   }
 
   void toggleRoute(bool? hasLoginInfos, BuildContext context) {

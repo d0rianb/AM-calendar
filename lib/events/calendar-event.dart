@@ -3,19 +3,17 @@ import 'dart:core';
 import 'dart:io' show Platform;
 import 'dart:ui';
 
-import 'package:am_calendar/helpers/requests.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../helpers/datetime-helpers.dart';
-import '../sfcalendar/calendar.dart';
 
-import 'calendar-event-popup.dart';
+import '../helpers/datetime-helpers.dart';
+import '../helpers/requests.dart';
+import '../sfcalendar/calendar.dart';
 import '../helpers/blur-transition.dart';
 import '../calendar-item.dart';
 import '../calendar.dart';
 import '../helpers/color-helpers.dart';
-
-typedef JSON = Map<String, dynamic>;
+import 'calendar-event-popup.dart';
 
 final Map<String, Color> classColor = {
   'CM': ORANGE,
@@ -29,21 +27,12 @@ final Map<String, Color> classColor = {
   'TEAMS': HexColor.fromHex('#4caf50'),
 };
 
-final class EnsamCampusRegex {
-  static final RegExp all = new RegExp(r'(.*)');
-  static final RegExp endChar = new RegExp(r'\\n');
-  static final RegExp classeType = new RegExp(r'TYPE_ACTIVITE\s:\s([\w_]+)\n', caseSensitive: false, multiLine: true);
-  static final RegExp teacherName = new RegExp(r'INTERVENANTS\s:\s(.+)\n-\sDESCRIPTION');
-  static final RegExp description = new RegExp(r'DESCRIPTION\s:\s(.+)\n-\sGROUPES');
-  static final RegExp group = new RegExp(r'GROUPES\s:\s(.*)\n');
-}
-
 final class ICalRegex {
   static final RegExp all = new RegExp(r'(.*)');
   static final RegExp endChar = new RegExp(r'\\n');
   static final RegExp classeType = new RegExp(r'TYPE_ACTIVITE\s:\s([\w_]+)\\n', caseSensitive: false, multiLine: true);
   static final RegExp teacherName = new RegExp(r'INTERVENANTS\s:\s(.+)\\n-\sDESCRIPTION');
-  static final RegExp description = new RegExp(r'DESCRIPTION\s:\s(.+)\\n-\sGROUPES');
+  static final RegExp description = new RegExp(r'DESCRIPTION\s:\s(.+)\\n-\sGROefUPES');
   static final RegExp group = new RegExp(r'GROUPES\s:\s(.*)\\n');
 }
 
@@ -59,7 +48,6 @@ class CalendarEvent extends Appointment {
   DateTime startTime = DateTime.now();
   DateTime endTime = DateTime.now();
   bool isAllDay = false;
-  DataSource source = defaultSource;
 
   CalendarEvent({
     required this.title,
@@ -73,7 +61,6 @@ class CalendarEvent extends Appointment {
     required this.startTime,
     required this.endTime,
     this.isAllDay = false,
-    this.source = defaultSource,
   }) : super(startTime: startTime, endTime: endTime);
 
   // For ENSAM Campus parsing
@@ -100,41 +87,17 @@ class CalendarEvent extends Appointment {
 
   Color get borderColor => isVisio ? classColor['TEAMS']! : darken(color, 15);
 
-  String get id => (location ?? '') + teacherName + group + startTime.millisecondsSinceEpoch.toString() + source.toString();
+  String get id => (location ?? '') + teacherName + group + startTime.millisecondsSinceEpoch.toString();
 
   /// Get the first group and format the result of the regex by taking of the \n and the _
   /// The XXXRegexp.all permit just the formatting
   static String getFormattedRegexResult(RegExp re, String input, { bool formatUnderscore = true, formatEndLine = true }) {
     String result = re.firstMatch(input)?.group(1) ?? '';
     if (formatUnderscore) result = result .replaceAll('_', ' ');
-    if (formatEndLine) result = result.replaceAll(EnsamCampusRegex.endChar, '');
+    if (formatEndLine) result = result.replaceAll(ICalRegex.endChar, '');
     return result;
   }
 
-  static CalendarEvent fromENSAMCampus(JSON event) {
-    DateTime startTime = Iso8601DateParser.parse(event['start']);
-    DateTime endTime = Iso8601DateParser.parse(event['end']);
-    Duration rawDuration = endTime.difference(startTime);
-    String duration = (rawDuration.inMinutes % 60 == 0) ? '${rawDuration.inHours}h' : '${rawDuration.inHours}h${rawDuration.inMinutes - rawDuration.inHours * 60}';
-
-    String desc1 = event['desc1'];
-    String desc2 = event['desc2'];
-
-    return new CalendarEvent(
-      title: desc1 + desc2,
-      course: getFormattedRegexResult(EnsamCampusRegex.all, desc1),
-      classType: getFormattedRegexResult(EnsamCampusRegex.classeType, desc2),
-      location: getFormattedRegexResult(EnsamCampusRegex.all, event['locAdd1']),
-      teacherName: getFormattedRegexResult(EnsamCampusRegex.teacherName, desc2),
-      description: getFormattedRegexResult(EnsamCampusRegex.description, desc2),
-      group: getFormattedRegexResult(EnsamCampusRegex.group, desc2),
-      duration: duration,
-      startTime: startTime,
-      endTime: endTime,
-      isAllDay: event['meeting'] == 'true',
-      source: DataSource.EnsamCampus,
-    );
-  }
 
   static CalendarEvent fromICal(JSON event) {
     if (event['type'] != 'VEVENT') {
@@ -163,7 +126,6 @@ class CalendarEvent extends Appointment {
         startTime: startTime,
         endTime: endTime,
         isAllDay: rawDuration.inHours >= 7 ,
-        source: DataSource.ICal,
     );
   }
 
@@ -183,7 +145,6 @@ class CalendarEvent extends Appointment {
       startTime: startTime,
       endTime: endTime,
       isAllDay: event['isAllDay'],
-      source: DataSource.values.byName(event['source']),
     );
   }
 
@@ -207,7 +168,6 @@ class CalendarEvent extends Appointment {
       'startTime': startTime.toIso8601String(),
       'endTime': endTime.toIso8601String(),
       'isAllDay': isAllDay,
-      'source': source.name,
     });
   }
 
@@ -263,7 +223,7 @@ class CalendarEvent extends Appointment {
       onPointerUp: (_) => shouldDisplay ? Navigator.pop(context) : null,
       onPointerCancel: (_) => shouldDisplay ? Navigator.pop(context) : null,
       child: MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+          data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScaleFactor)),
           child: CalendarItem(this, size, false),
       ),
     );

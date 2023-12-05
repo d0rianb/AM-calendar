@@ -134,19 +134,11 @@ class CalendarState extends State<Calendar> {
 
   Future<List<CalendarEvent>> getEventsFromNetworks(Week week) async {
     List<CalendarEvent> events = [];
-    String dataSource = widget.prefs.getString('source') ?? defaultSource.name;
-    if (dataSource == 'ICal' || dataSource == 'All') {
-      final iCalResponse = await ICalRequest.getCalendar();
-      if (!iCalResponse.containsKey('data')) { return []; }
-      final List<CalendarEvent> iCalEvents = List.from(iCalResponse['data'].map((e) => CalendarEvent.fromICal(e)));
-      events += iCalEvents;
-    }
-    if (dataSource == 'EnsamCampus' || dataSource == 'All') {
-      final ensamResponse = await ENSAMRequest.getCalendar(week.firstDay, week.getNextWeek().lastDay);
-      if (!ensamResponse.containsKey('events')) { return []; }
-      final List<CalendarEvent> ensamEvents = List.from(ensamResponse['events'].map((e) => CalendarEvent.fromENSAMCampus(e)));
-      events += ensamEvents;
-    }
+
+    final iCalResponse = await ICalRequest.getCalendar();
+    if (!iCalResponse.containsKey('data')) { return []; }
+    events = List.from(iCalResponse['data'].map((e) => CalendarEvent.fromICal(e)));
+
     final Cache cache = Cache.create(week.stringId, events);
     prefs.setString(cache.id, cache.serialized);
     return events;

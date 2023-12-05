@@ -1,7 +1,7 @@
 BUGS :  
-  - Error snackbar : Error lors du vidage du cache : popup blanche en dark mode
-  - IOS font size ratio : only for calendar event 
+  - Snackbar : looking for ancestor context is unsafe ...
 
  V2 :
   - Logo de l'application
+  - Delete EnsamCampus source
 

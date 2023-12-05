@@ -22,10 +22,9 @@ class DeleteAllCacheEvent {
 
 class LoginEvent {
   String text;
-  bool? finished = false;
-  bool? error = false;
+  bool finished = false;
 
-  LoginEvent(this.text, {this.finished, this.error});
+  LoginEvent(this.text, { this.finished = false });
 }
 
 class RequestErrorEvent {
