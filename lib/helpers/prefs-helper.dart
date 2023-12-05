@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 ThemeMode getThemeMode(SharedPreferences prefs) {
-  // return ThemeMode.dark; // for a debug purpose
   switch (prefs.getString('brightness')) {
     case 'light':
       return ThemeMode.light;

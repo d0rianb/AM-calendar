@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:am_calendar/helpers/app-events.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:icalendar_parser/icalendar_parser.dart';
@@ -50,7 +49,7 @@ class ICalRequest {
     ICalendar iCal = ICalendar.fromString(responseBody);
     JSON json = iCal.toJson();
     if (json.containsKey('data')) {
-      eventBus.fire(LoginEvent('Connection réussie', finished: true));
+      eventBus.fire(LoginEvent('Connexion réussie', finished: true));
       return json;
     }
     eventBus.fire(RequestErrorEvent('Erreur : Fichier ICal invalide'));
