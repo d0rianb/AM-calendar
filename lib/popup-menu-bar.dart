@@ -103,7 +103,7 @@ class PopupMenuBarState extends State<PopupMenuBar> {
           value: applyFilters,
           onChanged: (value) {
             setState(() {
-              applyFilters = value ?? true;
+              applyFilters = value ?? false;
               prefs!.setBool('applyFilters', applyFilters);
               eventBus.fire(ReloadViewEvent());
             });

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:am_calendar/helpers/cache-handler.dart';
 import 'package:am_calendar/popup-menu-bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -6699,9 +6700,9 @@ class _SfCalendarState extends State<SfCalendar> with SingleTickerProviderStateM
     children.add(const Divider(height: 1, thickness: 1));
     children.add(InkWell(
       onTap: () async {
-        final pref = await SharedPreferences.getInstance();
-        pref.remove('cmAuthToken');
-        Navigator.of(context).pushNamed('/login');
+        final prefs = await SharedPreferences.getInstance();
+        clearEventCache(prefs);
+        Navigator.of(context).pushReplacementNamed('/login');
       },
       child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 0.0),

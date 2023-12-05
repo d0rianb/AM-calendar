@@ -18,7 +18,7 @@ final String proms = DateTime.now().isAfter(DateTime(2021, 12, 4)) ? '221' : '.2
 
 const String tabIndent = '        ';
 const String DISCLAIMER = '''${tabIndent}Ce calendrier n'est pas une application officielle Arts&Métiers. 
-Elle a été crée par un élève voulant simplement avoir accès à son emploi du temps s'il vous plait ne me faite pas de procès.''';
+Elle a été créée par un élève voulant simplement avoir accès à son emploi du temps s'il vous plait ne me faite pas de procès.''';
 const String USAGE = '''${tabIndent}Ce calendrier utilise les données du webcal de Lise. Les données de l'agenda ne sont disponibles que sur 2 semaines. L'application s'actualise en arrière-plan à chaque ouverture.''';
 
 String crypt(String? str) {

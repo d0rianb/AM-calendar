@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:am_calendar/helpers/refresh-indicator.dart';
 import 'package:am_calendar/helpers/requests.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +30,10 @@ class LoginViewState extends State<LoginView> {
   final TextEditingController userIdFieldController = TextEditingController();
   late SharedPreferences prefs = widget.prefs;
   late PackageInfo packageInfo = PackageInfo(appName: '', packageName: '', version: '', buildNumber: '');
+
+  StreamSubscription? loginEventStream;
+  StreamSubscription? requestErrorEventStream;
+
   String userId = '';
   bool isLoading = false;
   bool hasError = false;
@@ -41,22 +47,15 @@ class LoginViewState extends State<LoginView> {
     super.initState();
     userId = prefs.getString('id') ?? '2021-';
     userIdFieldController.text = userId;
+    initStreams();
     initPackageInfo();
-    eventBus.on<LoginEvent>().listen((event) {
-      if (hasError) return;
-      if (mounted) setState(() => connectionText = event.text + ' ...');
-      if (event.finished) launchCalendar();
-    });
-    eventBus.on<RequestErrorEvent>().listen((event) {
-      if (hasError) return;
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-          hasError = true;
-          connectionText = event.text;
-        });
-      }
-    });
+  }
+
+  @override
+  void dispose() {
+    loginEventStream?.cancel();
+    requestErrorEventStream?.cancel();
+    super.dispose();
   }
 
   Future<void> initPackageInfo() async {
@@ -64,19 +63,43 @@ class LoginViewState extends State<LoginView> {
     setState(() {});
   }
 
+  // Init the event listener
+  void initStreams() {
+    if (loginEventStream == null) {
+      loginEventStream = eventBus.on<LoginEvent>().listen((event) {
+        if (hasError || !mounted) return;
+        setState(() => connectionText = event.text + ' ...');
+        if (event.finished) launchCalendar();
+      });
+    }
+
+    if (requestErrorEventStream == null) {
+      requestErrorEventStream = eventBus.on<RequestErrorEvent>().listen((event) {
+        if (hasError || !mounted) return;
+        setState(() {
+          isLoading = false;
+          hasError = true;
+          connectionText = event.text;
+        });
+      });
+    }
+  }
+
   void connectToICal(BuildContext context) async {
     prefs.setString('id', userId);
+    setState(() => isLoading = true);
     iCalResponse = await ICalRequest.getCalendar();
   }
 
   void launchCalendar() async {
     // Set cached events and load the calendar view
+    setState(() => isLoading = false);
     if (!iCalResponse.containsKey('data')) { return; }
     final List<CalendarEvent> events = List.from(iCalResponse['data'].map((e) => CalendarEvent.fromICal(e)));
     Week week = Week.fromDateTime(DateTime.now());
     final Cache cache = Cache.create(week.stringId, events);
     prefs.setString(cache.id, cache.serialized);
-    Navigator.of(context).pushNamed('/calendar');
+    Navigator.of(context).pushNamedAndRemoveUntil('/calendar', (Route<dynamic> route) => false);
   }
 
   @override
