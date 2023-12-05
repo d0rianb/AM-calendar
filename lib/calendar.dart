@@ -78,7 +78,6 @@ class CalendarState extends State<Calendar> {
       error = event.text;
       loading = false;
     }));
-
   }
 
   Future<void> getEvents() async {

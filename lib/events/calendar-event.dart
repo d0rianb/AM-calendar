@@ -224,7 +224,7 @@ class CalendarEvent extends Appointment {
       onPointerCancel: (_) => shouldDisplay ? Navigator.pop(context) : null,
       child: MediaQuery(
           data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScaleFactor)),
-          child: CalendarItem(this, size, false),
+          child: CalendarItem(this, size, MediaQuery.of(context).size, false),
       ),
     );
   }
