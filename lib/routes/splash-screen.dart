@@ -33,6 +33,9 @@ class SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     toggleRoute(hasLoginInfos(), context);
+
+    const double imageAspectRatio = 471 / 599;
+
     return Scaffold(
       body: Center(
         child: Column(
@@ -40,11 +43,11 @@ class SplashScreenState extends State<SplashScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(
-              width: MediaQuery.of(context).size.width * 2 / 3,
-              height: MediaQuery.of(context).size.width * 2 / 3,
+              width: MediaQuery.of(context).size.width / 3,
+              height: MediaQuery.of(context).size.width / 3 / imageAspectRatio,
               child: const Image(image: AssetImage('resources/icons/am-logo.png')),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 40),
             const ShadowedRefreshIndicator(color: VIOLET),
           ],
         ),

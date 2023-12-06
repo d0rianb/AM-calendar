@@ -19,6 +19,7 @@ const Color VIOLET = Color.fromRGBO(130, 44, 96, 1.0);
 
 class LoginView extends StatefulWidget {
   final SharedPreferences prefs;
+
   LoginView({Key? key, required this.prefs}) : super(key: key);
 
   @override
@@ -94,7 +95,9 @@ class LoginViewState extends State<LoginView> {
   void launchCalendar() async {
     // Set cached events and load the calendar view
     setState(() => isLoading = false);
-    if (!iCalResponse.containsKey('data')) { return; }
+    if (!iCalResponse.containsKey('data')) {
+      return;
+    }
     final List<CalendarEvent> events = List.from(iCalResponse['data'].map((e) => CalendarEvent.fromICal(e)));
     Week week = Week.fromDateTime(DateTime.now());
     final Cache cache = Cache.create(week.stringId, events);
@@ -109,7 +112,23 @@ class LoginViewState extends State<LoginView> {
     final Color primaryColor = isDarkMode ? ORANGE : VIOLET;
     final Color textColor = isDarkMode ? Colors.white60 : Colors.black;
 
+    const double imageAspectRatio = 471 / 599;
+
     List<Widget> formChildren = [
+      Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Hero(
+          tag: 'am_logo',
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width / 3,
+            height: MediaQuery.of(context).size.width / 3 / imageAspectRatio,
+            child: const Image(
+                image: AssetImage('resources/icons/am-logo.png')
+            ),
+          ),
+        ),
+      ),
+      const SizedBox(height: 30.0),  // Separator
       Transform.translate(
         offset: const Offset(-12.0, 0.0),
         child: Padding(
@@ -124,7 +143,7 @@ class LoginViewState extends State<LoginView> {
             cursorColor: primaryColor,
             inputFormatters: [LengthLimitingTextInputFormatter(9)],
             validator: (value) {
-              if (value  == null || value.isEmpty || !idRegexp.hasMatch(value)) {
+              if (value == null || value.isEmpty || !idRegexp.hasMatch(value)) {
                 return 'L\'identifiant doit être de la forme : 202X-XXXX';
               } else {
                 return null;
@@ -146,7 +165,11 @@ class LoginViewState extends State<LoginView> {
             side: BorderSide(width: 1.5, color: primaryColor),
           ),
           onPressed: () {
-            connectToICal(context);
+            hasError = false;
+            if (isLoading)
+              setState(() => isLoading = false);
+            else
+              connectToICal(context);
           },
         ),
       ),
@@ -191,17 +214,18 @@ class LoginViewState extends State<LoginView> {
                   primary: primaryColor,
                 ),
               ),
-              child: Form(
-                key: formKey,
-                child: Center(
-                  child: Container(
-                    width: MediaQuery.of(context).size.width * .85,
-                    padding: const EdgeInsets.all(16.0),
-                    child: ListView(
-                      children: formChildren,
+              child:
+                Center(
+                  child: Form(
+                    key: formKey,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * .85,
+                      padding: const EdgeInsets.all(16.0),
+                      child: ListView(
+                        children: formChildren,
+                      ),
                     ),
                   ),
-                ),
               ),
             ),
             Visibility(
