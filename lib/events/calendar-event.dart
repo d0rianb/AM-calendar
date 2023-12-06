@@ -191,7 +191,7 @@ class CalendarEvent extends Appointment {
                 opaque: false,
                 barrierDismissible: true,
                 transitionsBuilder: (context, animation, _, child) {
-                  final tween = Tween<double>(begin: 0, end: 2.0);
+                  final tween = Tween<double>(begin: 0, end: 3.0);
                   animation.drive(tween);
                   return BlurTransition(
                     animation: tween.animate(animation),
@@ -222,10 +222,10 @@ class CalendarEvent extends Appointment {
           : null,
       onPointerUp: (_) => shouldDisplay ? Navigator.pop(context) : null,
       onPointerCancel: (_) => shouldDisplay ? Navigator.pop(context) : null,
-      child: MediaQuery(
+      child: shouldDisplay ? MediaQuery(
           data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScaleFactor)),
           child: CalendarItem(this, size, MediaQuery.of(context).size, false),
-      ),
+      ) : null,
     );
   }
 }

@@ -13,11 +13,13 @@ class CalendarEventPopup extends Dialog {
     final Size contextSize = MediaQuery.of(context).size;
     final double width = contextSize.width * 3 / 4;
     final double height = contextSize.height / 2.3; // min height
-    return CalendarItem(
-        event,
-        Size(width, height),
-        contextSize,
-        true,
-      );
+    return Center(
+      child: CalendarItem(
+          event,
+          Size(width, height),
+          contextSize,
+          true,
+        ),
+    );
   }
 }
