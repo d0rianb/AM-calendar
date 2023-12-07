@@ -48,14 +48,12 @@ class LoginViewState extends State<LoginView> {
     super.initState();
     userId = prefs.getString('id') ?? '2021-';
     userIdFieldController.text = userId;
-    initStreams();
     initPackageInfo();
   }
 
   @override
   void dispose() {
-    loginEventStream?.cancel();
-    requestErrorEventStream?.cancel();
+    disposeStreams();
     super.dispose();
   }
 
@@ -86,7 +84,18 @@ class LoginViewState extends State<LoginView> {
     }
   }
 
+  void disposeStreams() {
+    loginEventStream?.cancel();
+    requestErrorEventStream?.cancel();
+  }
+
+  void cancel() async {
+    disposeStreams();
+    setState(() => isLoading = false);
+  }
+
   void connectToICal(BuildContext context) async {
+    initStreams();
     prefs.setString('id', userId);
     setState(() => isLoading = true);
     iCalResponse = await ICalRequest.getCalendar();
@@ -95,7 +104,8 @@ class LoginViewState extends State<LoginView> {
   void launchCalendar() async {
     // Set cached events and load the calendar view
     setState(() => isLoading = false);
-    if (!iCalResponse.containsKey('data')) {
+    if (iCalResponse['data'].length == 0) {
+      eventBus.fire(RequestErrorEvent('Identifiant incorrect, pas de données reçues'));
       return;
     }
     final List<CalendarEvent> events = List.from(iCalResponse['data'].map((e) => CalendarEvent.fromICal(e)));
@@ -122,9 +132,7 @@ class LoginViewState extends State<LoginView> {
           child: SizedBox(
             width: MediaQuery.of(context).size.width / 3,
             height: MediaQuery.of(context).size.width / 3 / imageAspectRatio,
-            child: const Image(
-                image: AssetImage('resources/icons/am-logo.png')
-            ),
+            child: const Image(image: AssetImage('resources/icons/am-logo.png')),
           ),
         ),
       ),
@@ -141,6 +149,7 @@ class LoginViewState extends State<LoginView> {
               border: const OutlineInputBorder(),
             ),
             cursorColor: primaryColor,
+            keyboardType: TextInputType.number,
             inputFormatters: [LengthLimitingTextInputFormatter(9)],
             validator: (value) {
               if (value == null || value.isEmpty || !idRegexp.hasMatch(value)) {
@@ -166,10 +175,11 @@ class LoginViewState extends State<LoginView> {
           ),
           onPressed: () {
             hasError = false;
-            if (isLoading)
-              setState(() => isLoading = false);
-            else
+            if (isLoading) {
+              cancel();
+            } else if (formKey.currentState!.validate()) {
               connectToICal(context);
+            }
           },
         ),
       ),
@@ -178,6 +188,7 @@ class LoginViewState extends State<LoginView> {
         child: Center(
           child: Text(
             connectionText,
+            overflow: TextOverflow.visible,
             style: TextStyle(
               fontStyle: FontStyle.italic,
               color: !hasError ? theme.textTheme.titleMedium?.color : Colors.red[800],
@@ -221,9 +232,7 @@ class LoginViewState extends State<LoginView> {
                     child: Container(
                       width: MediaQuery.of(context).size.width * .85,
                       padding: const EdgeInsets.all(16.0),
-                      child: ListView(
-                        children: formChildren,
-                      ),
+                      child: ListView(children: formChildren),
                     ),
                   ),
               ),
