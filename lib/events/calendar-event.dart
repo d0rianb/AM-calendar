@@ -17,13 +17,16 @@ import 'calendar-event-popup.dart';
 
 final Map<String, Color> classColor = {
   'CM': ORANGE,
+  'CM TEAMS': ORANGE,
   'ED TD': HexColor.fromHex('#9b3471'),
   'MISSION': HexColor.fromHex('#9b3471'),
+  'TP': HexColor.fromHex('#1976d2'),
   'TPS': HexColor.fromHex('#1976d2'),
   'TPF': HexColor.fromHex('#1976d2'),
   'OTHER': HexColor.fromHex('#607d8b'),
   'EXAM': HexColor.fromHex('#e53935'),
   'REUNION': HexColor.fromHex('#7986cb'),
+  'PROJET': HexColor.fromHex('#7E57C2'),
   'TEAMS': HexColor.fromHex('#4caf50'),
 };
 
@@ -79,15 +82,15 @@ class CalendarEvent extends Appointment {
             : classColor['OTHER']!;
   }
 
-  bool get shouldDisplay => classType != 'INDISP';
+  bool get shouldDisplay => classType.toUpperCase() != 'INDISP';
 
   bool get isExam => title.toUpperCase().contains('EXAMEN') || title.toUpperCase().contains('TEST') || title.toUpperCase().contains('SOUTENANCE');
 
-  bool get isVisio => title.contains('TEAMS') || (location != null && location!.contains('TEAMS')) || title.contains('autonom'); // match "ED en autonomie" | "ED autonome"
+  bool get isVisio => title.toUpperCase().contains('TEAMS') || (location != null && location!.toUpperCase().contains('TEAMS')) || title.toUpperCase().contains('AUTONOM'); // match "ED en autonomie" | "ED autonome"
 
   Color get borderColor => isVisio ? classColor['TEAMS']! : darken(color, 15);
 
-  String get id => (location ?? '') + teacherName + group + startTime.millisecondsSinceEpoch.toString();
+  String get id => (location ?? '') + teacherName + group + startTime.millisecondsSinceEpoch.toString() + startTime.millisecondsSinceEpoch.toString();
 
   /// Get the first group and format the result of the regex by taking of the \n and the _
   /// The XXXRegexp.all permit just the formatting
