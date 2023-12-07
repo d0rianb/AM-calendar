@@ -90,10 +90,10 @@ class CalendarState extends State<Calendar> {
     }
     addNoInfoEvents();
     final List<CalendarEvent> cachedEvents = getCachedEvents();
-    int addedEventsFromCache = addEvents(cachedEvents);
-    if (mounted && addedEventsFromCache > 0) setState(() => loading = false); // Update the view
+    addEvents(cachedEvents);
+    if (mounted) setState(() => loading = false); // Update the view
     final List<CalendarEvent> networksEvents = await getEventsFromNetworks(week);
-    int addedEventsFromNetwork = addEvents(networksEvents);
+    addEvents(networksEvents);
     if (mounted) setState(() => loading = false);
   }
 
@@ -144,19 +144,16 @@ class CalendarState extends State<Calendar> {
   }
 
   /// Return the number of events added
-  int addEvents(List<Appointment> newEvents) {
-    int oldEventsLength = events.length;
-    // Filter the old events that have an update on the same period
-    events = events.where((oldEvent) {
-      for (Appointment newEvent in newEvents) {
-        if (newEvent.startTime == oldEvent.startTime && newEvent.endTime == oldEvent.endTime) {
-          return false;
-        }
-      }
-      return true;
-    }).toList();
+  void addEvents(List<Appointment> newEvents) {
+    // Find the time period of the update
+    DateTime startTime = DateTime(3000);
+    DateTime endTime = DateTime(2000);
+    for (Appointment event in newEvents) {
+      if (event.startTime.isBefore(startTime)) startTime = event.startTime;
+      if (event.endTime.isAfter(endTime)) endTime = event.endTime;
+    }
+    events = events.where((event) => event.endTime.isBefore(startTime) || event.startTime.isAfter(endTime)).toList();
     events += newEvents; // add the new events
-    return events.length - oldEventsLength;
   }
 
   bool isFiltered(CalendarEvent event) {

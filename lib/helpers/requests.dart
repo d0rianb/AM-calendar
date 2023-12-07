@@ -11,7 +11,7 @@ import '../main.dart' show eventBus;
 typedef JSON = Map<String, dynamic>;
 
 class ICalRequest {
-  static const Map<String, String> ICalHeaders = {};
+  static const Map<String, String> ICalHeaders = { 'cache-control': 'no-cache' };
 
   static Future<String> getICalFile() async {
     eventBus.fire(LoginEvent('Initialisation de la connexion'));
@@ -23,6 +23,7 @@ class ICalRequest {
     }
     final Uri uri = Uri.https('lise.ensam.eu', 'ical_apprenant/$id');
     eventBus.fire(LoginEvent('Envoi de la requête iCal'));
+    await Future.delayed(Duration(seconds: 5));
     try {
       final Response response = await get(uri, headers: ICalHeaders);
       eventBus.fire(LoginEvent('Réception de la réponse'));
