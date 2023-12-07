@@ -16,7 +16,6 @@ class CalendarItem extends Hero {
   CalendarItem(this.event, this.size, this.contextSize, this.expanded)
       : super(
           tag: event.id,
-          transitionOnUserGestures: true,
           child: DefaultTextStyle(
             style: const TextStyle(
               decoration: TextDecoration.none,

@@ -121,8 +121,8 @@ class SettingsState extends State<Settings> {
                       controller: userIdFieldController,
                       textInputAction: TextInputAction.next,
                       onChanged: (id) => setState(() {
+                        userId = id.trim();
                         prefs.setString('id', id);
-                        userId = id;
                       }),
                     ),
                   ),
