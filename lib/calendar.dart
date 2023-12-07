@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:collection';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -58,26 +61,31 @@ class CalendarState extends State<Calendar> {
   @override
   void initState() {
     super.initState();
+    initStreams();
+    loadFilters();
     getEvents();
-    // Load filters
-    String filtersString = prefs.getString('filters') ?? '';
-    filters = filtersString.split(',').map((filter) => filter.toLowerCase()).where((filter) => filter.isNotEmpty).toList();
-    eventBus.on<RecallGetEvent>().listen((event) => getEvents());
-    eventBus.on<ReloadViewEvent>().listen(
-          (event) => setState(() {
-            _showPals = prefs.getBool('showPals') ?? false;
-            _showCM = prefs.getBool('showCM') ?? true;
-            _showTEAMS = prefs.getBool('showTEAMS') ?? true;
-            _applyFilters = prefs.getBool('applyFilters') ?? true;
+  }
 
-            String filtersString = prefs.getString('filters') ?? '';
-            filters = filtersString.split(',').map((filter) => filter.toLowerCase()).where((filter) => filter.isNotEmpty).toList();
-          }),
-        );
-    eventBus.on<RequestErrorEvent>().listen((event) => setState(() {
+  void initStreams() {
+    eventBus.on<RequestErrorEvent>().listen((event) {
       error = event.text;
       loading = false;
-    }));
+    });
+    eventBus.on<RecallGetEvent>().listen((event) => getEvents());
+    eventBus.on<ReloadViewEvent>().listen(
+        (event) => setState(() {
+          _showPals = prefs.getBool('showPals') ?? false;
+          _showCM = prefs.getBool('showCM') ?? true;
+          _showTEAMS = prefs.getBool('showTEAMS') ?? true;
+          _applyFilters = prefs.getBool('applyFilters') ?? true;
+          loadFilters();
+      }),
+    );
+  }
+
+  void loadFilters() {
+    String filtersString = prefs.getString('filters') ?? '';
+    filters = filtersString.split(',').map((filter) => filter.toLowerCase()).where((filter) => filter.isNotEmpty).toList();
   }
 
   Future<void> getEvents() async {
@@ -154,6 +162,7 @@ class CalendarState extends State<Calendar> {
     }
     events = events.where((event) => event.endTime.isBefore(startTime) || event.startTime.isAfter(endTime)).toList();
     events += newEvents; // add the new events
+    events = LinkedHashSet<Appointment>.from(events).toList(); // Delete repetitions
   }
 
   bool isFiltered(CalendarEvent event) {
@@ -170,7 +179,6 @@ class CalendarState extends State<Calendar> {
 
   @override
   Widget build(BuildContext context) {
-    eventBus.on<RequestErrorEvent>().listen((event) => showSnackBar(context, event.text));
     displayNoInfos = events.where((e) => week.isDayInside(e.startTime)).isEmpty;
     final ThemeData theme = Theme.of(context);
     final bool isDarkMode = theme.brightness == Brightness.dark;
