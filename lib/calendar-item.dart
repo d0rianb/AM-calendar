@@ -33,7 +33,7 @@ class CalendarItem extends Hero {
                     padding: expanded ? const EdgeInsets.all(10.0) : const EdgeInsets.all(2.0),
                     margin: const EdgeInsets.all(0.0),
                     width: size.width,
-                    height: size.height,
+                    height: expanded ? null : size.height,
                     alignment: Alignment.center,
                     clipBehavior: Clip.antiAlias,
                     decoration: BoxDecoration(
