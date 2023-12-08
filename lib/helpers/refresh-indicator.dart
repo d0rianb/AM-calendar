@@ -8,7 +8,7 @@ class ShadowedRefreshIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Theme(
         // custom theme for allowing elevation shadow despite material3 in the app theme
-        data: Theme.of(context).copyWith(useMaterial3: false),
+        data: Theme.of(context),
         child: RefreshProgressIndicator(
           color: color,
           strokeWidth: 2.5,
