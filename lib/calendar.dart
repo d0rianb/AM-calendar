@@ -98,8 +98,10 @@ class CalendarState extends State<Calendar> {
     }
     addNoInfoEvents();
     final List<CalendarEvent> cachedEvents = getCachedEvents();
+    int oldEventsLength = events.length;
     addEvents(cachedEvents);
-    if (mounted) setState(() => loading = false); // Update the view
+    bool hasAddedEventFromCache = events.length - oldEventsLength != 0;
+    if (mounted && hasAddedEventFromCache) setState(() => loading = false); // Update the view
     final List<CalendarEvent> networksEvents = await getEventsFromNetworks(week);
     addEvents(networksEvents);
     if (mounted) setState(() => loading = false);

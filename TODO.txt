@@ -1,8 +1,3 @@
 BUGS :  
   - Snackbar : looking for ancestor context is unsafe ...
-  - No load indicator when refreshing
-
- V2 :
-  - Logo de l'application
-  - Delete EnsamCampus source
 
