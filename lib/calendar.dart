@@ -71,7 +71,7 @@ class CalendarState extends State<Calendar> {
       error = event.text;
       loading = false;
     });
-    eventBus.on<RecallGetEvent>().listen((event) => getEvents());
+    eventBus.on<RecallGetEvent>().listen((event) => reloadEvents());
     eventBus.on<ReloadViewEvent>().listen(
         (event) => setState(() {
           _showPals = prefs.getBool('showPals') ?? false;
@@ -86,6 +86,16 @@ class CalendarState extends State<Calendar> {
   void loadFilters() {
     String filtersString = prefs.getString('filters') ?? '';
     filters = filtersString.split(',').map((filter) => filter.toLowerCase()).where((filter) => filter.isNotEmpty).toList();
+  }
+
+  /// Callback for the reload button
+  void reloadEvents() async {
+    StreamSubscription loginEventHandler = eventBus.on<LoginEvent>().listen((event) => error = event.text);
+    setState(() => error = 'Mise à jour du calendrier ...'); // use the error variable the propagate the snackbar to the build method
+    await getEvents();
+    setState(() => error = 'Calendrier à jour');
+    // The login events should only be displayed when the reload is required, otherwise, it should happens in the background so the stream handler has to be canceled
+    loginEventHandler.cancel();
   }
 
   Future<void> getEvents() async {
