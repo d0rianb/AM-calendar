@@ -2,5 +2,4 @@ BUGS :
   - Snackbar : looking for ancestor context is unsafe ... (still relevant ?)
 
 FEATURES :
-  - Cursor color when on CM
-
+  - Different cursor color when on CM

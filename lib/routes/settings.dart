@@ -47,9 +47,6 @@ class SettingsState extends State<Settings> {
     brightness = prefs.getString('brightness') ?? 'system';
     userIdFieldController.text = prefs.getString('id') ?? '2021-';
     filtersFieldController.text = prefs.getString('filters') ?? '';
-    eventBus.on<DeleteAllCacheEvent>().listen((event) {
-      setState(() => clearAllCache(prefs));
-    });
   }
 
   ThemeMode getThemeModeFromValue(String value) {
