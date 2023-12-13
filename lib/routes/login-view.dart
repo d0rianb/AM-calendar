@@ -53,6 +53,7 @@ class LoginViewState extends State<LoginView> {
 
   @override
   void dispose() {
+    // Call destructors
     disposeStreams();
     super.dispose();
   }
@@ -62,7 +63,7 @@ class LoginViewState extends State<LoginView> {
     setState(() {});
   }
 
-  // Init the event listener
+  /// Init the event listeners
   void initStreams() {
     if (loginEventStream == null) {
       loginEventStream = eventBus.on<LoginEvent>().listen((event) {
@@ -84,13 +85,17 @@ class LoginViewState extends State<LoginView> {
     }
   }
 
-  void disposeStreams() {
-    loginEventStream?.cancel();
-    requestErrorEventStream?.cancel();
+  void disposeStreams() async {
+    await loginEventStream?.cancel();
+    loginEventStream = null;
+    await requestErrorEventStream?.cancel();
+    requestErrorEventStream = null;
   }
 
+  // Cancel a request
   void cancel() async {
     disposeStreams();
+    connectionText = '';
     setState(() => isLoading = false);
   }
 
@@ -104,7 +109,7 @@ class LoginViewState extends State<LoginView> {
   void launchCalendar() async {
     // Set cached events and load the calendar view
     setState(() => isLoading = false);
-    if (iCalResponse['data'].length == 0) {
+    if (iCalResponse.isEmpty || iCalResponse['data']?.length == 0) {
       eventBus.fire(RequestErrorEvent('Identifiant incorrect, pas de données reçues'));
       return;
     }
@@ -175,6 +180,11 @@ class LoginViewState extends State<LoginView> {
           ),
           onPressed: () {
             hasError = false;
+            // Unfocus keyboard
+            FocusScopeNode currentFocus = FocusScope.of(context);
+            if (!currentFocus.hasPrimaryFocus) {
+              currentFocus.unfocus();
+            }
             if (isLoading) {
               cancel();
             } else if (formKey.currentState!.validate()) {

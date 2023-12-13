@@ -40,7 +40,7 @@ class ICalRequest {
   }
 
   static Future<JSON> getCalendar() async {
-    eventBus.fire(LoginEvent('Analyse de la réponse'));
+    eventBus.fire(LoginEvent('Connexion au serveur'));
     String responseBody = '';
     responseBody = await ICalRequest.getICalFile();
     if (responseBody == '') {
