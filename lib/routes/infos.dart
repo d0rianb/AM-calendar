@@ -2,8 +2,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'dart:io' show Platform;
+
 
 import 'package:package_info/package_info.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:mailto/mailto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -17,33 +20,33 @@ const Color ORANGE = Color.fromRGBO(230, 151, 54, 1.0);
 final String proms = DateTime.now().isAfter(DateTime(2021, 12, 4)) ? '221' : '.21';
 
 const String tabIndent = '        ';
-const String DISCLAIMER = '''${tabIndent}Ce calendrier n'est pas une application officielle Arts&Métiers. 
-Elle a été créée par un élève voulant simplement avoir accès à son emploi du temps s'il vous plait ne me faite pas de procès.''';
+const String DISCLAIMER = '''${tabIndent}Ce calendrier n'est pas une application officielle Arts & Métiers''';
 const String USAGE = '''${tabIndent}Ce calendrier utilise les données du webcal de Lise. Les données de l'agenda ne sont disponibles que sur 2 semaines. L'application s'actualise en arrière-plan à chaque ouverture.''';
-
-String crypt(String? str) {
-  if (str == null) return '';
-  final List<String> encodedBuffer = str.split('').map((letter) => letter.codeUnitAt(0) + str.length).map((charCode) => String.fromCharCode(charCode)).toList();
-  encodedBuffer.insert(0, String.fromCharCode(str.length));
-  return encodedBuffer.join('').trim();
-}
-
-String decrypt(String? str) {
-  if (str == null) return '';
-  List<String> list = str.substring(1).split('');
-  final strLength = str[0].codeUnitAt(0);
-  return list.map((letter) => letter.codeUnitAt(0) - strLength).map((charCode) => String.fromCharCode(charCode)).join('');
-}
 
 Future<List<List<String>>> getDebugData() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  return [
+  final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+  List<List<String>> infos = [
     [packageInfo.appName, 'v${packageInfo.version}+${packageInfo.buildNumber}'],
     ['ID', prefs.getString('id') ?? ''],
-    ['Password', crypt(prefs.getString('password')).trim()],
-    ['CmAuthToken', (prefs.getString('cmAuthToken')?.substring(0, 10) ?? '') + '...']
+    ['Filters', prefs.getString('filters') ?? ''],
   ];
+  if (Platform.isAndroid) {
+    AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
+    infos.add(['Model', androidInfo.model]);
+    infos.add(['Product', androidInfo.product]);
+    infos.add(['Android Version', androidInfo.version.release]);
+    infos.add(['SDK Version', androidInfo.version.sdkInt.toString()]);
+    infos.add(['Last security patch', androidInfo.version.securityPatch.toString()]);
+    infos.add(['Screen', '${androidInfo.displayMetrics.widthPx.toInt()}x${androidInfo.displayMetrics.heightPx.toInt()}']);
+  } else if (Platform.isIOS) {
+    IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
+    infos.add(['Model', iosInfo.utsname.machine]);
+    infos.add(['Name', iosInfo.name]);
+    infos.add(['Version', iosInfo.systemName + ' ' + iosInfo.systemVersion]);
+  }
+  return infos;
 }
 
 Future<Widget> generateDebugRapport(BuildContext context) async {
