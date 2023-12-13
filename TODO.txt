@@ -2,7 +2,5 @@ BUGS :
   - Snackbar : looking for ancestor context is unsafe ... (still relevant ?)
 
 FEATURES :
-  - New debug menu
   - Cursor color when on CM
-  - Close keyboard when login
 
