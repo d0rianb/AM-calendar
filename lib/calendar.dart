@@ -249,6 +249,7 @@ class CalendarState extends State<Calendar> {
             ),
             headerStyle: const CalendarHeaderStyle(textAlign: TextAlign.center),
             headerDateFormat: 'MMMM yyy',
+            showCurrentTimeIndicator: true,
             appointmentBuilder: (BuildContext context, CalendarAppointmentDetails details) {
               dynamic event = details.appointments.first;
               const Widget dumbWidget = const Center(); // Empty widget
