@@ -162,7 +162,8 @@ class AppState extends State<App> {
           '/login': (context) => LoginView(prefs: widget.prefs),
           '/infos': (context) => const Infos(),
           '/settings': (context) => Settings(prefs: widget.prefs),
-        });
+        },
+    );
   }
 }
 
