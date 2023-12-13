@@ -177,6 +177,50 @@ class CalendarEvent extends Appointment {
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) => toJSON();
 
+  void onTapDownCallback(BuildContext context) {
+    if (!shouldDisplay) return;
+    Navigator.push(
+      context,
+      new PageRouteBuilder(
+        pageBuilder: (context, animation, _) => CalendarEventPopup(this),
+        opaque: false,
+        barrierDismissible: true,
+        transitionsBuilder: (context, animation, _, child) {
+          final tween = Tween<double>(begin: 0, end: 3.0);
+          animation.drive(tween);
+          return BlurTransition(
+            animation: tween.animate(animation),
+            child: Stack(
+              children: [
+                BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: animation.value, sigmaY: animation.value),
+                  child: Scrollable(
+                    physics: NeverScrollableScrollPhysics(),
+                    viewportBuilder: (BuildContext context, _) => Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.2),
+                      ),
+                    ),
+                  ),
+                ),
+                child,
+              ],
+            ),
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+        reverseTransitionDuration: const Duration(milliseconds: 250),
+      ),
+    );
+  }
+
+  void onTapUpCallback(BuildContext context) {
+    if (!shouldDisplay) return;
+    Navigator.popUntil(context, ModalRoute.withName('/calendar'));
+  }
+
   Widget build(BuildContext context, Size size) {
     double textScaleFactor;
     if (Platform.isIOS) {
@@ -186,45 +230,9 @@ class CalendarEvent extends Appointment {
     }
     return Listener(
       behavior: HitTestBehavior.opaque,
-      onPointerDown: (pointerDownEvent) => shouldDisplay
-          ? Navigator.push(
-              context,
-              new PageRouteBuilder(
-                pageBuilder: (context, animation, _) => CalendarEventPopup(this),
-                opaque: false,
-                barrierDismissible: true,
-                transitionsBuilder: (context, animation, _, child) {
-                  final tween = Tween<double>(begin: 0, end: 3.0);
-                  animation.drive(tween);
-                  return BlurTransition(
-                    animation: tween.animate(animation),
-                    child: Stack(
-                      children: [
-                        BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: animation.value, sigmaY: animation.value),
-                          child: Scrollable(
-                            physics: NeverScrollableScrollPhysics(),
-                            viewportBuilder: (BuildContext context, _) => Container(
-                              width: MediaQuery.of(context).size.width,
-                              height: MediaQuery.of(context).size.height,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.withOpacity(0.2),
-                              ),
-                            ),
-                          ),
-                        ),
-                        child,
-                      ],
-                    ),
-                  );
-                },
-                transitionDuration: const Duration(milliseconds: 300),
-                reverseTransitionDuration: const Duration(milliseconds: 250),
-              ),
-            )
-          : null,
-      onPointerUp: (_) => shouldDisplay ? Navigator.pop(context) : null,
-      onPointerCancel: (_) => shouldDisplay ? Navigator.pop(context) : null,
+      onPointerDown: (pointerDownEvent) => onTapDownCallback(context),
+      onPointerUp: (_) => onTapUpCallback(context),
+      onPointerCancel: (_) => onTapUpCallback(context),
       child: shouldDisplay ? MediaQuery(
           data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScaleFactor)),
           child: CalendarItem(this, size, MediaQuery.of(context).size, false),
