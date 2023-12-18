@@ -1,6 +1,6 @@
 name: am_calendar
 description: A calendar for the ENSAM students
-version: 2.1.4+34
+version: 2.1.5+35
 
 environment:
   sdk: ">=3.0.0"
