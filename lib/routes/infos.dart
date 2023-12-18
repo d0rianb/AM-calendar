@@ -21,7 +21,10 @@ final String proms = DateTime.now().isAfter(DateTime(2021, 12, 4)) ? '221' : '.2
 
 const String tabIndent = '        ';
 const String DISCLAIMER = '''${tabIndent}Ce calendrier n'est pas une application officielle Arts & Métiers''';
-const String USAGE = '''${tabIndent}Ce calendrier utilise les données du webcal de Lise. Les données de l'agenda ne sont disponibles que sur 2 semaines. L'application s'actualise en arrière-plan à chaque ouverture.''';
+const String USAGE = "${tabIndent}Ce calendrier utilise désormais les données du webcal de Lise et ceux de façon parfaitement légale. "
+"Alors si demain votre directeur de campus vient chouiner que l'application n'est pas officielle et que les données ne sont pas les bonnes, "
+"vous pourrez lui dire de charser en expliquant que le flux webcal de Lise est fourni par les Arts et qu'ils n'avaient qu'à "
+"mieux branler leur système informatique. Les données de l'agenda ne sont d'ailleurs disponibles que sur 2 semaines à cause de la strass.";
 
 Future<List<List<String>>> getDebugData() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -106,7 +109,7 @@ class InfosState extends State<Infos> {
   }
 
   TextStyle titleStyle(BuildContext context) => Theme.of(context).textTheme.headlineSmall!.copyWith(
-        color: lighten(VIOLET, 8),
+        color: lighten(VIOLET, 22),
         fontFamily: 'Cloister',
       );
 
@@ -114,8 +117,8 @@ class InfosState extends State<Infos> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDarkMode = theme.brightness == Brightness.dark;
-    final TextStyle textStyle = TextStyle(color: isDarkMode ? Colors.white70 : Colors.grey[800]!);
-    final TextStyle linkTextStyle = TextStyle(color: isDarkMode ? Colors.blue[600]! : Colors.blue[900]!);
+    final TextStyle textStyle = TextStyle(color: isDarkMode ? Colors.white70 : Colors.grey[800]!, fontSize: 16);
+    final TextStyle linkTextStyle = TextStyle(color: isDarkMode ? Colors.blue[600]! : Colors.blue[900]!, fontSize: 16);
     final Color primaryColor = VIOLET;
     return Scaffold(
         appBar: AppBar(
@@ -123,20 +126,11 @@ class InfosState extends State<Infos> {
           leading: BackButton(color: theme.appBarTheme.foregroundColor),
         ),
         body: Padding(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Utilisation', style: titleStyle(context)),
-              RichText(
-                text: TextSpan(
-                  text: USAGE,
-                  style: textStyle,
-                ),
-                textAlign: TextAlign.justify,
-              ),
-              Separator,
               Text('Disclaimer', style: titleStyle(context)),
               GestureDetector(
                 onTap: () => showSnackBar(context, 'Nique la Strass'),
@@ -147,6 +141,15 @@ class InfosState extends State<Infos> {
                   ),
                   textAlign: TextAlign.justify,
                 ),
+              ),
+              Separator,
+              Text('Utilisation', style: titleStyle(context)),
+              RichText(
+                text: TextSpan(
+                  text: USAGE,
+                  style: textStyle,
+                ),
+                textAlign: TextAlign.justify,
               ),
               Separator,
               Text('Contact', style: titleStyle(context)),
@@ -162,7 +165,7 @@ class InfosState extends State<Infos> {
               ),
               Center(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: ElevatedButton(
                     child: const Text('Génerer un rapport de debug'),
                     style: ButtonStyle(
