@@ -3,6 +3,8 @@ import 'dart:core';
 import 'dart:io' show Platform;
 import 'dart:ui';
 
+import 'package:am_calendar/helpers/app-events.dart';
+import 'package:am_calendar/main.dart' show eventBus;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -179,6 +181,7 @@ class CalendarEvent extends Appointment {
 
   void onTapDownCallback(BuildContext context) {
     if (!shouldDisplay) return;
+    eventBus.fire(FreezeSwipeEvent(true));
     Navigator.push(
       context,
       new PageRouteBuilder(
@@ -218,6 +221,7 @@ class CalendarEvent extends Appointment {
 
   void onTapUpCallback(BuildContext context) {
     if (!shouldDisplay) return;
+    eventBus.fire(FreezeSwipeEvent(false));
     Navigator.popUntil(context, ModalRoute.withName('/calendar'));
   }
 
