@@ -38,3 +38,10 @@ class ThemeChangeEvent {
 
   ThemeChangeEvent(this.theme);
 }
+
+// Freeze the calendar swipe when hovering an event
+class FreezeSwipeEvent {
+  bool shouldFreeze = false;
+
+  FreezeSwipeEvent(this.shouldFreeze);
+}

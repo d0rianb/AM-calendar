@@ -36,6 +36,7 @@ class Calendar extends StatefulWidget {
 
 class CalendarState extends State<Calendar> {
   final CalendarController controller = CalendarController();
+  ViewNavigationMode calendarViewNavigationMode = ViewNavigationMode.snap; // To disable swipe when selecting event
   late SharedPreferences prefs = widget.prefs;
   List<Appointment> events = [];
   List<String> filters = [];
@@ -81,6 +82,10 @@ class CalendarState extends State<Calendar> {
           loadFilters();
       }),
     );
+    eventBus.on<FreezeSwipeEvent>().listen((event) {
+      if (event.shouldFreeze) { setState(() => calendarViewNavigationMode = ViewNavigationMode.none); }
+      else { setState(() => calendarViewNavigationMode = ViewNavigationMode.snap); }
+    });
   }
 
   void loadFilters() {
@@ -219,6 +224,7 @@ class CalendarState extends State<Calendar> {
           ),
           child: SfCalendar(
             view: CalendarView.workWeek,
+            viewNavigationMode: calendarViewNavigationMode,
             controller: controller,
             dataSource: AppointmentDataSource(events),
             allowedViews: [
