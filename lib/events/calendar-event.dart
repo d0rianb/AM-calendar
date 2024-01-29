@@ -37,7 +37,7 @@ final class ICalRegex {
   static final RegExp endChar = new RegExp(r'\\n');
   static final RegExp classeType = new RegExp(r'TYPE_ACTIVITE\s:\s([\w_]+)\\n', caseSensitive: false, multiLine: true);
   static final RegExp teacherName = new RegExp(r'INTERVENANTS\s:\s(.+)\\n-\sDESCRIPTION');
-  static final RegExp description = new RegExp(r'DESCRIPTION\s:\s(.+)\\n-\sGROefUPES');
+  static final RegExp description = new RegExp(r'DESCRIPTION\s:\s(.+)\\n-\sGROUPES');
   static final RegExp group = new RegExp(r'GROUPES\s:\s(.*)\\n');
 }
 
@@ -102,7 +102,6 @@ class CalendarEvent extends Appointment {
     if (formatEndLine) result = result.replaceAll(ICalRegex.endChar, '');
     return result;
   }
-
 
   static CalendarEvent fromICal(JSON event) {
     if (event['type'] != 'VEVENT') {
@@ -239,7 +238,7 @@ class CalendarEvent extends Appointment {
       onPointerCancel: (_) => onTapUpCallback(context),
       child: shouldDisplay ? MediaQuery(
           data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScaleFactor)),
-          child: CalendarItem(this, size, MediaQuery.of(context).size, false),
+          child: isAllDay ? AllDayCalendarItem(this, size, false) : CalendarItem(this, size, false),
       ) : null,
     );
   }
@@ -257,7 +256,7 @@ class AppointmentDataSource extends CalendarDataSource {
   DateTime getEndTime(int index) => appointments![index].to;
 
   @override
-  bool isAllDay(int index) => appointments![index].isAllDay;
+  bool isAllDay(int index) => false; //appointments![index].isAllDay;
 
   @override
   String getSubject(int index) => appointments![index].eventName;

@@ -14,12 +14,7 @@ class CalendarEventPopup extends Dialog {
     final double width = contextSize.width * 3 / 4;
     final double height = contextSize.height / 2.3; // min height
     return Center(
-      child: CalendarItem(
-          event,
-          Size(width, height),
-          contextSize,
-          true,
-        ),
+      child: event.isAllDay ?  AllDayCalendarItem(event, Size(width, height), true) : CalendarItem(event, Size(width, height), true),
     );
   }
 }
